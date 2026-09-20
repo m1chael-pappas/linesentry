@@ -55,7 +55,8 @@ Only the detection service autoscales, and that is deliberate: it is the stage w
 
 ## Running it
 
-Requires Node 22, pnpm 10.24.0 and Docker.
+Requires Node 24, pnpm 12.5.1 and Docker.
+The Node version is pinned in `.node-version`, and pnpm comes from the `packageManager` field through corepack, so `corepack enable` is the only setup step.
 
 ```
 pnpm install
@@ -91,10 +92,9 @@ This exists so a research-derived pipeline variant can be run against this one o
 pnpm only, no `npm install` or `npx` anywhere.
 Use `pnpm dlx` in place of `npx`.
 
-The pnpm version is pinned in the root `packageManager` field.
-Docker images activate it through corepack.
-Local development uses a standalone pnpm of the same version, because the corepack bundled with Node 22.13.1 ships a stale npm signing key list and rejects current pnpm releases ([nodejs/corepack#612](https://github.com/nodejs/corepack/issues/612)).
+The pnpm version is pinned in the root `packageManager` field and both local development and the Docker images activate it through corepack, so there is one pnpm version and one place it is declared.
 
-`pnpm deploy` runs with `--legacy` in the Dockerfile.
-From pnpm 10 the default deploy path requires `inject-workspace-packages=true`, which replaces the symlink from a service to `@linesentry/core` with a copied directory, so an edit to core would not be visible to a service until the next install.
-Keeping the legacy deploy confines that tradeoff to the image build and leaves local development on symlinks.
+Node is pinned to 24, the Active LTS line, in `.node-version`.
+Node 26 becomes LTS on 28 October 2026 and moving to it is a one line change in that file and in the `NODE_IMAGE` build argument.
+
+Versions across the workspace come from the `catalog` in `pnpm-workspace.yaml` rather than being repeated in each package.

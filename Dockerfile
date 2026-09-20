@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-ARG NODE_IMAGE=node:22-alpine
+ARG NODE_IMAGE=node:24-alpine
 
 FROM ${NODE_IMAGE} AS build
 ARG SERVICE
@@ -10,7 +10,7 @@ COPY packages ./packages
 COPY services ./services
 RUN pnpm install --frozen-lockfile
 RUN pnpm --filter "@linesentry/${SERVICE}..." build
-RUN pnpm deploy --legacy --filter "@linesentry/${SERVICE}" --prod /out
+RUN pnpm deploy --filter "@linesentry/${SERVICE}" --prod /out
 
 FROM ${NODE_IMAGE}
 ENV NODE_ENV=production
