@@ -51,16 +51,23 @@ case "$RUN" in
     ;;
 
   ramp)
-    for machines in 20 60 100 140 180 200; do
+    STEPS="${RAMP_STEPS:-20 60 100 140 180 200}"
+    STEP_SECONDS="${RAMP_STEP_SECONDS:-300}"
+    offset=0
+
+    for machines in $STEPS; do
       start_simulator "$machines" 4
-      node experiments/sample.mjs "$OUT/samples-$machines.csv" 300 | tee -a "$OUT/sampling.log"
+      node experiments/sample.mjs "$OUT/samples-$machines.csv" "$STEP_SECONDS" \
+        | tee -a "$OUT/sampling.log"
     done
-    head -1 "$OUT/samples-20.csv" > "$OUT/samples.csv"
-    for machines in 20 60 100 140 180 200; do
-      tail -n +2 "$OUT/samples-$machines.csv" | sed "s/^/$machines,/" >> "$OUT/samples.csv.tmp"
+
+    head -1 "$OUT/samples-${STEPS%% *}.csv" | sed 's/$/,machines/' > "$OUT/samples.csv"
+    for machines in $STEPS; do
+      tail -n +2 "$OUT/samples-$machines.csv" |
+        awk -F, -v off="$offset" -v m="$machines" 'BEGIN{OFS=","}{$1=$1+off; print $0, m}' \
+        >> "$OUT/samples.csv"
+      offset=$((offset + STEP_SECONDS))
     done
-    sed -i '1s/^/machines,/' "$OUT/samples.csv"
-    cat "$OUT/samples.csv.tmp" >> "$OUT/samples.csv" && rm "$OUT/samples.csv.tmp"
     ;;
 
   burst)

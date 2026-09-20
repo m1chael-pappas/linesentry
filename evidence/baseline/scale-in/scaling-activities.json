@@ -1,0 +1,74 @@
+[
+    {
+        "time": "2026-09-20T15:48:51.233000+10:00",
+        "resource": "service/linesentry/linesentry-detection",
+        "description": "Setting desired count to 1.",
+        "status": "Successful"
+    },
+    {
+        "time": "2026-09-20T15:48:46.611000+10:00",
+        "resource": "service/linesentry/linesentry-aggregation",
+        "description": "Setting desired count to 1.",
+        "status": "Successful"
+    },
+    {
+        "time": "2026-09-20T15:46:51.218000+10:00",
+        "resource": "service/linesentry/linesentry-detection",
+        "description": "Setting desired count to 2.",
+        "status": "Successful"
+    },
+    {
+        "time": "2026-09-20T15:46:46.616000+10:00",
+        "resource": "service/linesentry/linesentry-aggregation",
+        "description": "Setting desired count to 2.",
+        "status": "Successful"
+    },
+    {
+        "time": "2026-09-20T15:44:51.258000+10:00",
+        "resource": "service/linesentry/linesentry-detection",
+        "description": "Setting desired count to 3.",
+        "status": "Successful"
+    },
+    {
+        "time": "2026-09-20T15:44:46.602000+10:00",
+        "resource": "service/linesentry/linesentry-aggregation",
+        "description": "Setting desired count to 3.",
+        "status": "Successful"
+    },
+    {
+        "time": "2026-09-20T15:42:51.235000+10:00",
+        "resource": "service/linesentry/linesentry-detection",
+        "description": "Setting desired count to 4.",
+        "status": "Successful"
+    },
+    {
+        "time": "2026-09-20T15:42:46.595000+10:00",
+        "resource": "service/linesentry/linesentry-aggregation",
+        "description": "Setting desired count to 4.",
+        "status": "Successful"
+    },
+    {
+        "time": "2026-09-20T15:40:51.232000+10:00",
+        "resource": "service/linesentry/linesentry-detection",
+        "description": "Setting desired count to 5.",
+        "status": "Successful"
+    },
+    {
+        "time": "2026-09-20T15:40:46.643000+10:00",
+        "resource": "service/linesentry/linesentry-aggregation",
+        "description": "Setting desired count to 5.",
+        "status": "Successful"
+    },
+    {
+        "time": "2026-09-20T15:21:51.616000+10:00",
+        "resource": "service/linesentry/linesentry-detection",
+        "description": "Setting desired count to 6.",
+        "status": "Successful"
+    },
+    {
+        "time": "2026-09-20T15:21:27.942000+10:00",
+        "resource": "service/linesentry/linesentry-aggregation",
+        "description": "Setting desired count to 6.",
+        "status": "Successful"
+    }
+]
