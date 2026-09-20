@@ -175,6 +175,9 @@ importers:
 
   .:
     devDependencies:
+      '@aws-sdk/client-sns':
+        specifier: ^3.1136.0
+        version: 3.1136.0
       '@types/node':
         specifier: ^26.6.2
         version: 26.6.2

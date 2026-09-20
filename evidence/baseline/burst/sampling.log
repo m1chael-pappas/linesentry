@@ -1,0 +1,30 @@
+sampling every 10s for 120s into evidence/baseline/burst/samples-pre.csv
+  t+   0s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 11476
+  t+  11s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 11717
+  t+  22s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 12088
+  t+  33s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 12241
+  t+  43s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 12384
+  t+  54s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 12492
+  t+  65s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 12639
+  t+  76s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 12812
+  t+  86s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 13265
+  t+  97s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 13385
+  t+ 108s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 13475
+  t+ 119s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 13615
+sampling finished, evidence/baseline/burst/samples-pre.csv
+sampling every 10s for 600s into evidence/baseline/burst/samples.csv
+  t+   0s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 13734
+  t+  11s  agg queue    34 tasks 1  det queue     0 tasks 1  rows 13777
+  t+  22s  agg queue     0 tasks 1  det queue    40 tasks 1  rows 14149
+  t+  33s  agg queue    81 tasks 1  det queue     0 tasks 1  rows 14297
+  t+  44s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 14462
+  t+  54s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 14622
+  t+  65s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 14826
+  t+  76s  agg queue    81 tasks 1  det queue     0 tasks 1  rows 15142
+  t+  87s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 15336
+  t+  98s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 15442
+  t+ 109s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 15549
+  t+ 121s  agg queue    91 tasks 1  det queue   490 tasks 1  rows 16029
+  t+ 131s  agg queue    21 tasks 1  det queue   279 tasks 1  rows 16284
+  t+ 142s  agg queue    91 tasks 1  det queue     0 tasks 1  rows 16629
+  t+ 153s  agg queue    29 tasks 1  det queue   490 tasks 1  rows 16777

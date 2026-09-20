@@ -1,14 +1,18 @@
-# Detection autoscaling
+# Autoscaling
 
-Only the detection service scales. Aggregation, alerting and the api run a single task each.
+The detection and aggregation services scale. Alerting and the api run a single task each.
 
-Aggregation does one write per window, so its work grows with machine count but does not back up. Alerting only sees events, which are rare compared to windows. Detection is the stage whose cost rises with both machine count and fault load, and it holds a queue that grows visibly, so it is where scaling can be measured.
+The first version scaled only detection, on the assumption that it was the stage whose cost rises with machine count and fault load. The first burst run showed otherwise. The aggregation queue peaked at 260 messages while the detection queue stayed at 0, and Application Auto Scaling recorded no scaling activity for detection.
+
+Aggregation writes to DynamoDB for every window. Detection reads cached metadata and, for most windows, returns without writing anything. At 200 machines with 10 second windows, aggregation is the stage that queues.
+
+Both services now use the same policy. Alerting only sees events, which are rare compared to windows, and the api serves occasional reads.
 
 ## Metric
 
-Target tracking on backlog per task, held at 50.
+Target tracking on backlog per task, held at 50, for each scaled service.
 
-Backlog per task is not a metric AWS publishes, so the policy computes it with metric math:
+Backlog per task is not a metric AWS publishes, so the policy computes it with metric math. For detection:
 
 ```
 m1  AWS/SQS ApproximateNumberOfMessagesVisible   QueueName=linesentry-detection-q   Sum
@@ -27,6 +31,8 @@ Scaling on raw queue depth would be wrong. A depth of 500 means something differ
 | Target backlog per task | 50 | At about 20 windows per second and a handler taking a few milliseconds, one task clears 50 messages in under a second. A low target scales the service while the queue is still shallow, which keeps end to end latency inside the 5 second budget during a burst. |
 | Minimum tasks | 1 | The pipeline must keep working with no load. |
 | Maximum tasks | 6 | The burst run drives 200 machines, about 80 windows per second. Six tasks is several times that throughput, so the ceiling is not the limit being measured. |
+
+The same values apply to aggregation, set by `aggregation_backlog_target` and `aggregation_max_tasks`.
 | Scale out cooldown | 60s | Long enough for a scale-out to take effect before the next is considered, short enough to add tasks during a burst. |
 | Scale in cooldown | 60s | The minimum useful value. See below. |
 

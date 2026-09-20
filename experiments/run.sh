@@ -15,7 +15,7 @@ REGION="${AWS_REGION:-us-east-1}"
 SEED="${SEED:-linesentry}"
 
 if [[ -z $RUN ]]; then
-  echo "usage: run.sh <baseline|ramp|burst|scale-in|failure>" >&2
+  echo "usage: run.sh <baseline|ramp|burst|overload|scale-in|failure>" >&2
   exit 1
 fi
 
@@ -69,6 +69,19 @@ case "$RUN" in
     echo "faulting all of line-A"
     fault line-A overheat
     node experiments/sample.mjs "$OUT/samples.csv" 600 | tee -a "$OUT/sampling.log"
+    ;;
+
+  overload)
+    RATE="${LOAD_RATE:-300}"
+    SECONDS_OF_LOAD="${LOAD_SECONDS:-480}"
+    export WINDOWS_TOPIC_ARN="${WINDOWS_TOPIC_ARN:-$(aws sns list-topics --region "$REGION" \
+      --query "Topics[?contains(TopicArn,'linesentry-windows')].TopicArn|[0]" --output text)}"
+
+    echo "driving $RATE windows/s for ${SECONDS_OF_LOAD}s directly at the ingest topic"
+    node experiments/load.mjs "$RATE" "$SECONDS_OF_LOAD" > "$OUT/load.log" 2>&1 &
+    LOAD_PID=$!
+    node experiments/sample.mjs "$OUT/samples.csv" $((SECONDS_OF_LOAD + 420)) | tee "$OUT/sampling.log"
+    kill $LOAD_PID 2>/dev/null
     ;;
 
   scale-in)
