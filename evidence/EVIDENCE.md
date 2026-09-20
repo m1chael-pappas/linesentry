@@ -15,10 +15,12 @@ Targets come from the project brief. A missed target is reported as missed rathe
 
 | Run | p50 ms | p95 ms | Agg depth max | Det depth max | Agg tasks | Det tasks | Windows |
 |---|---|---|---|---|---|---|---|
+| baseline | 1244 | 1317 | 0 | 0 | 4 to 6 | 4 to 6 | 1160 |
 | burst | 1875 | 2212 | 224 | 962 | 1 to 1 | 0 to 1 | 9855 |
 | overload | 91740 | 155744 | 43866 | 45293 | 1 to 6 | 1 to 6 | 9525 |
 
 | Run | Against targets |
 |---|---|
+| baseline | all targets met |
 | burst | MISSED: steady_queue_depth |
 | overload | MISSED: p95_end_to_end, steady_queue_depth |
