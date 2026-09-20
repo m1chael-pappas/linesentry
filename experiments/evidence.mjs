@@ -92,5 +92,61 @@ if (variants.length === 2) {
   }
 }
 
+/** Reads every offline sweep written under evidence/sweep/. */
+function sweeps() {
+  const root = join('evidence', 'sweep');
+  if (!existsSync(root)) return [];
+
+  return readdirSync(root)
+    .map((scenario) => join(root, scenario, 'sweep.json'))
+    .filter((path) => existsSync(path))
+    .map((path) => JSON.parse(readFileSync(path, 'utf8')));
+}
+
+function sweepRow(arm) {
+  return [
+    arm.arm,
+    cell(arm.forwarded_per_second),
+    cell(arm.dropped_pct),
+    cell(arm.consumer_coverage_pct),
+    cell(arm.windows_evaluated_per_second),
+    cell(arm.reconstruction_error_sigma?.max),
+    `${arm.faults_matched}/${arm.faults_injected}`,
+    cell(arm.detection_delay_windows?.p95),
+    cell(arm.events_on_healthy_machines),
+    cell(arm.machines_per_task),
+  ].join(' | ');
+}
+
+/** Ratio of the control arm's value to `arm`'s, to one decimal place. */
+function against(control, arm, field) {
+  if (!control[field] || !arm[field]) return '-';
+  return `${(control[field] / arm[field]).toFixed(2)}x`;
+}
+
+for (const sweep of sweeps()) {
+  const control = sweep.arms.find((arm) => arm.arm === 'deadband/hb60');
+  if (!control) continue;
+
+  document += `\n## Offline sweep, ${sweep.scenario}\n\n`;
+  document += `${sweep.machines} machines over ${sweep.seconds}s, seed \`${sweep.seed}\`, ${sweep.faults.length} faults injected, ${sweep.windows_produced} windows produced.\n`;
+  document += `Every arm judges the same windows, fanned out from one aggregator and one smoother. Machines per task is derived from ${sweep.machines_per_task_basis}.\n`;
+  document += `The full grid is in \`evidence/sweep/${sweep.scenario}/sweep.csv\`, plotted in \`sweep-${sweep.scenario}.png\`.\n\n`;
+
+  const headline = sweep.arms.filter(
+    (arm) => arm.arm === 'deadband/hb60' || (arm.heartbeat_ms === 600000 && [0.5, 1, 2].includes(arm.error_bound_sigma)),
+  );
+
+  document += '| Arm | msg/s | Fewer messages | Consumer coverage | Faults | FP | Machines per task | More machines |\n';
+  document += '|---|---|---|---|---|---|---|---|\n';
+  for (const arm of headline) {
+    document += `| ${arm.arm} | ${cell(arm.forwarded_per_second)} | ${against(control, arm, 'forwarded_per_second')} | ${cell(arm.consumer_coverage_pct)}% | ${arm.faults_matched}/${arm.faults_injected} | ${cell(arm.events_on_healthy_machines)} | ${cell(arm.machines_per_task)} | ${against(arm, control, 'machines_per_task')} |\n`;
+  }
+
+  document += '\n| Arm | msg/s | Dropped % | Coverage % | Evaluated/s | Worst error sigma | Faults | Delay p95 | FP | Machines per task |\n';
+  document += '|---|---|---|---|---|---|---|---|---|---|\n';
+  for (const arm of sweep.arms) document += `| ${sweepRow(arm)} |\n`;
+}
+
 writeFileSync(join('evidence', 'EVIDENCE.md'), document);
 console.log('wrote evidence/EVIDENCE.md');

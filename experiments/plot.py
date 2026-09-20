@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Plots one experiment run's samples as a PNG beside its CSV."""
+"""Plots an experiment run's samples, or an offline sweep, as a PNG beside its CSV.
+
+    python3 experiments/plot.py <outDir> <run> <variant>
+    python3 experiments/plot.py sweep <scenario>
+"""
 
 import json
 import sys
@@ -79,8 +83,84 @@ def plot(out_dir: Path, run: str, variant: str) -> None:
         )
 
 
+HEARTBEAT_COLOURS = {60000: "#1f6feb", 150000: "#2a7f3f", 300000: "#c1440e", 600000: "#7d3c98"}
+
+
+def plot_sweep(scenario: str) -> None:
+    """Plots the offline sweep: error bound on x, four measures on y."""
+    out_dir = Path("evidence") / "sweep" / scenario
+    frame = pd.read_csv(out_dir / "sweep.csv")
+
+    dual = frame[frame["filter"] == "dual-prediction"]
+    deadband = frame[frame["filter"] == "deadband"]
+    reference = deadband[deadband["heartbeat_ms"] == 60000].iloc[0]
+
+    figure, axes = plt.subplots(2, 2, figsize=(12, 8))
+    (rate, capacity), (fidelity, quality) = axes
+
+    panels = [
+        (rate, "forwarded_per_second", "messages per second leaving the gateway", True),
+        (capacity, "machines_per_task", "machines supported per detection task", False),
+        (fidelity, "reconstruction_error_max", "worst reconstruction error, sigma", False),
+        (quality, "events_on_healthy_machines", "events raised on healthy machines", False),
+    ]
+
+    for axis, column, title, log in panels:
+        for heartbeat, group in dual.groupby("heartbeat_ms"):
+            ordered = group.sort_values("error_bound_sigma")
+            axis.plot(
+                ordered["error_bound_sigma"],
+                ordered[column],
+                marker="o",
+                markersize=4,
+                linewidth=1.6,
+                color=HEARTBEAT_COLOURS.get(heartbeat, "#555"),
+                label=f"heartbeat {heartbeat // 1000}s",
+            )
+
+        if column != "reconstruction_error_max":
+            axis.axhline(
+                reference[column],
+                linestyle="--",
+                linewidth=1.2,
+                color="#888",
+                label="deadband, 60s heartbeat",
+            )
+
+        if log:
+            axis.set_yscale("log")
+        axis.set_title(title, fontsize=10)
+        axis.set_xlabel("error bound, sigma")
+        axis.grid(alpha=0.25)
+
+    fidelity.plot(
+        [0, dual["error_bound_sigma"].max()],
+        [0, dual["error_bound_sigma"].max()],
+        linestyle=":",
+        linewidth=1.2,
+        color="#000",
+        label="the bound itself",
+    )
+
+    rate.legend(loc="lower left", frameon=False, fontsize=8)
+    fidelity.legend(loc="upper left", frameon=False, fontsize=8)
+    quality.legend(loc="upper left", frameon=False, fontsize=8)
+
+    figure.suptitle(
+        f"Dual prediction sweep, {scenario} scenario, error bound against heartbeat", fontsize=12
+    )
+    figure.tight_layout()
+
+    target = out_dir / f"sweep-{scenario}.png"
+    figure.savefig(target, dpi=140)
+    print(f"wrote {target}")
+
+
 if __name__ == "__main__":
-    if len(sys.argv) < 4:
-        print("usage: plot.py <outDir> <run> <variant>", file=sys.stderr)
+    if len(sys.argv) >= 3 and sys.argv[1] == "sweep":
+        plot_sweep(sys.argv[2])
+    elif len(sys.argv) >= 4:
+        plot(Path(sys.argv[1]), sys.argv[2], sys.argv[3])
+    else:
+        print("usage: plot.py <outDir> <run> <variant> | plot.py sweep <scenario>", file=sys.stderr)
         raise SystemExit(1)
-    plot(Path(sys.argv[1]), sys.argv[2], sys.argv[3])

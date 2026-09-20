@@ -57,6 +57,40 @@ Stopping the container is what makes this a real test. The messages the task hel
 
 Environment overrides: `MACHINES`, `LINE`, `FAULT`, `SETTLE_SECONDS`, `SQS_HOST`, `API_HOST`, `DYNAMO_HOST`.
 
+## Offline sweep
+
+```
+node experiments/sweep.mjs steady
+node experiments/sweep.mjs faults
+MACHINES=50 LINES=4 SECONDS=1800 node experiments/sweep.mjs faults
+python3 experiments/plot.py sweep faults
+```
+
+The sweep replays the seeded plant through the edge chain and the detection rules for every error bound and heartbeat in one pass, with no AWS account. The plant is deterministic in its seed, so the message rate and detection quality curve is a property of the simulator and the gateway rather than of the cloud.
+
+One aggregator and one smoother produce each window once, and every arm judges that same window. The arms therefore see identical load by construction rather than by running them one after another and hoping the load repeated.
+
+`steady` injects no faults and measures message rate. `faults` injects 16 faults across 16 machines, one of each type in rotation, staggered 30 seconds apart and cleared after 240 seconds.
+
+Per arm it writes:
+
+| Measure | How it is taken |
+|---|---|
+| Forwarded rate | Per second, per machine and per sensor type |
+| Consumer coverage | Forwarded plus reconstructed, over the windows in closed gaps |
+| Reconstruction error | `abs(real - reconstructed)` against the truth series, in standard deviations |
+| Faults matched | First event on a sensor the fault moves, inside the fault's window |
+| Detection delay | Windows between injection and the matching event |
+| Events on healthy machines | Events on a machine with no fault active at that window |
+| Windows evaluated | Forwarded plus reconstructed, which is the work, against messages, which is the cost |
+| Machines per task | Messages one task sustains, divided by the forwarded rate per machine |
+
+A gap travels on the message that closes it, so the windows after a key's last forward have not been reconstructed yet. Coverage is measured over closed gaps only, and counting them would report an end-of-run artefact as a loss.
+
+The harness does not model the shutdown the alerting service issues on a threshold breach, so a faulted machine keeps producing readings for the whole fault. It also skips the stopped-machine check, which exists to handle spin-down after that shutdown.
+
+Results go to `evidence/sweep/<scenario>/`, and `evidence.mjs` folds them into `evidence/EVIDENCE.md`.
+
 ## Reading the metrics locally
 
 Each service writes embedded metric format documents to `local/emf/<service>.jsonl`. `summarise-emf.mjs` reads those and prints totals and percentiles per service and variant.
