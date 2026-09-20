@@ -21,3 +21,16 @@ Faults a whole line, kills the detection container mid-burst, restarts it, and t
 Killing the container is what makes this a real test. The messages the task held were never acknowledged, so SQS makes them visible again after the visibility timeout and a different task picks them up, judging windows that may already have been judged.
 
 Environment overrides: `MACHINES`, `LINE`, `FAULT`, `SETTLE_SECONDS`, `SQS_HOST`, `API_HOST`, `DYNAMO_HOST`.
+
+## Reading the metrics
+
+Each service writes embedded metric format documents to `local/emf/<service>.jsonl`, one JSON object per line. `summarise-emf.mjs` reads those and prints totals and percentiles per service and variant.
+
+```
+node experiments/summarise-emf.mjs local/emf/*.jsonl
+node experiments/summarise-emf.mjs --json local/emf/*.jsonl
+```
+
+Three kinds of metric are handled differently. Millisecond metrics are reported as count, p50, p95 and max over every sample. Gauges, which are levels at a point in time rather than quantities to add up, are reported as their last and maximum value. Everything else is totalled.
+
+The same documents are what CloudWatch Logs extracts metrics from when the services run on AWS, where they go to stdout instead of a file. `packages/core/METRICS.md` describes the metrics themselves.

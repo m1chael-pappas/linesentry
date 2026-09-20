@@ -1,15 +1,19 @@
 import {
+  LATENCY_METRICS,
   alertKey,
-  machineAlertKey,
   cacheMetadata,
+  createDeadLetterWatcher,
   createDynamoAlertStateStore,
   createDynamoClient,
   createDynamoEventStore,
   createDynamoMetadataStore,
   createFanoutPublisher,
+  createMetrics,
   createQueueConsumer,
   createSqsClient,
   detectionRegistry,
+  eventLatencies,
+  machineAlertKey,
   numberEnv,
   onShutdown,
   optionalEnv,
@@ -27,6 +31,7 @@ const QUEUE_URL = requiredEnv('DETECTION_QUEUE_URL');
 const EVENTS_TABLE = requiredEnv('EVENTS_TABLE');
 const METADATA_TABLE = requiredEnv('METADATA_TABLE');
 const ALERTS_TABLE = requiredEnv('ALERTS_TABLE');
+const DLQ_URL = optionalEnv('DETECTION_DLQ_URL', '');
 const EVENTS_FANOUT = parseQueueUrls(requiredEnv('EVENTS_FANOUT_QUEUE_URLS'));
 
 const STRATEGY = optionalEnv('DETECTION_STRATEGY', 'baseline');
@@ -34,6 +39,7 @@ const METADATA_TTL_MS = numberEnv('METADATA_TTL_MS', 60000);
 const HISTORY_WINDOWS = numberEnv('HISTORY_WINDOWS', 6);
 const ALERT_EPISODE_MS = numberEnv('ALERT_EPISODE_MS', 600000);
 const MACHINE_STOP_TTL_MS = numberEnv('MACHINE_STOP_TTL_MS', 5000);
+const FLUSH_MS = numberEnv('METRICS_FLUSH_MS', 10000);
 
 const strategy = detectionRegistry.create(STRATEGY, {
   zScoreSigma: numberEnv('Z_SCORE_SIGMA', 3),
@@ -41,6 +47,7 @@ const strategy = detectionRegistry.create(STRATEGY, {
   rulHorizonMs: numberEnv('RUL_HORIZON_MS', 300000),
 });
 
+const metrics = createMetrics('detection');
 const dynamo = createDynamoClient();
 const events = createDynamoEventStore(dynamo, EVENTS_TABLE);
 const metadata = cacheMetadata(createDynamoMetadataStore(dynamo, METADATA_TABLE), METADATA_TTL_MS);
@@ -85,16 +92,22 @@ console.log(
 const loop = runConsumerLoop(consumer, async (message) => {
   const window = message.body;
   processed++;
-  if (message.receiveCount > 1) redelivered++;
+  metrics.count('MessagesProcessed');
+  if (message.receiveCount > 1) {
+    redelivered++;
+    metrics.count('MessagesRedelivered');
+  }
 
   const machine = await metadata.get(window.machine_id);
   if (!machine) {
     unknownMachines++;
+    metrics.count('UnknownMachines');
     return;
   }
 
   if (looksStopped(history, window.machine_id) || (await orderedToStop(window.machine_id))) {
     stoppedSkips++;
+    metrics.count('StoppedMachineSkips');
     return;
   }
 
@@ -106,6 +119,7 @@ const loop = runConsumerLoop(consumer, async (message) => {
   const key = alertKey(window.machine_id, window.sensor_type);
   if (!(await alerts.claim(key, eventRank(event), event.event_id, ALERT_EPISODE_MS))) {
     suppressed++;
+    metrics.count('EpisodesSuppressed');
     return;
   }
 
@@ -113,8 +127,15 @@ const loop = runConsumerLoop(consumer, async (message) => {
 
   if (!(await events.putIfAbsent(event))) {
     duplicates++;
+    metrics.count('ConditionalWriteRejections');
     return;
   }
+
+  const latencies = eventLatencies(event);
+  if (latencies.ingestToDetect !== undefined) {
+    metrics.record(LATENCY_METRICS.ingestToDetect, latencies.ingestToDetect);
+  }
+  metrics.count('EventsWritten');
 
   if (event.type === 'threshold-breach') {
     await alerts.claim(
@@ -132,6 +153,8 @@ const loop = runConsumerLoop(consumer, async (message) => {
   for (const message of batch) history.add(message.body);
 });
 
+const deadLetters = DLQ_URL ? createDeadLetterWatcher(sqs, DLQ_URL, metrics, FLUSH_MS) : undefined;
+
 const report = setInterval(() => {
   console.log(
     `detection processed ${processed}, redelivered ${redelivered}, events ${written}, duplicates rejected ${duplicates}, episode suppressed ${suppressed}, stopped machines ${stoppedSkips}, unknown machines ${unknownMachines}`,
@@ -143,9 +166,12 @@ const report = setInterval(() => {
   stoppedSkips = 0;
   redelivered = 0;
   unknownMachines = 0;
-}, 10000);
+  metrics.flush();
+}, FLUSH_MS);
 
 onShutdown(async () => {
   clearInterval(report);
+  deadLetters?.stop();
   await loop.stop();
+  metrics.flush();
 });

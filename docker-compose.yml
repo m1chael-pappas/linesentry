@@ -11,6 +11,8 @@ x-aws-local: &aws-local
   WORKORDERS_TABLE: linesentry-workorders
   METADATA_TABLE: linesentry-metadata
   ALERTS_TABLE: linesentry-alerts
+  METRICS_FLUSH_MS: "${METRICS_FLUSH_MS:-10000}"
+  VARIANT: "${VARIANT:-baseline}"
 
 x-service: &service
   build:
@@ -95,8 +97,11 @@ services:
       dockerfile: Dockerfile
       args:
         SERVICE: ingest
+    volumes:
+      - ./local/emf:/emf
     environment:
       <<: *aws-local
+      EMF_FILE: /emf/ingest.jsonl
       MQTT_URL: mqtt://mosquitto:1883
       EDGE_TOPIC: linesentry/edge/#
       FANOUT_QUEUE_URLS: http://elasticmq:9324/queue/aggregation-q,http://elasticmq:9324/queue/detection-q
@@ -108,9 +113,13 @@ services:
       dockerfile: Dockerfile
       args:
         SERVICE: aggregation
+    volumes:
+      - ./local/emf:/emf
     environment:
       <<: *aws-local
+      EMF_FILE: /emf/aggregation.jsonl
       AGGREGATION_QUEUE_URL: http://elasticmq:9324/queue/aggregation-q
+      AGGREGATION_DLQ_URL: http://elasticmq:9324/queue/aggregation-dlq
 
   detection:
     <<: *service
@@ -119,12 +128,15 @@ services:
       dockerfile: Dockerfile
       args:
         SERVICE: detection
+    volumes:
+      - ./local/emf:/emf
     environment:
       <<: *aws-local
+      EMF_FILE: /emf/detection.jsonl
       DETECTION_QUEUE_URL: http://elasticmq:9324/queue/detection-q
+      DETECTION_DLQ_URL: http://elasticmq:9324/queue/detection-dlq
       EVENTS_FANOUT_QUEUE_URLS: http://elasticmq:9324/queue/alerting-q
       DETECTION_STRATEGY: "${DETECTION_STRATEGY:-baseline}"
-      VARIANT: "${VARIANT:-baseline}"
 
   alerting:
     <<: *service
@@ -133,9 +145,13 @@ services:
       dockerfile: Dockerfile
       args:
         SERVICE: alerting
+    volumes:
+      - ./local/emf:/emf
     environment:
       <<: *aws-local
+      EMF_FILE: /emf/alerting.jsonl
       ALERTING_QUEUE_URL: http://elasticmq:9324/queue/alerting-q
+      ALERTING_DLQ_URL: http://elasticmq:9324/queue/alerting-dlq
       MQTT_URL: mqtt://mosquitto:1883
 
   api:

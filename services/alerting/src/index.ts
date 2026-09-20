@@ -1,9 +1,14 @@
 import mqtt from 'mqtt';
 import {
+  LATENCY_METRICS,
+  createDeadLetterWatcher,
   createDynamoClient,
   createDynamoWorkOrderStore,
+  createMetrics,
   createQueueConsumer,
   createSqsClient,
+  eventLatencies,
+  numberEnv,
   onShutdown,
   optionalEnv,
   requiredEnv,
@@ -18,9 +23,13 @@ const QUEUE_URL = requiredEnv('ALERTING_QUEUE_URL');
 const WORKORDERS_TABLE = requiredEnv('WORKORDERS_TABLE');
 const MQTT_URL = requiredEnv('MQTT_URL');
 const NOTIFICATION_TOPIC = optionalEnv('NOTIFICATION_TOPIC', 'linesentry/notifications');
+const DLQ_URL = optionalEnv('ALERTING_DLQ_URL', '');
+const FLUSH_MS = numberEnv('METRICS_FLUSH_MS', 10000);
 
+const metrics = createMetrics('alerting');
 const workOrders = createDynamoWorkOrderStore(createDynamoClient(), WORKORDERS_TABLE);
-const consumer = createQueueConsumer<DetectionEvent>(createSqsClient(), QUEUE_URL);
+const sqs = createSqsClient();
+const consumer = createQueueConsumer<DetectionEvent>(sqs, QUEUE_URL);
 const client = mqtt.connect(MQTT_URL, { clientId: `linesentry-alerting-${process.pid}` });
 
 let alerted = 0;
@@ -65,8 +74,12 @@ const loop = runConsumerLoop(consumer, async (message) => {
   const event = message.body;
   const alertTs = Date.now();
 
+  metrics.count('MessagesProcessed');
+  if (message.receiveCount > 1) metrics.count('MessagesRedelivered');
+
   if (!(await workOrders.putIfAbsent(buildWorkOrder(event, alertTs)))) {
     duplicates++;
+    metrics.count('ConditionalWriteRejections');
     return;
   }
 
@@ -86,17 +99,31 @@ const loop = runConsumerLoop(consumer, async (message) => {
     console.log(`alert ${event.event_id} -> notification only on ${event.machine_id}`);
   }
 
+  const latencies = eventLatencies(event, alertTs);
+  if (latencies.detectToAlert !== undefined) {
+    metrics.record(LATENCY_METRICS.detectToAlert, latencies.detectToAlert);
+  }
+  if (latencies.endToEnd !== undefined) {
+    metrics.record(LATENCY_METRICS.endToEnd, latencies.endToEnd);
+  }
+
   alerted++;
+  metrics.count('AlertsRaised');
 });
+
+const deadLetters = DLQ_URL ? createDeadLetterWatcher(sqs, DLQ_URL, metrics, FLUSH_MS) : undefined;
 
 const report = setInterval(() => {
   console.log(`alerting handled ${alerted}, duplicates rejected ${duplicates}`);
   alerted = 0;
   duplicates = 0;
-}, 10000);
+  metrics.flush();
+}, FLUSH_MS);
 
 onShutdown(async () => {
   clearInterval(report);
+  deadLetters?.stop();
   await loop.stop();
+  metrics.flush();
   client.end();
 });

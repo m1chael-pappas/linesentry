@@ -1,9 +1,11 @@
 import {
   DeleteMessageCommand,
+  GetQueueAttributesCommand,
   ReceiveMessageCommand,
   SQSClient,
   SendMessageCommand,
 } from '@aws-sdk/client-sqs';
+import type { Metrics } from './metrics.js';
 import { optionalEnv } from './runtime.js';
 
 /** A message taken off a queue, with the handle needed to delete it. */
@@ -189,4 +191,56 @@ export function runConsumerLoop<T>(
       await finished;
     },
   };
+}
+
+/** Approximate number of messages visible on a queue. */
+export async function queueDepth(client: SQSClient, queueUrl: string): Promise<number> {
+  const result = await client.send(
+    new GetQueueAttributesCommand({
+      QueueUrl: queueUrl,
+      AttributeNames: ['ApproximateNumberOfMessages'],
+    }),
+  );
+  return Number(result.Attributes?.ApproximateNumberOfMessages ?? '0');
+}
+
+/** A running dead letter queue poller. */
+export interface DeadLetterWatcher {
+  stop(): void;
+}
+
+/**
+ * Polls `dlqUrl` every `intervalMs` and records `DlqDepth` and `DlqArrivals`.
+ *
+ * `DlqArrivals` is the increase in depth since the previous poll, and is not
+ * recorded when the depth has not risen. A failing poll is logged and skipped,
+ * leaving the previous depth in place so the next successful poll reports the
+ * whole rise rather than attributing it to one interval.
+ *
+ * See ../METRICS.md.
+ */
+export function createDeadLetterWatcher(
+  client: SQSClient,
+  dlqUrl: string,
+  metrics: Metrics,
+  intervalMs: number,
+): DeadLetterWatcher {
+  let previous = 0;
+
+  const poll = async (): Promise<void> => {
+    let depth: number;
+    try {
+      depth = await queueDepth(client, dlqUrl);
+    } catch (error) {
+      console.error('dead letter queue poll failed', error);
+      return;
+    }
+
+    metrics.record('DlqDepth', depth, 'Count');
+    if (depth > previous) metrics.count('DlqArrivals', depth - previous);
+    previous = depth;
+  };
+
+  const timer = setInterval(() => void poll(), intervalMs);
+  return { stop: () => clearInterval(timer) };
 }
