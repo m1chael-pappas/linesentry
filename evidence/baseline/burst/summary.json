@@ -1,0 +1,89 @@
+{
+  "run": "burst",
+  "variant": "baseline",
+  "started_at": "2026-09-20T05:45:16Z",
+  "finished_at": "2026-09-20T05:57:35Z",
+  "duration_seconds": 598,
+  "measured": {
+    "edge_output_msg_per_second": 16.64,
+    "detection_queue_depth": {
+      "samples": 48,
+      "min": 0,
+      "p50": 0,
+      "p95": 42,
+      "max": 50,
+      "mean": 3.1
+    },
+    "aggregation_queue_depth": {
+      "samples": 48,
+      "min": 0,
+      "p50": 0,
+      "p95": 8,
+      "max": 10,
+      "mean": 0.69
+    },
+    "detection_tasks": {
+      "min": 1,
+      "max": 2,
+      "final": 1
+    },
+    "aggregation_tasks": {
+      "min": 1,
+      "max": 2,
+      "final": 1
+    },
+    "windows_stored": 9953,
+    "latency_ms": {
+      "window_stored": {
+        "samples": 12,
+        "min": 1867,
+        "p50": 2125,
+        "p95": 4806,
+        "max": 4806,
+        "mean": 2532.92
+      },
+      "edge_to_ingest": {
+        "samples": 12,
+        "min": 1327,
+        "p50": 1516,
+        "p95": 1713,
+        "max": 1713,
+        "mean": 1502.5
+      },
+      "ingest_to_detect": {
+        "samples": 12,
+        "min": 507,
+        "p50": 1112,
+        "p95": 1475,
+        "max": 1475,
+        "mean": 1134
+      },
+      "detect_to_alert": {
+        "samples": 9,
+        "min": 43,
+        "p50": 113,
+        "p95": 1215,
+        "max": 1215,
+        "mean": 312
+      },
+      "end_to_end_event": {
+        "samples": 9,
+        "min": 1002,
+        "p50": 2086,
+        "p95": 3755,
+        "max": 3755,
+        "mean": 2093.56
+      }
+    }
+  },
+  "targets": {
+    "edge_output_msg_per_second": 80,
+    "p95_end_to_end_ms": 5000,
+    "steady_queue_depth": 100
+  },
+  "against_targets": {
+    "edge_output": "met",
+    "p95_end_to_end": "met",
+    "steady_queue_depth": "met"
+  }
+}
