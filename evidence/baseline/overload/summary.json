@@ -1,0 +1,89 @@
+{
+  "run": "overload",
+  "variant": "baseline",
+  "started_at": "2026-09-20T05:16:43Z",
+  "finished_at": "2026-09-20T05:31:54Z",
+  "duration_seconds": 897,
+  "measured": {
+    "edge_output_msg_per_second": 10.62,
+    "detection_queue_depth": {
+      "samples": 74,
+      "min": 0,
+      "p50": 5,
+      "p95": 39920,
+      "max": 45293,
+      "mean": 10547.92
+    },
+    "aggregation_queue_depth": {
+      "samples": 74,
+      "min": 0,
+      "p50": 0,
+      "p95": 40366,
+      "max": 43866,
+      "mean": 10168.95
+    },
+    "detection_tasks": {
+      "min": 1,
+      "max": 6,
+      "final": 6
+    },
+    "aggregation_tasks": {
+      "min": 1,
+      "max": 6,
+      "final": 6
+    },
+    "windows_stored": 9525,
+    "latency_ms": {
+      "window_stored": {
+        "samples": 9,
+        "min": 1590,
+        "p50": 91740,
+        "p95": 155744,
+        "max": 155744,
+        "mean": 79128.44
+      },
+      "edge_to_ingest": {
+        "samples": 9,
+        "min": 0,
+        "p50": 0,
+        "p95": 0,
+        "max": 0,
+        "mean": 0
+      },
+      "ingest_to_detect": {
+        "samples": 9,
+        "min": 1608,
+        "p50": 87321,
+        "p95": 160153,
+        "max": 160153,
+        "mean": 79942
+      },
+      "detect_to_alert": {
+        "samples": 2,
+        "min": 387,
+        "p50": 387,
+        "p95": 698,
+        "max": 698,
+        "mean": 542.5
+      },
+      "end_to_end_event": {
+        "samples": 2,
+        "min": 6797,
+        "p50": 6797,
+        "p95": 26079,
+        "max": 26079,
+        "mean": 16438
+      }
+    }
+  },
+  "targets": {
+    "edge_output_msg_per_second": 80,
+    "p95_end_to_end_ms": 5000,
+    "steady_queue_depth": 100
+  },
+  "against_targets": {
+    "edge_output": "met",
+    "p95_end_to_end": "MISSED",
+    "steady_queue_depth": "MISSED"
+  }
+}

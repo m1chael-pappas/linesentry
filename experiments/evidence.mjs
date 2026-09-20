@@ -6,7 +6,7 @@ const variants = process.argv.slice(2);
 if (variants.length === 0) variants.push('baseline');
 
 /** Run order in the written table, so it does not follow directory order. */
-const RUN_ORDER = ['baseline', 'ramp', 'burst', 'scale-in', 'failure'];
+const RUN_ORDER = ['baseline', 'ramp', 'burst', 'overload', 'scale-in', 'failure'];
 
 function summaries(variant) {
   const root = join('evidence', variant);
@@ -28,15 +28,16 @@ function row(summary) {
   const latency = m.latency_ms?.window_stored;
   const depth = m.detection_queue_depth;
 
+  const aggDepth = m.aggregation_queue_depth;
+
   return [
     summary.run,
-    cell(m.edge_output_msg_per_second),
     cell(latency?.p50),
     cell(latency?.p95),
-    cell(depth?.p95),
+    cell(aggDepth?.max),
     cell(depth?.max),
+    `${cell(m.aggregation_tasks?.min)} to ${cell(m.aggregation_tasks?.max)}`,
     `${cell(m.detection_tasks?.min)} to ${cell(m.detection_tasks?.max)}`,
-    cell(m.detection_tasks?.final),
     cell(m.windows_stored),
   ].join(' | ');
 }
@@ -67,8 +68,8 @@ for (const variant of variants) {
   if (runs.length === 0) continue;
 
   document += `\n## ${variant}\n\n`;
-  document += '| Run | Edge msg/s | p50 ms | p95 ms | Depth p95 | Depth max | Tasks | Final tasks | Windows |\n';
-  document += '|---|---|---|---|---|---|---|---|---|\n';
+  document += '| Run | p50 ms | p95 ms | Agg depth max | Det depth max | Agg tasks | Det tasks | Windows |\n';
+  document += '|---|---|---|---|---|---|---|---|\n';
   for (const summary of runs) document += `| ${row(summary)} |\n`;
 
   document += '\n| Run | Against targets |\n|---|---|\n';
