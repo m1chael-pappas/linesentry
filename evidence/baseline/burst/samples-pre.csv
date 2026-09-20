@@ -1,5 +1,0 @@
-elapsed_seconds,aggregation_depth,detection_depth,alerting_depth,detection_tasks,timeseries_rows
-0,0,0,0,1,1225
-10,0,0,0,1,1609
-20,0,0,0,2,1617
-30,0,0,0,2,1624

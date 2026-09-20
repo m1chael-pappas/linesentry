@@ -62,3 +62,15 @@ variable "log_retention_days" {
   type        = number
   default     = 1
 }
+
+variable "aggregation_backlog_target" {
+  description = "Queue backlog per aggregation task the scaling policy holds."
+  type        = number
+  default     = 50
+}
+
+variable "aggregation_max_tasks" {
+  description = "Upper bound on aggregation tasks."
+  type        = number
+  default     = 6
+}

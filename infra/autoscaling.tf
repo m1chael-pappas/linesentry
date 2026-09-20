@@ -75,3 +75,82 @@ resource "aws_appautoscaling_policy" "detection_backlog" {
     }
   }
 }
+
+
+resource "aws_appautoscaling_target" "aggregation" {
+  service_namespace  = "ecs"
+  resource_id        = "service/${aws_ecs_cluster.main.name}/${aws_ecs_service.service["aggregation"].name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+  min_capacity       = 1
+  max_capacity       = var.aggregation_max_tasks
+}
+
+resource "aws_appautoscaling_policy" "aggregation_backlog" {
+  name               = "${local.name}-aggregation-backlog-per-task"
+  policy_type        = "TargetTrackingScaling"
+  service_namespace  = aws_appautoscaling_target.aggregation.service_namespace
+  resource_id        = aws_appautoscaling_target.aggregation.resource_id
+  scalable_dimension = aws_appautoscaling_target.aggregation.scalable_dimension
+
+  target_tracking_scaling_policy_configuration {
+    target_value       = var.aggregation_backlog_target
+    scale_in_cooldown  = 60
+    scale_out_cooldown = 60
+
+    customized_metric_specification {
+      metrics {
+        id    = "m1"
+        label = "Messages waiting on the aggregation queue"
+
+        metric_stat {
+          metric {
+            namespace   = "AWS/SQS"
+            metric_name = "ApproximateNumberOfMessagesVisible"
+
+            dimensions {
+              name  = "QueueName"
+              value = aws_sqs_queue.work["aggregation"].name
+            }
+          }
+
+          stat = "Sum"
+        }
+
+        return_data = false
+      }
+
+      metrics {
+        id    = "m2"
+        label = "Aggregation tasks currently running"
+
+        metric_stat {
+          metric {
+            namespace   = "ECS/ContainerInsights"
+            metric_name = "RunningTaskCount"
+
+            dimensions {
+              name  = "ClusterName"
+              value = aws_ecs_cluster.main.name
+            }
+
+            dimensions {
+              name  = "ServiceName"
+              value = aws_ecs_service.service["aggregation"].name
+            }
+          }
+
+          stat = "Average"
+        }
+
+        return_data = false
+      }
+
+      metrics {
+        id          = "e1"
+        label       = "Backlog per task"
+        expression  = "m1 / m2"
+        return_data = true
+      }
+    }
+  }
+}

@@ -1,5 +1,0 @@
-sampling every 10s for 120s into evidence/baseline/burst/samples-pre.csv
-  t+   0s  detection queue     0  tasks 1  rows 1225
-  t+  10s  detection queue     0  tasks 1  rows 1609
-  t+  20s  detection queue     0  tasks 2  rows 1617
-  t+  30s  detection queue     0  tasks 2  rows 1624

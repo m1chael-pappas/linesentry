@@ -104,6 +104,8 @@ function readSamples() {
 const samples = readSamples();
 const depths = samples.map((s) => s.detection_depth).filter(Number.isFinite);
 const tasks = samples.map((s) => s.detection_tasks).filter(Number.isFinite);
+const aggTasks = samples.map((s) => s.aggregation_tasks).filter(Number.isFinite);
+const aggDepths = samples.map((s) => s.aggregation_depth).filter(Number.isFinite);
 const rows = samples.map((s) => s.timeseries_rows).filter(Number.isFinite);
 
 const elapsed = samples.length > 1 ? samples[samples.length - 1].elapsed_seconds : 0;
@@ -139,10 +141,16 @@ const summary = {
   measured: {
     edge_output_msg_per_second: edgeOutputRate,
     detection_queue_depth: summarise(depths),
+    aggregation_queue_depth: summarise(aggDepths),
     detection_tasks: {
       min: tasks.length ? Math.min(...tasks) : null,
       max: tasks.length ? Math.max(...tasks) : null,
       final: tasks.length ? tasks[tasks.length - 1] : null,
+    },
+    aggregation_tasks: {
+      min: aggTasks.length ? Math.min(...aggTasks) : null,
+      max: aggTasks.length ? Math.max(...aggTasks) : null,
+      final: aggTasks.length ? aggTasks[aggTasks.length - 1] : null,
     },
     windows_stored: rows.length ? rows[rows.length - 1] - rows[0] : null,
     latency_ms: latency,
@@ -162,9 +170,9 @@ const summary = {
           ? 'met'
           : 'MISSED',
     steady_queue_depth:
-      depths.length === 0
+      depths.length === 0 || aggDepths.length === 0
         ? 'not measured'
-        : summarise(depths).p95 <= TARGETS.steady_queue_depth
+        : Math.max(summarise(depths).p95, summarise(aggDepths).p95) <= TARGETS.steady_queue_depth
           ? 'met'
           : 'MISSED',
   },

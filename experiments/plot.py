@@ -46,10 +46,18 @@ def plot(out_dir: Path, run: str, variant: str) -> None:
     queues.legend(loc="upper right", frameon=False)
     queues.grid(alpha=0.25)
 
-    if "detection_tasks" in frame:
-        tasks.step(minutes, frame["detection_tasks"], where="post", linewidth=1.8, color="#c1440e")
-        tasks.set_ylim(0, max(7, frame["detection_tasks"].max() + 1))
-        tasks.set_ylabel("detection tasks")
+    highest = 1
+    for column, label, colour in (
+        ("detection_tasks", "detection", "#c1440e"),
+        ("aggregation_tasks", "aggregation", "#1f6feb"),
+    ):
+        if column in frame:
+            tasks.step(minutes, frame[column], where="post", linewidth=1.8, label=label, color=colour)
+            highest = max(highest, frame[column].max())
+
+    tasks.set_ylim(0, max(7, highest + 1))
+    tasks.set_ylabel("running tasks")
+    tasks.legend(loc="upper right", frameon=False)
 
     tasks.set_xlabel("minutes into run")
     tasks.grid(alpha=0.25)

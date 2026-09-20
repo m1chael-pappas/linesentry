@@ -68,8 +68,14 @@ function runningCount(service) {
   ]);
 }
 
+/**
+ * Total rows in the time-series table.
+ *
+ * `scan --select COUNT` paginates past 1 MB and the CLI prints one count per
+ * page, so the pages are summed. Returns an empty string when the call fails.
+ */
 function timeSeriesRows() {
-  return aws([
+  const output = aws([
     'dynamodb',
     'scan',
     '--table-name',
@@ -81,12 +87,20 @@ function timeSeriesRows() {
     '--output',
     'text',
   ]);
+
+  if (!output) return '';
+  const total = output
+    .split(/\s+/)
+    .map(Number)
+    .filter(Number.isFinite)
+    .reduce((sum, value) => sum + value, 0);
+  return String(total);
 }
 
 mkdirSync(dirname(outputPath), { recursive: true });
 writeFileSync(
   outputPath,
-  `elapsed_seconds,${QUEUES.map((q) => q.replace('-q', '_depth')).join(',')},detection_tasks,timeseries_rows\n`,
+  `elapsed_seconds,${QUEUES.map((q) => q.replace('-q', '_depth')).join(',')},detection_tasks,aggregation_tasks,timeseries_rows\n`,
 );
 
 const account = aws(['sts', 'get-caller-identity', '--query', 'Account', '--output', 'text']);
@@ -101,12 +115,16 @@ console.log(`sampling every ${INTERVAL_SECONDS}s for ${duration}s into ${outputP
 while ((Date.now() - started) / 1000 < duration) {
   const elapsed = Math.round((Date.now() - started) / 1000);
   const depths = QUEUES.map((q) => queueDepth(q) || '0');
-  const tasks = runningCount('detection') || '0';
+  const detectionTasks = runningCount('detection') || '0';
+  const aggregationTasks = runningCount('aggregation') || '0';
   const rows = timeSeriesRows() || '0';
 
-  appendFileSync(outputPath, `${elapsed},${depths.join(',')},${tasks},${rows}\n`);
+  appendFileSync(
+    outputPath,
+    `${elapsed},${depths.join(',')},${detectionTasks},${aggregationTasks},${rows}\n`,
+  );
   process.stdout.write(
-    `  t+${String(elapsed).padStart(4)}s  detection queue ${depths[1].padStart(5)}  tasks ${tasks}  rows ${rows}\n`,
+    `  t+${String(elapsed).padStart(4)}s  agg queue ${depths[0].padStart(5)} tasks ${aggregationTasks}  det queue ${depths[1].padStart(5)} tasks ${detectionTasks}  rows ${rows}\n`,
   );
 
   const next = started + (elapsed + INTERVAL_SECONDS) * 1000;
