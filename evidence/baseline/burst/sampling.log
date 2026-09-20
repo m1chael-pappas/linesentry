@@ -51,3 +51,7 @@ sampling every 10s for 600s into evidence/baseline/burst/samples.csv
   t+ 469s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 55321
   t+ 481s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 55489
   t+ 494s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 55675
+  t+ 507s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 55874
+  t+ 520s  agg queue     0 tasks 1  det queue    15 tasks 1  rows 56019
+  t+ 533s  agg queue     0 tasks 1  det queue    50 tasks 1  rows 56384
+  t+ 546s  agg queue     2 tasks 1  det queue     0 tasks 1  rows 56567

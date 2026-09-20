@@ -23,10 +23,12 @@ Four timestamps are stamped as a reading moves through the pipeline. All four tr
 | `detected_ts` | Detection service | Event write |
 | `alert_ts` | Alerting service | Notification publish |
 
-```
-edge_ts ──────> ingest_ts ──────> detected_ts ──────> alert_ts
-        EdgeToIngest     IngestToDetect      DetectToAlert
-        └───────────────── EndToEnd ──────────────────┘
+```mermaid
+flowchart LR
+    A["edge_ts<br/>window close"] -->|EdgeToIngest| B["ingest_ts<br/>IoT Core rule"]
+    B -->|IngestToDetect| C["detected_ts<br/>event write"]
+    C -->|DetectToAlert| D["alert_ts<br/>notification"]
+    A -.->|EndToEnd| D
 ```
 
 A stage is reported only when both its stamps are present. A stage whose interval is negative is dropped, so a clock that has moved backwards produces a missing sample rather than a negative one.

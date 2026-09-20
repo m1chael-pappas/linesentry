@@ -6,30 +6,48 @@ Sensors on simulated machines publish once per second over MQTT. An edge gateway
 
 ## Pipeline
 
+```mermaid
+flowchart TD
+    SIM["Simulator<br/>N machines x 4 sensors"]
+    EDGE["Edge gateway (Node-RED)<br/>10s window, EWMA, deadband"]
+    IOT["AWS IoT Core<br/>topic rule adds ingest_ts"]
+    SNSW["SNS linesentry-windows"]
+    QA["SQS aggregation-q"]
+    QD["SQS detection-q"]
+    AGG["Aggregation<br/>autoscaled 1-6"]
+    DET["Detection<br/>autoscaled 1-6"]
+    TS[("Time-series")]
+    EV[("Events")]
+    SNSE["SNS linesentry-events"]
+    QAL["SQS alerting-q"]
+    ALERT["Alerting"]
+    TECH["SNS notification"]
+    ACT["IoT Core actuator"]
+    WO[("Work orders")]
+    API["API"]
+
+    SIM -->|MQTT| EDGE
+    EDGE -->|MQTT over TLS| IOT
+    IOT --> SNSW
+    SNSW --> QA
+    SNSW --> QD
+    QA --> AGG
+    QD --> DET
+    AGG --> TS
+    DET --> EV
+    DET --> SNSE
+    SNSE --> QAL
+    QAL --> ALERT
+    ALERT --> TECH
+    ALERT --> ACT
+    ALERT --> WO
+    ACT -.->|shutdown, beacon| SIM
+    TS --> API
+    EV --> API
+    WO --> API
 ```
-simulator                     edge gateway (Node-RED)
-  4 sensors x N machines  -->   10s window -> EWMA -> deadband
-  1 reading/sec                          |
-                                         v
-                                    AWS IoT Core
-                                         |  topic rule adds ingest_ts
-                                         v
-                              SNS linesentry-windows
-                                 |                  |
-                    SQS aggregation-q          SQS detection-q
-                           |                          |
-                    aggregation svc            detection svc  (autoscaled)
-                           |                          |
-                    time-series store          events store
-                                                      |
-                                           SNS linesentry-events
-                                                      |
-                                              SQS alerting-q
-                                                      |
-                                                alerting svc
-                                                 |    |    |
-                                    technician SNS   MQTT actuator   work orders
-```
+
+Locally the ingest bridge stands in for IoT Core and its topic rule, and alerting publishes over MQTT instead of IoT Core and SNS. Everything else is identical.
 
 Services do not call each other. Every producer and consumer is connected by the bus, so the detection service scales on queue backlog without other services changing.
 
