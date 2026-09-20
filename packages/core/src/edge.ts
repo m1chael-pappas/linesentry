@@ -2,6 +2,7 @@ import type { RawReading, SensorType, WindowExtension } from './contracts.js';
 import { BASELINE_SD, SAFETY_THRESHOLDS } from './plant-config.js';
 import {
   fitTrend,
+  gapWindowCount,
   predictAt,
   predictorVersion,
   type LinearModel,
@@ -265,6 +266,18 @@ export function readDualPrediction(ext: unknown): Required<DualPredictionExtensi
     last_forwarded_window_start: from,
     divergence: typeof fields.divergence === 'number' ? fields.divergence : 0,
   };
+}
+
+/**
+ * Returns how many windows the gateway suppressed before the one carrying
+ * `ext`, uncapped.
+ *
+ * Pure. Zero for a window from an arm that sets no dual prediction extension.
+ */
+export function dualPredictionGapSize(ext: unknown, windowStart: number): number {
+  const read = readDualPrediction(ext);
+  if (!read) return 0;
+  return gapWindowCount(read.last_forwarded_window_start, windowStart, WINDOW_MS, Infinity);
 }
 
 /**

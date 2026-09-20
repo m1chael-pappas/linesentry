@@ -74,3 +74,19 @@ The episode expires after `ALERT_EPISODE_MS`. A fault that recurs later opens a 
 The trend rule fits a least-squares line through the last `HISTORY_WINDOWS` smoothed values and computes when that line reaches the safety threshold. It reports a prediction when the crossing falls inside `RUL_HORIZON_MS` and the value has not already crossed. A value past the limit is a breach for the threshold rule to report.
 
 Fewer points than the configured history produces no prediction. This is what makes the history buffer disposable. A detection task that restarts with an empty buffer loses predictions for a few minutes. The threshold and z-score rules judge each window on its own and are unaffected.
+
+The buffer is per task and holds only what that task received. Detection scales to 6 tasks on one queue, so windows for one machine and sensor land on arbitrary tasks and each task holds a partial series. A task can therefore be short of points for a machine that has been running all along.
+
+## Reconstruction
+
+The `dual-prediction` strategy runs the same three rules against a different history.
+
+A window from the `dual-prediction` edge filter carries the model the gateway used over the gap it closes, so the strategy rebuilds the windows the gateway suppressed and passes the rebuilt series as the history. It reuses the baseline rules unchanged, so the history is the only difference between the arms.
+
+This removes the trend rule's dependence on the buffer. One message carries enough to fit the line, so a task that started a second ago predicts as well as one that has been running for an hour, and it does so without reading shared state.
+
+Reconstructed windows feed the rules but raise no event of their own. Event identity, deduplication and the episode ladder are unchanged, and one message still produces at most one event.
+
+Nothing is lost by that. A value that breaches a safety limit sharply is far from the prediction, so the gateway forwards it as soon as it happens. A value that reaches the limit along a line the model tracked is forwarded by the gateway's safety override, which does not consult the error bound. See ../../edge/EDGE.md.
+
+A reconstructed window holds the predicted value in every statistic and a `count` of 0, because it summarises no samples.

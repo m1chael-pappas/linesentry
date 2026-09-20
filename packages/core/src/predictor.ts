@@ -52,6 +52,27 @@ export function predictAt(model: LinearModel, t: number): number {
 }
 
 /**
+ * Returns how many `stepMs` boundaries fall strictly between the two window
+ * starts, capped at `limit`.
+ *
+ * Pure. Zero when the bounds are adjacent, equal or out of order. Pass
+ * `Infinity` as `limit` for the true size of the gap.
+ */
+export function gapWindowCount(
+  fromWindowStart: number,
+  toWindowStart: number,
+  stepMs: number,
+  limit: number,
+): number {
+  if (stepMs <= 0 || limit <= 0) return 0;
+
+  const count = Math.floor((toWindowStart - fromWindowStart) / stepMs) - 1;
+  if (count <= 0) return 0;
+
+  return Math.min(count, limit);
+}
+
+/**
  * Returns the points `model` predicts at every `stepMs` boundary strictly
  * between `fromWindowStart` and `toWindowStart`, ascending.
  *
@@ -66,12 +87,9 @@ export function reconstructGap(
   stepMs: number,
   limit: number,
 ): readonly Point[] {
-  if (stepMs <= 0 || limit <= 0) return [];
+  const kept = gapWindowCount(fromWindowStart, toWindowStart, stepMs, limit);
+  if (kept === 0) return [];
 
-  const count = Math.floor((toWindowStart - fromWindowStart) / stepMs) - 1;
-  if (count <= 0) return [];
-
-  const kept = Math.min(count, limit);
   const first = toWindowStart - kept * stepMs;
 
   const points: Point[] = [];

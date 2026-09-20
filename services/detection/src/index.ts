@@ -12,6 +12,7 @@ import {
   createQueueConsumer,
   createSqsClient,
   detectionRegistry,
+  dualPredictionGapSize,
   machineAlertKey,
   numberEnv,
   onShutdown,
@@ -25,6 +26,7 @@ import {
 import { buildEvent, eventRank } from './events.js';
 import { createHistoryBuffer, looksStopped } from './history.js';
 import './strategies/baseline.js';
+import './strategies/dual-prediction.js';
 
 const QUEUE_URL = requiredEnv('DETECTION_QUEUE_URL');
 const EVENTS_TABLE = requiredEnv('EVENTS_TABLE');
@@ -64,6 +66,7 @@ let unknownMachines = 0;
 let suppressed = 0;
 let stoppedSkips = 0;
 let redelivered = 0;
+let reconstructed = 0;
 
 const stopCache = new Map<string, { stopped: boolean; expiresAt: number }>();
 
@@ -100,6 +103,15 @@ const loop = runConsumerLoop(consumer, async (message) => {
   if (window.ingest_ts !== undefined) {
     metrics.record(LATENCY_METRICS.ingestToDetect, Date.now() - window.ingest_ts);
   }
+
+  const gap = dualPredictionGapSize(window.ext, window.window_start);
+  const rebuilt = Math.min(gap, HISTORY_WINDOWS);
+  if (gap > 0) {
+    reconstructed += rebuilt;
+    metrics.count('WindowsReconstructed', rebuilt);
+    metrics.record('ReconstructionGapWindows', gap, 'Count');
+  }
+  metrics.count('WindowsEvaluated', 1 + rebuilt);
 
   const machine = await metadata.get(window.machine_id);
   if (!machine) {
@@ -156,9 +168,10 @@ const deadLetters = DLQ_URL ? createDeadLetterWatcher(sqs, DLQ_URL, metrics, FLU
 
 const report = setInterval(() => {
   console.log(
-    `detection processed ${processed}, redelivered ${redelivered}, events ${written}, duplicates rejected ${duplicates}, episode suppressed ${suppressed}, stopped machines ${stoppedSkips}, unknown machines ${unknownMachines}`,
+    `detection processed ${processed}, reconstructed ${reconstructed}, redelivered ${redelivered}, events ${written}, duplicates rejected ${duplicates}, episode suppressed ${suppressed}, stopped machines ${stoppedSkips}, unknown machines ${unknownMachines}`,
   );
   processed = 0;
+  reconstructed = 0;
   written = 0;
   duplicates = 0;
   suppressed = 0;

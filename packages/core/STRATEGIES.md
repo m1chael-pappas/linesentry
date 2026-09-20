@@ -8,7 +8,7 @@ This repo runs an A/B comparison between the pipeline as built and a variant der
 
 Both arms produce comparable evidence from the same experiment harness. Both run in the same services, over the same queues, against the same message contract. Only the selected strategy differs.
 
-The two planned variants are a dual prediction scheme replacing the edge deadband, and FFT feature extraction on the vibration signal replacing the raw window statistics. Neither is implemented here.
+Two edge filters and two detection strategies are registered. `deadband` and `baseline` are the pair the Distinction build measured. `dual-prediction` replaces both: it filters at the gateway by comparing each window against a least-squares prediction, and reconstructs the suppressed windows at the consumer. See ../../edge/EDGE.md and ./DETECTION.md.
 
 ## Adding a variant
 
@@ -33,7 +33,9 @@ Detection strategies are pure. `evaluate` takes a window and a context and retur
 
 The detection service owns event identity, deduplication and persistence. Event ids are a hash of `machine_id + sensor_type + window_start`, written with a conditional put that succeeds only when the id is absent. SQS standard delivers at least once and several detection tasks run concurrently.
 
-Keeping that in the service means every arm gets the same idempotency guarantee without reimplementing it. It also means a strategy cannot tell whether a window arrived for the first time, arrived again after a visibility timeout, or was reconstructed by a mirrored predictor. The dual prediction variant depends on the reconstructed case working, so no strategy may assume a window was transmitted.
+Keeping that in the service means every arm gets the same idempotency guarantee without reimplementing it. It also means a strategy cannot tell whether a window arrived for the first time or arrived again after a visibility timeout.
+
+A strategy may reconstruct windows internally, as `dual-prediction` does, but the service builds at most one event per message and derives its id from the arriving window. A reconstructed window therefore cannot raise an event of its own, and no strategy may rely on raising one.
 
 Extra fields go in `ext`. `ForwardedWindow.ext` is an open map a variant fills and the matching consumer reads. The baseline never sets or reads it, so a variant can add spectral peaks or prediction residuals without changing the baseline consumer or the stored row shape.
 
@@ -41,4 +43,4 @@ Adding a top-level field to `ForwardedWindow` would make the two arms' messages 
 
 Edge filters hold their own state. A deadband compares against the last value it sent and a dual prediction scheme carries a predictor. The factory builds one instance per gateway and that instance keeps its state.
 
-A filter that a consumer mirrors must rebuild its state from the windows that were sent, because the consumer never sees the ones that were dropped.
+A filter whose consumer has to reconstruct what it dropped puts what the consumer needs in `ext`, rather than expecting the consumer to hold mirrored state. Detection autoscales on a queue that offers no consumer affinity, so there is no task that reliably sees a given machine's whole series.
