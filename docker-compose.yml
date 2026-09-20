@@ -66,8 +66,10 @@ services:
     environment:
       MQTT_HOST: mosquitto
       MQTT_PORT: "1883"
+      ERROR_BOUND_SIGMA: "${ERROR_BOUND_SIGMA:-}"
+      HEARTBEAT_MS: "${HEARTBEAT_MS:-}"
     volumes:
-      - ./edge/linesentry-edge-flow.json:/data/flows.json:ro
+      - ./edge/${EDGE_FLOW:-linesentry-edge-flow.json}:/data/flows.json:ro
     depends_on:
       mosquitto:
         condition: service_healthy

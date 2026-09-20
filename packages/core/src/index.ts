@@ -1,6 +1,7 @@
 export * from './bus.js';
 export * from './contracts.js';
 export * from './dynamo.js';
+export * from './edge.js';
 export * from './ids.js';
 export * from './latency.js';
 export * from './metrics.js';

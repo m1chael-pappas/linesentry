@@ -7,8 +7,14 @@ export type Unit = 'mm/s' | 'C' | 'A' | 'rpm';
 /** Faults the simulator can inject, per machine or per line. */
 export type FaultType = 'bearing' | 'overheat' | 'overload' | 'dropout';
 
-/** Why the edge gateway chose to forward a window rather than drop it. */
-export type ForwardReason = 'first' | 'changed' | 'heartbeat';
+/**
+ * Why the edge gateway chose to forward a window rather than drop it.
+ *
+ * `changed` is emitted by the deadband filter. `divergence` and `safety` are
+ * emitted by the dual prediction filter. No filter emits both `changed` and
+ * `divergence`.
+ */
+export type ForwardReason = 'first' | 'changed' | 'divergence' | 'safety' | 'heartbeat';
 
 /** One sensor sample, published on `<site>/<line>/<machine>/<sensor>`. */
 export interface RawReading {

@@ -17,5 +17,7 @@ crash.log
 certs/
 local/
 edge/linesentry-edge-flow-aws.json
+edge/linesentry-edge-flow-dp.json
+edge/linesentry-edge-flow-dp-aws.json
 experiments/.run-locked.sh
 report/

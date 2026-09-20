@@ -16,6 +16,9 @@ export interface EdgeFilterDecision {
   ext?: WindowExtension;
 }
 
+/** An aggregated and smoothed window, before a filter has judged it. */
+export type PendingWindow = Omit<ForwardedWindow, 'forward_reason' | 'ext'>;
+
 /**
  * Decides which aggregated windows leave the gateway.
  *
@@ -24,13 +27,21 @@ export interface EdgeFilterDecision {
  */
 export interface EdgeFilterStrategy {
   readonly name: string;
-  decide(window: ForwardedWindow, now: number): EdgeFilterDecision;
+  decide(window: PendingWindow, now: number): EdgeFilterDecision;
 }
 
-/** Deadband widths and heartbeat interval used by the baseline edge filter. */
+/**
+ * Configuration for every registered edge filter.
+ *
+ * `deadband` and `heartbeatMs` drive the `deadband` filter. `errorBoundSigma`
+ * and `historyWindows` drive the `dual-prediction` filter and are ignored by
+ * `deadband`. See ../EDGE.md.
+ */
 export interface EdgeFilterConfig {
   deadband: Record<SensorType, number>;
   heartbeatMs: number;
+  errorBoundSigma?: number | undefined;
+  historyWindows?: number | undefined;
 }
 
 /** `history` is ordered by `window_start` ascending and includes the window being judged. */
