@@ -2,6 +2,8 @@ export * from './bus.js';
 export * from './contracts.js';
 export * from './dynamo.js';
 export * from './ids.js';
+export * from './latency.js';
+export * from './metrics.js';
 export * from './plant-config.js';
 export * from './registry.js';
 export * from './runtime.js';
