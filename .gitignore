@@ -15,4 +15,4 @@ crash.log
 *.key
 *.crt
 certs/
-local/emf/*.jsonl
+local/
