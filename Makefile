@@ -2,9 +2,20 @@ SHELL := /bin/bash
 SERVICES := aggregation detection alerting api
 REGION ?= us-east-1
 IMAGE_TAG ?= latest
-TF := terraform -chdir=infra
 
-.PHONY: help deploy destroy plan images push seed outputs tasks scale-status
+# One experiment arm. VARIANT is the metric label and the evidence directory,
+# DETECTION_STRATEGY is the registry name, and BOUND and HEARTBEAT_S configure
+# the gateway. See edge/EDGE.md.
+VARIANT ?= baseline
+DETECTION_STRATEGY ?= baseline
+BOUND ?=
+HEARTBEAT_S ?= 60
+EDGE_FLOW ?= linesentry-edge-flow-aws.json
+
+TF := terraform -chdir=infra
+TFVARS := -var variant=$(VARIANT) -var detection_strategy=$(DETECTION_STRATEGY)
+
+.PHONY: help deploy destroy plan images push seed outputs tasks scale-status gateway reset-scale
 
 help:
 	@echo "deploy        provision, build and push images, then roll the services"
@@ -16,6 +27,8 @@ help:
 	@echo "outputs       print the Terraform outputs"
 	@echo "tasks         show running task counts per service"
 	@echo "scale-status  show detection queue depth and task count"
+	@echo "gateway       start the edge gateway for the current arm"
+	@echo "reset-scale   force every service back to one task"
 
 $(eval ACCOUNT := $(shell aws sts get-caller-identity --query Account --output text 2>/dev/null))
 REGISTRY := $(ACCOUNT).dkr.ecr.$(REGION).amazonaws.com
@@ -24,7 +37,7 @@ deploy:
 	$(TF) init -input=false
 	$(TF) apply -input=false -auto-approve -target=aws_ecr_repository.service
 	$(MAKE) push
-	$(TF) apply -input=false -auto-approve
+	$(TF) apply -input=false -auto-approve $(TFVARS)
 	$(MAKE) seed
 	@for s in $(SERVICES); do \
 		aws ecs update-service --cluster linesentry --service linesentry-$$s \
@@ -45,7 +58,22 @@ destroy:
 	@echo "still carry their tags, so a tag count overstates what is left."
 
 plan:
-	$(TF) plan -input=false
+	$(TF) plan -input=false $(TFVARS)
+
+gateway:
+	@echo "arm $(VARIANT): flow $(EDGE_FLOW), bound $(BOUND) sigma, heartbeat $(HEARTBEAT_S)s"
+	IOT_ENDPOINT=$$($(TF) output -raw iot_endpoint) \
+	EDGE_FLOW=$(EDGE_FLOW) \
+	ERROR_BOUND_SIGMA=$(BOUND) \
+	HEARTBEAT_MS=$$(( $(HEARTBEAT_S) * 1000 )) \
+	docker compose -f docker-compose.aws.yml up -d
+
+reset-scale:
+	@for s in $(SERVICES); do \
+		aws ecs update-service --cluster linesentry --service linesentry-$$s \
+			--desired-count 1 --region $(REGION) >/dev/null; \
+	done
+	@echo "every service set to one task, skipping the 17.5 minute scale-in wait"
 
 images:
 	@for s in $(SERVICES); do \

@@ -2,14 +2,16 @@
 
 A predictive maintenance pipeline for a simulated manufacturing site.
 
-Sensors on simulated machines publish once per second over MQTT. An edge gateway aggregates them into 10 second windows and forwards only what has changed. The cloud side detects faults, raises events, notifies a technician and shuts the machine down. Each stage is connected by a queue, so stages scale independently.
+Sensors on simulated machines publish once per second over MQTT. An edge gateway aggregates them into 10 second windows and forwards only a fraction of them. The cloud side detects faults, raises events, notifies a technician and shuts the machine down. Each stage is connected by a queue, so stages scale independently.
+
+Two arms of the pipeline are built and measured. The `deadband` arm forwards a window when the smoothed value has moved past a per-sensor band. The `dual-prediction` arm runs a least-squares predictor at the gateway, forwards only when the real value diverges from its own prediction, and carries the model on the message so the detection service rebuilds the windows the gateway suppressed.
 
 ## Pipeline
 
 ```mermaid
 flowchart TD
     SIM["Simulator<br/>N machines x 4 sensors"]
-    EDGE["Edge gateway (Node-RED)<br/>10s window, EWMA, deadband"]
+    EDGE["Edge gateway (Node-RED)<br/>10s window, EWMA, filter"]
     IOT["AWS IoT Core<br/>topic rule adds ingest_ts"]
     SNSW["SNS linesentry-windows"]
     QA["SQS aggregation-q"]
@@ -58,11 +60,12 @@ Only the detection service autoscales. Its cost grows with both machine count an
 | Path | What is in it |
 |---|---|
 | `simulator/` | Machines, sensors, actuators and injectable faults over MQTT |
-| `edge/` | Node-RED flow doing window aggregation, EWMA smoothing and deadband filtering |
+| `edge/` | Node-RED flows, and the script that generates the variant flows from `packages/core` |
 | `packages/core` | Message contracts, strategy registries and runtime helpers shared by every service |
 | `services/ingest` | Local stand-in for the IoT Core topic rule, bridging MQTT to the queues |
 | `services/aggregation` | Writes each window to the time-series store |
 | `services/detection` | Z-score, safety thresholds and remaining useful life, raises events |
+| `evidence/sweep` | Offline sweep of every error bound and heartbeat, run without an AWS account |
 | `services/alerting` | Technician notification, actuator command, work order |
 | `services/api` | Read-only endpoints over events, time-series and work orders |
 | `tools/bootstrap` | Creates the tables and seeds per-machine baselines |
@@ -150,11 +153,42 @@ The alerting service publishes actuator commands through the IoT Core data plane
 
 The same container images run in both environments. The environment decides which adapters are constructed.
 
-## Swappable pipeline stages
+## The two arms
 
-The edge filter and the detection algorithm are each selected by name at startup from a registry. Adding an alternative is a new file and one `register` call, with no change to the services or the queue plumbing. This lets a research-derived pipeline variant run against this one on identical load.
+The edge filter and the detection algorithm are each selected by name at startup from a registry, so the two arms run in the same services, over the same queues, against the same message contract.
 
-`packages/core/STRATEGIES.md` states the requirements on an implementation. `packages/core/DETECTION.md` covers how the rules here are tuned and why one fault produces about four events rather than one per window.
+| | `deadband` + `baseline` | `dual-prediction` |
+|---|---|---|
+| Gateway forwards when | the smoothed value moved past a per-sensor band | the value diverges from a least-squares prediction by more than the error bound |
+| Also forwards | on a heartbeat | on a heartbeat, and on any window at or above a safety limit |
+| Message carries | the window | the window, plus the model that governed the gap it closes |
+| Consumer sees | the forwarded windows | the forwarded windows and every window between them, rebuilt |
+| Consumer state | a per-task history buffer | none |
+
+Reconstruction is stateless because detection autoscales to six tasks on one queue and SQS gives no consumer affinity. Shipping the model on the message means any task can rebuild any gap, and a task that started a second ago is as capable as one that has been running for an hour.
+
+Measured at 200 machines over 1800 seconds with 16 injected faults, against the `deadband` arm at a 60 second heartbeat:
+
+| Arm | msg/s | Consumer coverage | Faults found | Events on healthy machines | Machines per task |
+|---|---|---|---|---|---|
+| `deadband`, 60s heartbeat | 15.26 | 19% | 16/16 | 50 | 2096 |
+| `dual-prediction`, 0.5 sigma, 600s heartbeat | 8.78 | 100% | 16/16 | 43 | 3645 |
+| `dual-prediction`, 2 sigma, 600s heartbeat | 3.38 | 100% | 16/16 | 193 | 9455 |
+
+The heartbeat does different jobs in the two arms, which is why it moves. Under `deadband` it is the only bound on how stale the consumer's view can get. Under `dual-prediction` the consumer rebuilds the whole gap within the error bound, so the heartbeat carries liveness alone.
+
+Running an arm locally:
+
+```
+EDGE_FLOW=linesentry-edge-flow-dp.json \
+ERROR_BOUND_SIGMA=1 HEARTBEAT_MS=60000 \
+DETECTION_STRATEGY=dual-prediction VARIANT=dual-prediction-b1-hb60 \
+docker compose up -d
+```
+
+On AWS, `make deploy VARIANT=... DETECTION_STRATEGY=...` and `make gateway BOUND=... HEARTBEAT_S=...`.
+
+`edge/EDGE.md` covers the gateway chain and the flow generation. `packages/core/STRATEGIES.md` states the requirements on an implementation. `packages/core/DETECTION.md` covers how the rules are tuned and why one fault produces about four events rather than one per window. `experiments/README.md` covers the offline sweep.
 
 ## Toolchain notes
 

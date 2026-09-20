@@ -1,3 +1,4 @@
+import { appendFileSync } from 'node:fs';
 import readline from 'node:readline';
 import mqtt from 'mqtt';
 import type { ActuatorCommand, FaultType, RawReading } from '@linesentry/core';
@@ -9,6 +10,7 @@ const MACHINES = Number.parseInt(process.argv[2] ?? process.env.MACHINES ?? '5',
 const LINES = Number.parseInt(process.argv[3] ?? process.env.LINES ?? '1', 10);
 const RATE_MS = Number.parseInt(process.env.RATE_MS ?? '1000', 10);
 const SEED = process.env.SEED ?? DEFAULT_SEED;
+const FAULT_LOG = process.env.FAULT_LOG ?? '';
 const REPORT_MS = 10000;
 
 const machines = buildPlant(MACHINES, LINES, SEED);
@@ -85,6 +87,16 @@ function setFault(target: string, fault: FaultType | null): void {
   }
   const what = fault ? `fault ${fault}` : 'cleared';
   console.log(`${what} on ${list.map((m) => m.id).join(', ')}`);
+
+  if (FAULT_LOG) {
+    const line = JSON.stringify({
+      ts: Date.now(),
+      target,
+      fault,
+      machines: list.map((m) => m.id),
+    });
+    appendFileSync(FAULT_LOG, `${line}\n`);
+  }
 }
 
 function applyActuator(machine: Machine, command: ActuatorCommand['command']): void {

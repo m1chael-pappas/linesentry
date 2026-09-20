@@ -28,9 +28,20 @@ variable "image_tag" {
 }
 
 variable "variant" {
-  description = "Experiment variant label attached to every metric."
+  description = "Experiment variant label attached to every metric. Carries the error bound and heartbeat for a dual prediction arm, so two arms do not share a metric stream."
   type        = string
   default     = "baseline"
+}
+
+variable "detection_strategy" {
+  description = "Detection strategy the service selects from its registry. One of baseline, dual-prediction. Separate from var.variant, which is only a label."
+  type        = string
+  default     = "baseline"
+
+  validation {
+    condition     = contains(["baseline", "dual-prediction"], var.detection_strategy)
+    error_message = "detection_strategy must be baseline or dual-prediction."
+  }
 }
 
 variable "detection_backlog_target" {

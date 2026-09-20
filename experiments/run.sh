@@ -4,7 +4,11 @@
 #
 #   ./experiments/run.sh baseline
 #   ./experiments/run.sh burst
-#   VARIANT=spectral ./experiments/run.sh baseline
+#   VARIANT=dual-prediction-b1-hb600 BOUND=1 HEARTBEAT_S=600 ./experiments/run.sh burst
+#
+# VARIANT must match the variant the stack was deployed with, since it is both
+# the metric dimension and the output directory. BOUND and HEARTBEAT_S are
+# recorded in the summary and must match what the gateway was started with.
 set -uo pipefail
 
 cd "$(dirname "$0")/.."
@@ -13,6 +17,8 @@ RUN="${1:-}"
 VARIANT="${VARIANT:-baseline}"
 REGION="${AWS_REGION:-us-east-1}"
 SEED="${SEED:-linesentry}"
+BOUND="${BOUND:-}"
+HEARTBEAT_S="${HEARTBEAT_S:-}"
 
 if [[ -z $RUN ]]; then
   echo "usage: run.sh <baseline|ramp|burst|overload|scale-in|failure>" >&2
@@ -32,7 +38,8 @@ trap stop_simulator EXIT
 start_simulator() {
   local machines=$1 lines=${2:-1}
   stop_simulator
-  SEED="$SEED" node simulator/dist/index.js "$machines" "$lines" < /dev/null \
+  SEED="$SEED" FAULT_LOG="$OUT/faults.jsonl" \
+    node simulator/dist/index.js "$machines" "$lines" < /dev/null \
     > "$OUT/simulator.log" 2>&1 &
   SIM_PID=$!
   echo "simulator started at $machines machines on $lines line(s), pid $SIM_PID"
@@ -121,7 +128,8 @@ stop_simulator
 finished_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 
 echo "collecting metrics for $started_at to $finished_at"
-node experiments/collect.mjs "$OUT" "$started_at" "$finished_at" "$RUN" "$VARIANT"
+BOUND="$BOUND" HEARTBEAT_S="$HEARTBEAT_S" \
+  node experiments/collect.mjs "$OUT" "$started_at" "$finished_at" "$RUN" "$VARIANT"
 python3 experiments/plot.py "$OUT" "$RUN" "$VARIANT"
 node experiments/evidence.mjs "$VARIANT"
 

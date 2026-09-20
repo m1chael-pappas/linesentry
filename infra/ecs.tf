@@ -35,7 +35,7 @@ locals {
       DETECTION_QUEUE_URL      = aws_sqs_queue.work["detection"].url
       DETECTION_DLQ_URL        = aws_sqs_queue.dlq["detection"].url
       EVENTS_FANOUT_QUEUE_URLS = aws_sqs_queue.work["alerting"].url
-      DETECTION_STRATEGY       = var.variant
+      DETECTION_STRATEGY       = var.detection_strategy
     }
     alerting = {
       ALERTING_QUEUE_URL = aws_sqs_queue.work["alerting"].url

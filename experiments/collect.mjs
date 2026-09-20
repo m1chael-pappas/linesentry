@@ -135,6 +135,8 @@ const latency = {
 const summary = {
   run,
   variant,
+  error_bound_sigma: process.env.BOUND ? Number(process.env.BOUND) : null,
+  heartbeat_seconds: process.env.HEARTBEAT_S ? Number(process.env.HEARTBEAT_S) : null,
   started_at: startedAt,
   finished_at: finishedAt,
   duration_seconds: elapsed,
