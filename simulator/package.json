@@ -1,0 +1,27 @@
+{
+  "name": "@linesentry/simulator",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Simulated factory machines and sensors publishing over MQTT with injectable faults",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "broker": "node dist/broker.js",
+    "start": "node dist/index.js",
+    "start:plant": "node dist/index.js 50 4",
+    "watch": "node dist/watch.js plant-01/#",
+    "watch:edge": "node dist/watch.js linesentry/edge/#",
+    "fault": "node dist/control.js",
+    "clear": "node dist/control.js"
+  },
+  "dependencies": {
+    "@linesentry/core": "workspace:*",
+    "aedes": "^1.2.0",
+    "mqtt": "^5.16.0"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

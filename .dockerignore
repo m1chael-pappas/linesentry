@@ -1,0 +1,12 @@
+**/node_modules
+**/dist
+**/*.tsbuildinfo
+.git
+.gitignore
+evidence
+experiments
+infra
+edge
+simulator
+**/*.md
+**/*.test.ts
