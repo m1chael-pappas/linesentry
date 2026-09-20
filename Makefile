@@ -34,10 +34,15 @@ deploy:
 
 destroy:
 	$(TF) destroy -input=false -auto-approve
-	@echo "remaining resources tagged project=linesentry:"
-	@aws resourcegroupstaggingapi get-resources --region $(REGION) \
-		--tag-filters Key=project,Values=linesentry \
-		--query 'length(ResourceTagMappingList)' --output text
+	@echo "verifying teardown"
+	@printf '  ecs clusters      %s\n' "$$(aws ecs list-clusters --region $(REGION) --query 'length(clusterArns)' --output text)"
+	@printf '  task definitions  %s\n' "$$(aws ecs list-task-definitions --status ACTIVE --region $(REGION) --query 'length(taskDefinitionArns)' --output text)"
+	@printf '  sqs queues        %s\n' "$$(aws sqs list-queues --region $(REGION) --query 'length(QueueUrls)' --output text 2>/dev/null || echo 0)"
+	@printf '  dynamodb tables   %s\n' "$$(aws dynamodb list-tables --region $(REGION) --query 'length(TableNames)' --output text)"
+	@printf '  ecr repositories  %s\n' "$$(aws ecr describe-repositories --region $(REGION) --query 'length(repositories)' --output text)"
+	@printf '  iot certificates  %s\n' "$$(aws iot list-certificates --region $(REGION) --query 'length(certificates)' --output text)"
+	@echo "ecs keeps deleted clusters and task definitions as INACTIVE records that"
+	@echo "still carry their tags, so a tag count overstates what is left."
 
 plan:
 	$(TF) plan -input=false
