@@ -45,10 +45,13 @@ Only the detection service autoscales, and that is deliberate: it is the stage w
 | `simulator/` | Machines, sensors, actuators and injectable faults over MQTT |
 | `edge/` | Node-RED flow doing window aggregation, EWMA smoothing and deadband filtering |
 | `packages/core` | Message contracts, strategy registries and runtime helpers shared by every service |
+| `services/ingest` | Local stand-in for the IoT Core topic rule, bridging MQTT to the queues |
 | `services/aggregation` | Writes each window to the time-series store |
 | `services/detection` | Z-score, safety thresholds and remaining useful life, raises events |
 | `services/alerting` | Technician notification, actuator command, work order |
 | `services/api` | Read-only endpoints over events, time-series and work orders |
+| `tools/bootstrap` | Creates the tables and seeds per-machine baselines |
+| `local/` | Mosquitto and ElasticMQ configuration for the local stack |
 | `infra/` | Terraform, and the AWS capability probe |
 | `experiments/` | Unattended experiment runs |
 | `evidence/` | Measured results, one directory per variant and run |
@@ -74,18 +77,49 @@ pnpm --filter @linesentry/simulator watch
 
 See `simulator/SIMULATION.md` for the fault model and the topic layout.
 
+### The whole pipeline, locally
+
+`docker compose up` runs the entire pipeline with no AWS account: Mosquitto, ElasticMQ in place of SQS, DynamoDB Local, Node-RED running the edge flow, and the five services.
+
+```
+docker compose up -d
+pnpm --filter @linesentry/simulator start 5 1
+```
+
+Then inject a fault and watch it come out the other end:
+
+```
+pnpm --filter @linesentry/simulator fault press-03 overheat
+curl -s localhost:3000/events | jq
+curl -s localhost:3000/workorders | jq
+```
+
+The api is read-only and listens on port 3000.
+
+| Endpoint | What it returns |
+|---|---|
+| `GET /machines` | Every machine with its open event count and worst severity |
+| `GET /events?limit=` | Events, newest first |
+| `POST /events/:id/ack` | Acknowledges one event |
+| `GET /machines/:id/timeseries?sensor=&from=&to=` | Stored windows for one sensor |
+| `GET /workorders?limit=` | Open maintenance jobs |
+
 Service images all come from the one root `Dockerfile`, which takes the service as a build argument:
 
 ```
 docker build --build-arg SERVICE=detection -t linesentry-detection:dev .
 ```
 
+### What runs where
+
+Postgres is not in the local stack even though the brief lists it. The capability probe found that this account can describe RDS instances but not create them, so work orders live in DynamoDB, and a Postgres container locally would mean maintaining an adapter that can never be deployed. `infra/CAPABILITIES.md` records the probe output.
+
 ## Swappable pipeline stages
 
 The edge filter and the detection algorithm are each selected by name at startup from a registry.
 Adding an alternative is a new file and one `register` call, with no change to the services or the queue plumbing.
 This exists so a research-derived pipeline variant can be run against this one on identical load and compared directly.
-`packages/core/STRATEGIES.md` sets out what an implementation has to honour.
+`packages/core/STRATEGIES.md` sets out what an implementation has to honour, and `packages/core/DETECTION.md` explains how the rules that ship here are tuned and why one fault produces a handful of events rather than one per window.
 
 ## Toolchain notes
 

@@ -55,8 +55,8 @@ export interface ForwardedWindow {
   rms: number;
   smoothed: number;
   forward_reason: ForwardReason;
-  ingest_ts?: number;
-  ext?: WindowExtension;
+  ingest_ts?: number | undefined;
+  ext?: WindowExtension | undefined;
 }
 
 /** Classification of a detection event. */
@@ -88,9 +88,9 @@ export interface DetectionEvent {
   status: EventStatus;
   window_start: number;
   edge_ts: number;
-  ingest_ts?: number;
+  ingest_ts?: number | undefined;
   detected_ts: number;
-  alert_ts?: number;
+  alert_ts?: number | undefined;
 }
 
 /** Commands the simulator's actuators accept. */
@@ -105,8 +105,8 @@ export type ActuatorCommandName = 'beacon_on' | 'beacon_off' | 'shutdown';
  */
 export interface ActuatorCommand {
   command: ActuatorCommandName;
-  event_id?: string;
-  issued_at?: number;
+  event_id?: string | undefined;
+  issued_at?: number | undefined;
 }
 
 /** Progress of the maintenance job opened for an event. */
@@ -121,7 +121,7 @@ export interface WorkOrder {
   severity: Severity;
   status: WorkOrderStatus;
   opened_at: string;
-  closed_at?: string;
+  closed_at?: string | undefined;
   reason: string;
 }
 

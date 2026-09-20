@@ -1,0 +1,152 @@
+name: linesentry
+
+x-aws-local: &aws-local
+  AWS_REGION: us-east-1
+  AWS_ACCESS_KEY_ID: local
+  AWS_SECRET_ACCESS_KEY: local
+  SQS_ENDPOINT: http://elasticmq:9324
+  DYNAMODB_ENDPOINT: http://dynamodb:8000
+  TIMESERIES_TABLE: linesentry-timeseries
+  EVENTS_TABLE: linesentry-events
+  WORKORDERS_TABLE: linesentry-workorders
+  METADATA_TABLE: linesentry-metadata
+  ALERTS_TABLE: linesentry-alerts
+
+x-service: &service
+  build:
+    context: .
+    dockerfile: Dockerfile
+  restart: unless-stopped
+  depends_on:
+    bootstrap:
+      condition: service_completed_successfully
+
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./local/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+    healthcheck:
+      test: ["CMD", "mosquitto_sub", "-t", "$$SYS/#", "-C", "1", "-W", "3"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  elasticmq:
+    image: softwaremill/elasticmq-native:latest
+    ports:
+      - "9324:9324"
+    volumes:
+      - ./local/elasticmq/elasticmq.conf:/opt/elasticmq.conf:ro
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:9324/?Action=ListQueues"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  dynamodb:
+    image: amazon/dynamodb-local:latest
+    ports:
+      - "8000:8000"
+    command: ["-jar", "DynamoDBLocal.jar", "-inMemory", "-sharedDb"]
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8000"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  nodered:
+    image: nodered/node-red:latest
+    ports:
+      - "1880:1880"
+    environment:
+      MQTT_HOST: mosquitto
+      MQTT_PORT: "1883"
+    volumes:
+      - ./edge/linesentry-edge-flow.json:/data/flows.json:ro
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+
+  bootstrap:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE: bootstrap
+    environment:
+      <<: *aws-local
+      CREATE_TABLES: "true"
+      SEED_MACHINES: "${SEED_MACHINES:-5}"
+      SEED_LINES: "${SEED_LINES:-1}"
+    depends_on:
+      dynamodb:
+        condition: service_healthy
+      elasticmq:
+        condition: service_healthy
+    restart: "no"
+
+  ingest:
+    <<: *service
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE: ingest
+    environment:
+      <<: *aws-local
+      MQTT_URL: mqtt://mosquitto:1883
+      EDGE_TOPIC: linesentry/edge/#
+      FANOUT_QUEUE_URLS: http://elasticmq:9324/queue/aggregation-q,http://elasticmq:9324/queue/detection-q
+
+  aggregation:
+    <<: *service
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE: aggregation
+    environment:
+      <<: *aws-local
+      AGGREGATION_QUEUE_URL: http://elasticmq:9324/queue/aggregation-q
+
+  detection:
+    <<: *service
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE: detection
+    environment:
+      <<: *aws-local
+      DETECTION_QUEUE_URL: http://elasticmq:9324/queue/detection-q
+      EVENTS_FANOUT_QUEUE_URLS: http://elasticmq:9324/queue/alerting-q
+      DETECTION_STRATEGY: "${DETECTION_STRATEGY:-baseline}"
+      VARIANT: "${VARIANT:-baseline}"
+
+  alerting:
+    <<: *service
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE: alerting
+    environment:
+      <<: *aws-local
+      ALERTING_QUEUE_URL: http://elasticmq:9324/queue/alerting-q
+      MQTT_URL: mqtt://mosquitto:1883
+
+  api:
+    <<: *service
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE: api
+    environment:
+      <<: *aws-local
+      API_PORT: "3000"
+    ports:
+      - "3000:3000"

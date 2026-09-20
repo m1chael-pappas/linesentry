@@ -1,16 +1,17 @@
 import readline from 'node:readline';
 import mqtt from 'mqtt';
 import type { ActuatorCommand, FaultType, RawReading } from '@linesentry/core';
-import { FAULTS, SENSORS, UNITS, buildPlant, isFaultType, type Machine } from './plant.js';
+import { DEFAULT_SEED, FAULTS, SENSORS, UNITS, buildPlant, isFaultType, type Machine } from './plant.js';
 
 const BROKER = process.env.MQTT_URL ?? 'mqtt://localhost:1883';
 const SITE = process.env.SITE_ID ?? 'plant-01';
 const MACHINES = Number.parseInt(process.argv[2] ?? process.env.MACHINES ?? '5', 10);
 const LINES = Number.parseInt(process.argv[3] ?? process.env.LINES ?? '1', 10);
 const RATE_MS = Number.parseInt(process.env.RATE_MS ?? '1000', 10);
+const SEED = process.env.SEED ?? DEFAULT_SEED;
 const REPORT_MS = 10000;
 
-const machines = buildPlant(MACHINES, LINES);
+const machines = buildPlant(MACHINES, LINES, SEED);
 const byId = new Map(machines.map((m) => [m.id, m]));
 
 const client = mqtt.connect(BROKER, { clientId: `linesentry-sim-${process.pid}` });
@@ -19,7 +20,7 @@ let published = 0;
 client.on('connect', () => {
   console.log(`connected to ${BROKER}`);
   console.log(
-    `simulating ${machines.length} machines across ${LINES} line(s), ${SENSORS.length} sensors each, ${RATE_MS} ms sample period`,
+    `simulating ${machines.length} machines across ${LINES} line(s), ${SENSORS.length} sensors each, ${RATE_MS} ms sample period, seed ${SEED}`,
   );
   client.subscribe('linesentry/control');
   client.subscribe(`${SITE}/+/+/actuator`);

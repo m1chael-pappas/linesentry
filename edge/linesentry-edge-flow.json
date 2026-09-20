@@ -1,161 +1,186 @@
 [
-  {
-    "id": "ls-edge-tab",
-    "type": "tab",
-    "label": "LineSentry edge gateway",
-    "disabled": false,
-    "info": "Edge processing for LineSentry: window aggregation, EWMA smoothing and deadband filtering of raw sensor readings before they go to the cloud."
-  },
-  {
-    "id": "ls-broker",
-    "type": "mqtt-broker",
-    "name": "Local broker",
-    "broker": "localhost",
-    "port": "1883",
-    "clientid": "linesentry-edge",
-    "autoConnect": true,
-    "usetls": false,
-    "protocolVersion": "4",
-    "keepalive": "60",
-    "cleansession": true,
-    "autoUnsubscribe": true,
-    "birthTopic": "",
-    "birthQos": "0",
-    "birthPayload": "",
-    "closeTopic": "",
-    "closeQos": "0",
-    "closePayload": "",
-    "willTopic": "",
-    "willQos": "0",
-    "willPayload": "",
-    "userProps": "",
-    "sessionExpiry": ""
-  },
-  {
-    "id": "ls-mqtt-in",
-    "type": "mqtt in",
-    "z": "ls-edge-tab",
-    "name": "Raw sensor readings",
-    "topic": "plant-01/+/+/+",
-    "qos": "0",
-    "datatype": "json",
-    "broker": "ls-broker",
-    "nl": false,
-    "rap": true,
-    "rh": 0,
-    "inputs": 0,
-    "x": 150,
-    "y": 120,
-    "wires": [
-      [
-        "ls-window"
-      ]
-    ]
-  },
-  {
-    "id": "ls-window",
-    "type": "function",
-    "z": "ls-edge-tab",
-    "name": "Window aggregate (10 s)",
-    "func": "// Roll raw samples into fixed 10 second windows per machine and sensor.\n// When a sample arrives that belongs to a new window, the previous window\n// for that key is summarised and forwarded. edge_ts is stamped at that moment\n// and is the start point for the end-to-end latency measurement.\nconst WINDOW_MS = 10000;\nconst p = msg.payload;\nif (!p || p.value === undefined) return null;\n\nconst key = p.machine_id + '/' + p.sensor_type;\nconst windows = context.get('windows') || {};\nconst ws = Math.floor(p.ts / WINDOW_MS) * WINDOW_MS;\n\nfunction summarise(w) {\n    const n = w.values.length;\n    const sum = w.values.reduce((a, b) => a + b, 0);\n    const sumSq = w.values.reduce((a, b) => a + b * b, 0);\n    return {\n        edge_ts: Date.now(),\n        window_start: w.window_start,\n        window_end: w.window_start + WINDOW_MS,\n        window: '10s',\n        site_id: w.site_id,\n        line_id: w.line_id,\n        machine_id: w.machine_id,\n        sensor_type: w.sensor_type,\n        unit: w.unit,\n        count: n,\n        mean: Math.round(sum / n * 1000) / 1000,\n        min: Math.min(...w.values),\n        max: Math.max(...w.values),\n        rms: Math.round(Math.sqrt(sumSq / n) * 1000) / 1000\n    };\n}\n\nlet w = windows[key];\nlet out = null;\nif (w && w.window_start !== ws) {\n    out = summarise(w);\n    w = null;\n}\nif (!w) {\n    w = {\n        window_start: ws,\n        site_id: p.site_id,\n        line_id: p.line_id,\n        machine_id: p.machine_id,\n        sensor_type: p.sensor_type,\n        unit: p.unit,\n        values: []\n    };\n}\nw.values.push(p.value);\nwindows[key] = w;\ncontext.set('windows', windows);\n\nif (!out) return null;\nreturn {\n    topic: 'linesentry/edge/' + out.site_id + '/' + out.line_id + '/' + out.machine_id + '/' + out.sensor_type,\n    payload: out\n};",
-    "outputs": 1,
-    "timeout": 0,
-    "noerr": 0,
-    "initialize": "",
-    "finalize": "",
-    "libs": [],
-    "x": 400,
-    "y": 120,
-    "wires": [
-      [
-        "ls-ewma"
-      ]
-    ]
-  },
-  {
-    "id": "ls-ewma",
-    "type": "function",
-    "z": "ls-edge-tab",
-    "name": "EWMA smoothing",
-    "func": "// Exponentially weighted moving average on the window mean so one noisy\n// window does not look like a fault. Alpha 0.3 gives roughly a 30 second\n// memory at 10 second windows.\nconst ALPHA = 0.3;\nconst p = msg.payload;\nconst key = p.machine_id + '/' + p.sensor_type;\nconst state = context.get('ewma') || {};\nconst prev = state[key];\nconst smoothed = prev === undefined ? p.mean : ALPHA * p.mean + (1 - ALPHA) * prev;\nstate[key] = smoothed;\ncontext.set('ewma', state);\np.smoothed = Math.round(smoothed * 1000) / 1000;\nreturn msg;",
-    "outputs": 1,
-    "timeout": 0,
-    "noerr": 0,
-    "initialize": "",
-    "finalize": "",
-    "libs": [],
-    "x": 640,
-    "y": 120,
-    "wires": [
-      [
-        "ls-deadband"
-      ]
-    ]
-  },
-  {
-    "id": "ls-deadband",
-    "type": "function",
-    "z": "ls-edge-tab",
-    "name": "Deadband filter",
-    "func": "// Only forward a window when the smoothed value has moved by a meaningful\n// amount since the last one sent, or when a heartbeat is due. This is what\n// keeps the cloud traffic low in steady state.\nconst DEADBAND = { vibration: 0.15, temperature: 1.0, current: 0.5, rpm: 20 };\nconst HEARTBEAT_MS = 60000;\nconst p = msg.payload;\nconst key = p.machine_id + '/' + p.sensor_type;\nconst last = context.get('last') || {};\nconst prev = last[key];\nconst band = DEADBAND[p.sensor_type] || 0;\nconst now = Date.now();\n\nlet reason = null;\nif (!prev) reason = 'first';\nelse if (Math.abs(p.smoothed - prev.value) >= band) reason = 'changed';\nelse if (now - prev.sent >= HEARTBEAT_MS) reason = 'heartbeat';\n\n// Keep a running count of what is dropped versus forwarded for the evidence\nconst stats = context.get('stats') || { forwarded: 0, dropped: 0 };\nif (!reason) {\n    stats.dropped++;\n    context.set('stats', stats);\n    return null;\n}\nstats.forwarded++;\ncontext.set('stats', stats);\nlast[key] = { value: p.smoothed, sent: now };\ncontext.set('last', last);\np.forward_reason = reason;\nnode.status({ fill: 'green', shape: 'dot', text: 'fwd ' + stats.forwarded + ' / drop ' + stats.dropped });\nreturn msg;",
-    "outputs": 1,
-    "timeout": 0,
-    "noerr": 0,
-    "initialize": "",
-    "finalize": "",
-    "libs": [],
-    "x": 860,
-    "y": 120,
-    "wires": [
-      [
-        "ls-mqtt-out",
-        "ls-debug"
-      ]
-    ]
-  },
-  {
-    "id": "ls-mqtt-out",
-    "type": "mqtt out",
-    "z": "ls-edge-tab",
-    "name": "To cloud ingestion",
-    "topic": "",
-    "qos": "1",
-    "retain": "",
-    "respTopic": "",
-    "contentType": "",
-    "userProps": "",
-    "correl": "",
-    "expiry": "",
-    "broker": "ls-broker",
-    "x": 1100,
-    "y": 80,
-    "wires": []
-  },
-  {
-    "id": "ls-debug",
-    "type": "debug",
-    "z": "ls-edge-tab",
-    "name": "Forwarded windows",
-    "active": true,
-    "tosidebar": true,
-    "console": false,
-    "tostatus": false,
-    "complete": "payload",
-    "targetType": "msg",
-    "statusVal": "",
-    "statusType": "auto",
-    "x": 1100,
-    "y": 160,
-    "wires": []
-  },
-  {
-    "id": "ls-comment",
-    "type": "comment",
-    "z": "ls-edge-tab",
-    "name": "Raw MQTT in -> 10 s window (mean/min/max/rms) -> EWMA -> deadband -> linesentry/edge/... . Point the mqtt out at AWS IoT Core once the cloud side is up.",
-    "info": "",
-    "x": 480,
-    "y": 40,
-    "wires": []
-  }
+    {
+        "id": "ls-edge-tab",
+        "type": "tab",
+        "label": "LineSentry edge gateway",
+        "disabled": false,
+        "info": "Edge processing for LineSentry: window aggregation, EWMA smoothing and deadband filtering of raw sensor readings before they go to the cloud."
+    },
+    {
+        "id": "ls-broker",
+        "type": "mqtt-broker",
+        "name": "Plant broker",
+        "broker": "${MQTT_HOST}",
+        "port": "${MQTT_PORT}",
+        "clientid": "linesentry-edge",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "ls-mqtt-in",
+        "type": "mqtt in",
+        "z": "ls-edge-tab",
+        "name": "Raw sensor readings",
+        "topic": "plant-01/+/+/+",
+        "qos": "0",
+        "datatype": "json",
+        "broker": "ls-broker",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 150,
+        "y": 120,
+        "wires": [
+            [
+                "ls-window"
+            ]
+        ]
+    },
+    {
+        "id": "ls-flush-tick",
+        "type": "inject",
+        "z": "ls-edge-tab",
+        "name": "Flush idle windows",
+        "props": [
+            {
+                "p": "flush",
+                "v": "true",
+                "vt": "bool"
+            }
+        ],
+        "repeat": "5",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 160,
+        "y": 200,
+        "wires": [
+            [
+                "ls-window"
+            ]
+        ]
+    },
+    {
+        "id": "ls-window",
+        "type": "function",
+        "z": "ls-edge-tab",
+        "name": "Window aggregate (10 s)",
+        "func": "// Roll raw samples into fixed 10 second windows per machine and sensor.\n// A window is forwarded when a sample arrives that belongs to a later window,\n// or when the flush tick finds it closed and idle. Without the flush a key\n// that stops publishing would strand its last window here forever, and every\n// key strands one when a run ends.\nconst WINDOW_MS = 10000;\nconst FLUSH_GRACE_MS = 3000;\nconst windows = context.get('windows') || {};\n\nfunction summarise(w) {\n    const n = w.values.length;\n    const sum = w.values.reduce((a, b) => a + b, 0);\n    const sumSq = w.values.reduce((a, b) => a + b * b, 0);\n    return {\n        edge_ts: Date.now(),\n        window_start: w.window_start,\n        window_end: w.window_start + WINDOW_MS,\n        window: '10s',\n        site_id: w.site_id,\n        line_id: w.line_id,\n        machine_id: w.machine_id,\n        sensor_type: w.sensor_type,\n        unit: w.unit,\n        count: n,\n        mean: Math.round(sum / n * 1000) / 1000,\n        min: Math.min(...w.values),\n        max: Math.max(...w.values),\n        rms: Math.round(Math.sqrt(sumSq / n) * 1000) / 1000\n    };\n}\n\nfunction envelope(out) {\n    return {\n        topic: 'linesentry/edge/' + out.site_id + '/' + out.line_id + '/' + out.machine_id + '/' + out.sensor_type,\n        payload: out\n    };\n}\n\nif (msg.flush) {\n    const now = Date.now();\n    let flushed = 0;\n    for (const key of Object.keys(windows)) {\n        const w = windows[key];\n        if (now >= w.window_start + WINDOW_MS + FLUSH_GRACE_MS) {\n            node.send(envelope(summarise(w)));\n            delete windows[key];\n            flushed++;\n        }\n    }\n    context.set('windows', windows);\n    if (flushed) node.status({ fill: 'blue', shape: 'ring', text: 'flushed ' + flushed });\n    return null;\n}\n\nconst p = msg.payload;\nif (!p || p.value === undefined) return null;\n\nconst key = p.machine_id + '/' + p.sensor_type;\nconst ws = Math.floor(p.ts / WINDOW_MS) * WINDOW_MS;\n\nlet w = windows[key];\nlet out = null;\nif (w && w.window_start !== ws) {\n    out = summarise(w);\n    w = null;\n}\nif (!w) {\n    w = {\n        window_start: ws,\n        site_id: p.site_id,\n        line_id: p.line_id,\n        machine_id: p.machine_id,\n        sensor_type: p.sensor_type,\n        unit: p.unit,\n        values: []\n    };\n}\nw.values.push(p.value);\nwindows[key] = w;\ncontext.set('windows', windows);\n\nif (!out) return null;\nreturn envelope(out);\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 120,
+        "wires": [
+            [
+                "ls-ewma"
+            ]
+        ]
+    },
+    {
+        "id": "ls-ewma",
+        "type": "function",
+        "z": "ls-edge-tab",
+        "name": "EWMA smoothing",
+        "func": "// Exponentially weighted moving average on the window mean so one noisy\n// window does not look like a fault. Alpha 0.3 gives roughly a 30 second\n// memory at 10 second windows.\nconst ALPHA = 0.3;\nconst p = msg.payload;\nconst key = p.machine_id + '/' + p.sensor_type;\nconst state = context.get('ewma') || {};\nconst prev = state[key];\nconst smoothed = prev === undefined ? p.mean : ALPHA * p.mean + (1 - ALPHA) * prev;\nstate[key] = smoothed;\ncontext.set('ewma', state);\np.smoothed = Math.round(smoothed * 1000) / 1000;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 640,
+        "y": 120,
+        "wires": [
+            [
+                "ls-deadband"
+            ]
+        ]
+    },
+    {
+        "id": "ls-deadband",
+        "type": "function",
+        "z": "ls-edge-tab",
+        "name": "Deadband filter",
+        "func": "// Only forward a window when the smoothed value has moved by a meaningful\n// amount since the last one sent, or when a heartbeat is due. This is what\n// keeps the cloud traffic low in steady state.\nconst DEADBAND = { vibration: 0.15, temperature: 1.0, current: 0.5, rpm: 20 };\nconst HEARTBEAT_MS = 60000;\nconst p = msg.payload;\nconst key = p.machine_id + '/' + p.sensor_type;\nconst last = context.get('last') || {};\nconst prev = last[key];\nconst band = DEADBAND[p.sensor_type] || 0;\nconst now = Date.now();\n\nlet reason = null;\nif (!prev) reason = 'first';\nelse if (Math.abs(p.smoothed - prev.value) >= band) reason = 'changed';\nelse if (now - prev.sent >= HEARTBEAT_MS) reason = 'heartbeat';\n\n// Keep a running count of what is dropped versus forwarded for the evidence\nconst stats = context.get('stats') || { forwarded: 0, dropped: 0 };\nif (!reason) {\n    stats.dropped++;\n    context.set('stats', stats);\n    return null;\n}\nstats.forwarded++;\ncontext.set('stats', stats);\nlast[key] = { value: p.smoothed, sent: now };\ncontext.set('last', last);\np.forward_reason = reason;\nnode.status({ fill: 'green', shape: 'dot', text: 'fwd ' + stats.forwarded + ' / drop ' + stats.dropped });\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 860,
+        "y": 120,
+        "wires": [
+            [
+                "ls-mqtt-out",
+                "ls-debug"
+            ]
+        ]
+    },
+    {
+        "id": "ls-mqtt-out",
+        "type": "mqtt out",
+        "z": "ls-edge-tab",
+        "name": "To cloud ingestion",
+        "topic": "",
+        "qos": "1",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "ls-broker",
+        "x": 1100,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "ls-debug",
+        "type": "debug",
+        "z": "ls-edge-tab",
+        "name": "Forwarded windows",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1100,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "ls-comment",
+        "type": "comment",
+        "z": "ls-edge-tab",
+        "name": "Raw MQTT in -> 10 s window (mean/min/max/rms) -> EWMA -> deadband -> linesentry/edge/... . Point the mqtt out at AWS IoT Core once the cloud side is up.",
+        "info": "",
+        "x": 480,
+        "y": 40,
+        "wires": []
+    }
 ]

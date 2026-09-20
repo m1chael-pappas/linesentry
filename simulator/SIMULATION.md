@@ -22,6 +22,7 @@ Everything else is environment.
 | `MACHINES` | `5` | Machines per line, overridden by the first positional argument |
 | `LINES` | `1` | Production lines, overridden by the second positional argument |
 | `RATE_MS` | `1000` | Raw sample period |
+| `SEED` | `linesentry` | Run seed, see below |
 | `MQTT_PORT` | `1883` | Port the development broker listens on |
 
 The development broker exists so the simulator and Node-RED run without installing Mosquitto.
@@ -55,9 +56,26 @@ A null fault clears.
 `bearing` and `overheat` ramp with fault age, so they are the two that exercise the remaining-useful-life trend fit.
 `overload` and `dropout` are step changes, which is what the z-score and the fixed safety thresholds catch.
 
+## The plant is reproducible
+
+Every machine draws its resting values and its noise from a stream seeded by the run seed and its own machine id, so the same seed always produces the same plant.
+
+Two properties follow, and both matter for the experiments.
+
+A run can be repeated exactly. Two arms of an A/B comparison see identical load rather than merely similar load, so a difference in the measurements is a difference between the arms rather than between two draws of random noise.
+
+A machine behaves the same regardless of how many machines are around it. `press-05` produces the same readings in a 5 machine run and in a 200 machine run, because its stream is keyed on its own id rather than on its position in a sequence. The ramp run can therefore grow the plant from 20 to 200 machines without the machines already running changing underneath the measurement.
+
+It also means the metadata store can be seeded with the values a machine will actually produce. `machineBaseline` is exported and the bootstrap tool calls the same function, so the stored baseline is the machine's real resting value rather than an approximation of it.
+
 ## Why each machine gets its own baseline
 
-Baselines are drawn from a normal distribution once per machine at construction, so normal vibration on `press-01` is not normal vibration on `press-02`.
+Each machine's resting values are drawn from a normal distribution keyed on its own id, so normal vibration on `press-01` is not normal vibration on `press-02`.
 A single plant-wide threshold would either miss a genuinely faulty quiet machine or constantly fire on a noisy healthy one, which is the case for storing per-machine baselines in the metadata store and computing a z-score against them.
 
-Load also wanders slowly within 0.7 to 1.3 and drives current draw, and temperature carries a 60 second sine, so the signal has structure that a naive fixed threshold would trip on.
+The signal also carries structure that a naive fixed threshold would trip on.
+Load wanders slowly between 0.7 and 1.3 and drives current draw, so current moves across several amps over a run.
+Temperature carries a sine of amplitude 2 C whose period is about six minutes, since `Math.sin(now / 60000)` takes radians and so repeats every 2 pi times 60 seconds rather than every 60 seconds.
+
+Both survive the edge gateway's averaging and smoothing, which is why the baseline spreads stored for those two sensors are much wider than their per-sample noise.
+See `packages/core/DETECTION.md`.

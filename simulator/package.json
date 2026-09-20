@@ -23,5 +23,16 @@
   "devDependencies": {
     "@types/node": "catalog:",
     "typescript": "catalog:"
-  }
+  },
+  "main": "./dist/exports.js",
+  "types": "./dist/exports.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/exports.d.ts",
+      "default": "./dist/exports.js"
+    }
+  },
+  "files": [
+    "dist"
+  ]
 }

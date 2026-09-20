@@ -8,6 +8,8 @@ WORKDIR /repo
 COPY pnpm-workspace.yaml pnpm-lock.yaml package.json tsconfig.base.json .npmrc ./
 COPY packages ./packages
 COPY services ./services
+COPY simulator ./simulator
+COPY tools ./tools
 RUN pnpm install --frozen-lockfile
 RUN pnpm --filter "@linesentry/${SERVICE}..." build
 RUN pnpm deploy --filter "@linesentry/${SERVICE}" --prod /out

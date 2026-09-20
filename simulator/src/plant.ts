@@ -22,9 +22,44 @@ export function isFaultType(value: unknown): value is FaultType {
 /** One sample from every sensor on a machine. */
 export type Readings = Record<SensorType, number>;
 
-function gauss(mean: number, sd: number): number {
-  const u = 1 - Math.random();
-  const v = Math.random();
+/** Returns numbers in [0, 1), deterministic for a given seed. */
+export type Random = () => number;
+
+function mulberry32(seed: number): Random {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function hash(text: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < text.length; i++) {
+    h ^= text.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+/**
+ * Builds the random stream for one machine.
+ *
+ * Streams are per machine and derived from the run seed and the machine id, so
+ * the plant produces the same signal on every run with the same seed and the
+ * same machine still behaves the same whether the run has 5 machines or 200.
+ * Two arms of an experiment can therefore be compared on identical load.
+ */
+export function machineRandom(seed: string, machineId: string): Random {
+  return mulberry32(hash(`${seed}:${machineId}`));
+}
+
+function gauss(random: Random, mean: number, sd: number): number {
+  const u = 1 - random();
+  const v = random();
   return mean + sd * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
 }
 
@@ -34,16 +69,36 @@ function round(n: number, dp: number): number {
 }
 
 /**
+ * The resting value of each sensor on one machine.
+ *
+ * Derived from the run seed and the machine id rather than drawn at startup,
+ * so the metadata store can be seeded with the same numbers the machine will
+ * actually produce. Called by the bootstrap tool as well as by the machine.
+ */
+export function machineBaseline(seed: string, machineId: string): Readings {
+  const random = mulberry32(hash(`${seed}:${machineId}:baseline`));
+  return {
+    vibration: round(gauss(random, 2.1, 0.3), 2),
+    temperature: round(gauss(random, 55, 4), 1),
+    current: round(gauss(random, 12, 1.5), 1),
+    rpm: Math.round(gauss(random, 1450, 40)),
+  };
+}
+
+/**
  * A single machine with its own idea of normal.
  *
- * Baselines are drawn once at construction so that "normal" differs machine to
- * machine, which is what makes a per-machine baseline worth storing rather
- * than a single plant-wide threshold. See ../SIMULATION.md.
+ * Normal differs machine to machine, which is what makes a per-machine
+ * baseline worth storing rather than one plant-wide threshold. Both the
+ * baseline and the noise come from a stream seeded by the run seed and the
+ * machine id, so a machine behaves identically across runs. See
+ * ../SIMULATION.md.
  */
 export class Machine {
   readonly lineId: string;
   readonly id: string;
   readonly base: Readings;
+  private readonly random: Random;
   load = 1.0;
   fault: FaultType | null = null;
   faultStart = 0;
@@ -51,15 +106,11 @@ export class Machine {
   beacon = false;
   seq = 0;
 
-  constructor(lineId: string, index: number) {
+  constructor(lineId: string, index: number, seed: string) {
     this.lineId = lineId;
     this.id = `press-${String(index).padStart(2, '0')}`;
-    this.base = {
-      vibration: round(gauss(2.1, 0.3), 2),
-      temperature: round(gauss(55, 4), 1),
-      current: round(gauss(12, 1.5), 1),
-      rpm: Math.round(gauss(1450, 40)),
-    };
+    this.base = machineBaseline(seed, this.id);
+    this.random = machineRandom(seed, this.id);
   }
 
   /** Seconds since the current fault or shutdown started. */
@@ -69,27 +120,28 @@ export class Machine {
 
   /** Samples every sensor at the given instant, applying any active fault. */
   readings(now: number): Readings {
+    const random = this.random;
     if (this.shutdown) {
       return {
-        vibration: round(gauss(0.1, 0.02), 2),
+        vibration: round(gauss(random, 0.1, 0.02), 2),
         temperature: round(Math.max(20, this.base.temperature - this.faultAge(now) * 0.2), 1),
         current: 0,
         rpm: 0,
       };
     }
 
-    this.load += gauss(0, 0.01);
+    this.load += gauss(random, 0, 0.01);
     this.load = Math.min(1.3, Math.max(0.7, this.load));
 
     const age = this.faultAge(now);
-    let vibration = gauss(this.base.vibration, 0.15);
-    let temperature = this.base.temperature + 2 * Math.sin(now / 60000) + gauss(0, 0.3);
-    let current = this.base.current * this.load + gauss(0, 0.2);
-    let rpm = gauss(this.base.rpm, 8);
+    let vibration = gauss(random, this.base.vibration, 0.15);
+    let temperature = this.base.temperature + 2 * Math.sin(now / 60000) + gauss(random, 0, 0.3);
+    let current = this.base.current * this.load + gauss(random, 0, 0.2);
+    let rpm = gauss(random, this.base.rpm, 8);
 
     switch (this.fault) {
       case 'bearing':
-        vibration += 0.08 * age + (Math.random() < 0.2 ? gauss(1.5, 0.5) : 0);
+        vibration += 0.08 * age + (random() < 0.2 ? gauss(random, 1.5, 0.5) : 0);
         temperature += 0.05 * age;
         break;
       case 'overheat':
@@ -102,7 +154,7 @@ export class Machine {
         vibration += 0.4;
         break;
       case 'dropout':
-        if (Math.random() < 0.3) rpm = gauss(200, 50);
+        if (random() < 0.3) rpm = gauss(random, 200, 50);
         break;
       default:
         break;
@@ -117,13 +169,16 @@ export class Machine {
   }
 }
 
+/** Seed used when no run seed is given, so a plain run is still reproducible. */
+export const DEFAULT_SEED = 'linesentry';
+
 /** Builds the plant as `lines` production lines of `machinesPerLine` machines. */
-export function buildPlant(machinesPerLine: number, lines: number): Machine[] {
+export function buildPlant(machinesPerLine: number, lines: number, seed = DEFAULT_SEED): Machine[] {
   const machines: Machine[] = [];
   for (let l = 0; l < lines; l++) {
     const lineId = `line-${String.fromCharCode(65 + l)}`;
     for (let m = 1; m <= machinesPerLine; m++) {
-      machines.push(new Machine(lineId, l * machinesPerLine + m));
+      machines.push(new Machine(lineId, l * machinesPerLine + m, seed));
     }
   }
   return machines;

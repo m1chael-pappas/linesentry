@@ -2,6 +2,7 @@ packages:
   - packages/*
   - services/*
   - simulator
+  - tools/*
 
 catalog:
   "@types/node": ^26.6.2
