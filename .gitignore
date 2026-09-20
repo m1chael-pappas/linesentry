@@ -18,3 +18,4 @@ certs/
 local/
 edge/linesentry-edge-flow-aws.json
 experiments/.run-locked.sh
+report/
