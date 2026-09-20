@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { DetectionContext, ForwardedWindow, MachineMetadata } from '@linesentry/core';
-import { createBaselineDetection, crossingTime, fitTrend, zScore } from './baseline.js';
+import { createBaselineDetection, crossingTime, zScore } from './baseline.js';
 
 const WINDOW_MS = 10000;
 const START = 1789000000000;
@@ -40,31 +40,6 @@ function window(smoothed: number, index = 0, sensor: 'temperature' | 'vibration'
 function context(history: ForwardedWindow[] = []): DetectionContext {
   return { metadata, history };
 }
-
-describe('fitTrend', () => {
-  it('finds the slope of a straight line', () => {
-    const trend = fitTrend([
-      { t: 0, v: 10 },
-      { t: 10, v: 20 },
-      { t: 20, v: 30 },
-    ]);
-    expect(trend?.slope).toBeCloseTo(1);
-    expect(trend?.intercept).toBeCloseTo(10);
-  });
-
-  it('has no trend from a single point', () => {
-    expect(fitTrend([{ t: 0, v: 10 }])).toBeNull();
-  });
-
-  it('has no trend when every point shares a timestamp', () => {
-    expect(
-      fitTrend([
-        { t: 5, v: 1 },
-        { t: 5, v: 9 },
-      ]),
-    ).toBeNull();
-  });
-});
 
 describe('crossingTime', () => {
   it('finds when a rising line reaches the threshold', () => {

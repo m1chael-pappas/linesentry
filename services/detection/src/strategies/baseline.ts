@@ -1,45 +1,14 @@
 import {
   ALARM_DIRECTION,
   detectionRegistry,
+  fitTrend,
   type DetectionConfig,
   type DetectionContext,
   type DetectionFinding,
   type DetectionStrategy,
   type ForwardedWindow,
+  type LinearModel,
 } from '@linesentry/core';
-
-/** `v = slope * t + intercept`. */
-export interface Trend {
-  slope: number;
-  intercept: number;
-}
-
-/**
- * Least-squares fit over the points, or null when there are fewer than two
- * points or every point shares one `t`.
- *
- * Pure.
- */
-export function fitTrend(points: readonly { t: number; v: number }[]): Trend | null {
-  if (points.length < 2) return null;
-
-  const n = points.length;
-  const meanT = points.reduce((sum, p) => sum + p.t, 0) / n;
-  const meanV = points.reduce((sum, p) => sum + p.v, 0) / n;
-
-  let covariance = 0;
-  let variance = 0;
-  for (const point of points) {
-    const dt = point.t - meanT;
-    covariance += dt * (point.v - meanV);
-    variance += dt * dt;
-  }
-
-  if (variance === 0) return null;
-
-  const slope = covariance / variance;
-  return { slope, intercept: meanV - slope * meanT };
-}
 
 /**
  * The `t` at which `trend` reaches `threshold`, or null when the slope is not
@@ -47,7 +16,7 @@ export function fitTrend(points: readonly { t: number; v: number }[]): Trend | n
  *
  * Pure.
  */
-export function crossingTime(trend: Trend, threshold: number, current: number): number | null {
+export function crossingTime(trend: LinearModel, threshold: number, current: number): number | null {
   if (trend.slope <= 0) return null;
   if (current >= threshold) return null;
   return (threshold - trend.intercept) / trend.slope;

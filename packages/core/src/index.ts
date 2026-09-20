@@ -5,6 +5,7 @@ export * from './ids.js';
 export * from './latency.js';
 export * from './metrics.js';
 export * from './plant-config.js';
+export * from './predictor.js';
 export * from './registry.js';
 export * from './runtime.js';
 export * from './stores.js';
