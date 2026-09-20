@@ -21,3 +21,18 @@ The ordering does have a cost. If the process dies between the work order write 
 | `medium` or `low` | Nothing, work order only |
 
 A threshold breach means a fixed safety limit has been passed, which is the case where the machine should stop without waiting for anyone to look at it.
+
+## How it reaches the machine and the technician
+
+Both destinations are chosen from configuration at startup, because the right mechanism differs between environments and neither service code nor the message contract should know which one it got.
+
+| | Local | AWS |
+|---|---|---|
+| Actuator command | MQTT publish to Mosquitto | IoT Core data plane `Publish` |
+| Technician notification | MQTT publish to a topic | SNS publish |
+
+Setting `IOT_DATA_ENDPOINT` selects the IoT Core data plane for actuators, and a `NOTIFICATION_TOPIC` that is an SNS ARN selects SNS for notifications. Anything else falls back to MQTT against `MQTT_URL`.
+
+The actuator path deserves the explanation. Locally the service holds an ordinary MQTT connection to the broker. On AWS the same publish has to reach a device topic on IoT Core, and IoT Core authenticates MQTT clients with a device certificate. Giving a cloud service a device certificate would mean provisioning one, storing it, mounting it into the task and rotating it, all to authenticate something that already has an IAM role. The data plane API takes the same publish over HTTPS and authorises it with that role instead, so there is no certificate to manage and no second identity for the service.
+
+The device certificate stays where it belongs, on the edge gateway, which is the only thing in the system that actually is a device.

@@ -1,0 +1,2 @@
+lab_role_arn = "arn:aws:iam::000000000000:role/LabRole"
+region       = "us-east-1"

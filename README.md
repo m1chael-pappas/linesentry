@@ -114,6 +114,27 @@ docker build --build-arg SERVICE=detection -t linesentry-detection:dev .
 
 Postgres is not in the local stack even though the brief lists it. The capability probe found that this account can describe RDS instances but not create them, so work orders live in DynamoDB, and a Postgres container locally would mean maintaining an adapter that can never be deployed. `infra/CAPABILITIES.md` records the probe output.
 
+## Deploying
+
+```
+make deploy     provision, build and push images, roll the services
+make destroy    tear it down
+make tasks      running task count per service
+make plan       show what deploy would change
+```
+
+`make deploy` provisions the registries first, pushes the images, applies the rest, seeds machine metadata, then forces a new deployment so the services pick up the images.
+
+Terraform needs `infra/terraform.tfvars` holding the `LabRole` ARN. `infra/terraform.tfvars.example` shows the shape. The file is gitignored because it carries the account number.
+
+On AWS the pipeline differs from the local stack in two places, and nothing else changes.
+
+The ingest bridge does not exist. An IoT Core topic rule matches `linesentry/edge/#`, adds `ingest_ts` in its SQL, and delivers to the `linesentry-windows` SNS topic, which fans out to the aggregation and detection queues.
+
+The alerting service publishes actuator commands through the IoT Core data plane and technician notifications to SNS, rather than over MQTT. Both are selected from environment variables at startup. See `services/alerting/ALERTING.md`.
+
+The same container images run in both environments. The environment decides which adapters are constructed.
+
 ## Swappable pipeline stages
 
 The edge filter and the detection algorithm are each selected by name at startup from a registry.

@@ -16,3 +16,4 @@ crash.log
 *.crt
 certs/
 local/
+edge/linesentry-edge-flow-aws.json

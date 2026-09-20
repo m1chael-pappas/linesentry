@@ -10,6 +10,8 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
+    "@aws-sdk/client-iot-data-plane": "^3.1136.0",
+    "@aws-sdk/client-sns": "^3.1136.0",
     "@linesentry/core": "workspace:*",
     "mqtt": "^5.16.0"
   },

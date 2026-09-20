@@ -18,10 +18,20 @@ import {
   type DetectionEvent,
   type WorkOrder,
 } from '@linesentry/core';
+import {
+  createIotActuatorPublisher,
+  createMqttActuatorPublisher,
+  createMqttNotificationPublisher,
+  createSnsNotificationPublisher,
+  isSnsTopic,
+  type ActuatorPublisher,
+  type NotificationPublisher,
+} from './publishers.js';
 
 const QUEUE_URL = requiredEnv('ALERTING_QUEUE_URL');
 const WORKORDERS_TABLE = requiredEnv('WORKORDERS_TABLE');
-const MQTT_URL = requiredEnv('MQTT_URL');
+const MQTT_URL = optionalEnv('MQTT_URL', '');
+const IOT_DATA_ENDPOINT = optionalEnv('IOT_DATA_ENDPOINT', '');
 const NOTIFICATION_TOPIC = optionalEnv('NOTIFICATION_TOPIC', 'linesentry/notifications');
 const DLQ_URL = optionalEnv('ALERTING_DLQ_URL', '');
 const FLUSH_MS = numberEnv('METRICS_FLUSH_MS', 10000);
@@ -30,7 +40,18 @@ const metrics = createMetrics('alerting');
 const workOrders = createDynamoWorkOrderStore(createDynamoClient(), WORKORDERS_TABLE);
 const sqs = createSqsClient();
 const consumer = createQueueConsumer<DetectionEvent>(sqs, QUEUE_URL);
-const client = mqtt.connect(MQTT_URL, { clientId: `linesentry-alerting-${process.pid}` });
+
+const client = MQTT_URL
+  ? mqtt.connect(MQTT_URL, { clientId: `linesentry-alerting-${process.pid}` })
+  : undefined;
+
+const actuators: ActuatorPublisher = IOT_DATA_ENDPOINT
+  ? createIotActuatorPublisher(IOT_DATA_ENDPOINT)
+  : createMqttActuatorPublisher(client!);
+
+const notifications: NotificationPublisher = isSnsTopic(NOTIFICATION_TOPIC)
+  ? createSnsNotificationPublisher(NOTIFICATION_TOPIC)
+  : createMqttNotificationPublisher(client!, NOTIFICATION_TOPIC);
 
 let alerted = 0;
 let duplicates = 0;
@@ -47,14 +68,6 @@ function commandFor(event: DetectionEvent): ActuatorCommand['command'] | null {
   return null;
 }
 
-function publish(topic: string, payload: unknown): Promise<void> {
-  return new Promise((resolve, reject) => {
-    client.publish(topic, JSON.stringify(payload), (error) =>
-      error ? reject(error) : resolve(),
-    );
-  });
-}
-
 function buildWorkOrder(event: DetectionEvent, openedAt: number): WorkOrder {
   return {
     work_order_id: workOrderId(event.event_id),
@@ -68,7 +81,9 @@ function buildWorkOrder(event: DetectionEvent, openedAt: number): WorkOrder {
   };
 }
 
-console.log(`alerting consuming ${QUEUE_URL}, publishing actuator commands to ${MQTT_URL}`);
+console.log(
+  `alerting consuming ${QUEUE_URL}, actuators via ${IOT_DATA_ENDPOINT || MQTT_URL}, notifications to ${NOTIFICATION_TOPIC}`,
+);
 
 const loop = runConsumerLoop(consumer, async (message) => {
   const event = message.body;
@@ -83,7 +98,7 @@ const loop = runConsumerLoop(consumer, async (message) => {
     return;
   }
 
-  await publish(NOTIFICATION_TOPIC, { ...event, alert_ts: alertTs });
+  await notifications.publish({ ...event, alert_ts: alertTs });
 
   const command = commandFor(event);
   if (command) {
@@ -93,7 +108,7 @@ const loop = runConsumerLoop(consumer, async (message) => {
       event_id: event.event_id,
       issued_at: alertTs,
     };
-    await publish(topic, payload);
+    await actuators.publish(topic, payload);
     console.log(`alert ${event.event_id} -> ${command} on ${event.machine_id}`);
   } else {
     console.log(`alert ${event.event_id} -> notification only on ${event.machine_id}`);
@@ -125,5 +140,5 @@ onShutdown(async () => {
   deadLetters?.stop();
   await loop.stop();
   metrics.flush();
-  client.end();
+  client?.end();
 });
