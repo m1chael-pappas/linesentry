@@ -1,10 +1,8 @@
 # LineSentry
 
-A predictive maintenance pipeline for a simulated manufacturing site, built to be measurably scalable rather than just described as scalable.
+A predictive maintenance pipeline for a simulated manufacturing site.
 
-Sensors on simulated machines publish once per second over MQTT.
-An edge gateway aggregates them into 10 second windows and forwards only what has changed.
-The cloud side detects faults, raises events, alerts a technician and shuts the machine down, with each stage decoupled through a queue so it can scale on its own.
+Sensors on simulated machines publish once per second over MQTT. An edge gateway aggregates them into 10 second windows and forwards only what has changed. The cloud side detects faults, raises events, notifies a technician and shuts the machine down. Each stage is connected by a queue, so stages scale independently.
 
 ## Pipeline
 
@@ -33,10 +31,9 @@ simulator                     edge gateway (Node-RED)
                                     technician SNS   MQTT actuator   work orders
 ```
 
-Services never call each other.
-Every producer and consumer is decoupled through the bus, which is what allows the detection service to scale on queue backlog without anything else changing.
+Services do not call each other. Every producer and consumer is connected by the bus, so the detection service scales on queue backlog without other services changing.
 
-Only the detection service autoscales, and that is deliberate: it is the stage whose cost grows with fault load rather than with machine count, so it is the one where scaling is worth demonstrating.
+Only the detection service autoscales. Its cost grows with both machine count and fault load, and it holds a queue that grows visibly, so it is where scaling can be measured. See `infra/SCALING.md`.
 
 ## Layout
 
@@ -112,7 +109,7 @@ docker build --build-arg SERVICE=detection -t linesentry-detection:dev .
 
 ### What runs where
 
-Postgres is not in the local stack even though the brief lists it. The capability probe found that this account can describe RDS instances but not create them, so work orders live in DynamoDB, and a Postgres container locally would mean maintaining an adapter that can never be deployed. `infra/CAPABILITIES.md` records the probe output.
+Postgres is not in the local stack. The capability probe found this account can describe RDS instances but not create them, so work orders are in DynamoDB. A Postgres container locally would mean maintaining an adapter that cannot be deployed. `infra/CAPABILITIES.md` records the probe output.
 
 ## Deploying
 
@@ -127,29 +124,27 @@ make plan       show what deploy would change
 
 Terraform needs `infra/terraform.tfvars` holding the `LabRole` ARN. `infra/terraform.tfvars.example` shows the shape. The file is gitignored because it carries the account number.
 
-On AWS the pipeline differs from the local stack in two places, and nothing else changes.
+On AWS the pipeline differs from the local stack in two places.
 
-The ingest bridge does not exist. An IoT Core topic rule matches `linesentry/edge/#`, adds `ingest_ts` in its SQL, and delivers to the `linesentry-windows` SNS topic, which fans out to the aggregation and detection queues.
+The ingest bridge does not run. An IoT Core topic rule matches `linesentry/edge/#`, adds `ingest_ts` in its SQL, and delivers to the `linesentry-windows` SNS topic, which fans out to the aggregation and detection queues.
 
-The alerting service publishes actuator commands through the IoT Core data plane and technician notifications to SNS, rather than over MQTT. Both are selected from environment variables at startup. See `services/alerting/ALERTING.md`.
+The alerting service publishes actuator commands through the IoT Core data plane and technician notifications to SNS, instead of over MQTT. Both are selected from environment variables at startup. See `services/alerting/ALERTING.md`.
 
 The same container images run in both environments. The environment decides which adapters are constructed.
 
 ## Swappable pipeline stages
 
-The edge filter and the detection algorithm are each selected by name at startup from a registry.
-Adding an alternative is a new file and one `register` call, with no change to the services or the queue plumbing.
-This exists so a research-derived pipeline variant can be run against this one on identical load and compared directly.
-`packages/core/STRATEGIES.md` sets out what an implementation has to honour, and `packages/core/DETECTION.md` explains how the rules that ship here are tuned and why one fault produces a handful of events rather than one per window.
+The edge filter and the detection algorithm are each selected by name at startup from a registry. Adding an alternative is a new file and one `register` call, with no change to the services or the queue plumbing. This lets a research-derived pipeline variant run against this one on identical load.
+
+`packages/core/STRATEGIES.md` states the requirements on an implementation. `packages/core/DETECTION.md` covers how the rules here are tuned and why one fault produces about four events rather than one per window.
 
 ## Toolchain notes
 
 pnpm only, no `npm install` or `npx` anywhere.
 Use `pnpm dlx` in place of `npx`.
 
-The pnpm version is pinned in the root `packageManager` field and both local development and the Docker images activate it through corepack, so there is one pnpm version and one place it is declared.
+The pnpm version is pinned in the root `packageManager` field. Local development and the Docker images both activate it through corepack, so there is one pnpm version declared in one place.
 
-Node is pinned to 24, the Active LTS line, in `.node-version`.
-Node 26 becomes LTS on 28 October 2026 and moving to it is a one line change in that file and in the `NODE_IMAGE` build argument.
+Node is pinned to 24, the Active LTS line, in `.node-version`. Moving to Node 26 is a one line change in that file and in the `NODE_IMAGE` build argument.
 
-Versions across the workspace come from the `catalog` in `pnpm-workspace.yaml` rather than being repeated in each package.
+Dependency versions come from the `catalog` in `pnpm-workspace.yaml` rather than being repeated per package.

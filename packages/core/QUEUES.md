@@ -1,48 +1,48 @@
 # Queues and the bus
 
-Every stage is decoupled through a queue. Services never call each other.
+Each stage is connected by a queue. Services do not call each other.
 
 ## Delivery guarantees
 
-SQS standard queues deliver at least once and do not order messages. Every consumer here is therefore written to tolerate the same message arriving twice, arriving late, or arriving after a newer one.
+SQS standard queues deliver at least once and do not preserve order. Every consumer handles the same message arriving twice, arriving late, or arriving after a newer one.
 
-A message is deleted only after its handler resolves. A handler that throws leaves the message on the queue, so it becomes visible again after the visibility timeout and reaches the dead letter queue once its receive count passes the queue's limit. A task that dies mid-message loses nothing for the same reason: it never acknowledged, so the message comes back.
+A message is deleted only after its handler resolves. If a handler throws, the message stays on the queue, becomes visible again after the visibility timeout, and moves to the dead letter queue once its receive count passes the limit. A task that stops mid-message loses nothing, because it never acknowledged the message.
 
-Messages within a batch are handled in parallel, because windows are independent of one another and every handler is idempotent. Work that must see the whole batch before any of it is judged goes in the `prepare` hook instead, which runs over the batch first. The detection service uses that to load every window in the batch into its history before evaluating any of them, so the outcome does not depend on which handler the scheduler happens to run first.
+Messages in a batch are handled in parallel. Windows are independent and every handler is idempotent.
 
-A message whose body will not parse is dropped from the batch rather than throwing. Throwing during receive would fail the whole batch before any message in it was handled, so one malformed message would stall the queue permanently. Dropping it leaves it unacknowledged, so it rides its receive count to the dead letter queue like any other failure.
+Work that must see the whole batch before any message is handled goes in the `prepare` hook, which runs over the batch first. The detection service uses this to load every window in the batch into its history before evaluating any of them.
+
+A message whose body does not parse is dropped from the batch. It stays unacknowledged and moves to the dead letter queue by receive count. Throwing during receive would fail the whole batch, so one bad message could block the queue.
 
 ## Fanout
 
-On AWS a stage that has more than one consumer publishes to an SNS topic, and each consumer has its own queue subscribed to it.
+On AWS, a stage with more than one consumer publishes to an SNS topic. Each consumer has its own queue subscribed to that topic.
 
-There is no SNS locally, so `createFanoutPublisher` writes to each subscribing queue directly. Services depend on the `TopicPublisher` interface and cannot tell which one they were given.
+There is no SNS locally. `createFanoutPublisher` writes to each subscribing queue directly. Services depend on the `TopicPublisher` interface and do not know which implementation they have.
 
 ## Dead letter queues
 
-Every queue has one, after three receives. The visibility timeout is 60 seconds, which is well above the worst case handler time.
+Every queue has a dead letter queue after 3 receives. The visibility timeout is 60 seconds.
 
-A message on a dead letter queue means a handler failed three times. It does not mean a task died, since that case is recovered by redelivery without the receive count running out under normal load.
+A message on a dead letter queue means a handler failed 3 times. Task restarts do not produce dead letter messages under normal load, because redelivery succeeds well within the receive limit.
 
 ## Event identity
 
-An event id is `evt-` followed by sixteen hex characters of a SHA-256 hash of the machine id, the sensor type and the window start. It depends on what the event is about and never on when it was written or which task wrote it.
+An event id is `evt-` plus the first 16 hex characters of the SHA-256 of `machine_id|sensor_type|window_start`. It does not depend on when the event was written or which task wrote it.
 
-Two consequences follow.
+The same window judged twice produces the same id. The conditional write that stores it accepts only the first. A redelivery does nothing.
 
-The same window judged twice, by a redelivery or by two tasks at once, produces the same id both times, and the conditional write that stores it accepts only the first. A redelivery does nothing rather than raising a second alert.
+16 hex characters is 64 bits. At 200 machines the pipeline produces about 7 million window ids per day. The chance of a collision at that volume is about 1 in 1,000,000. A shorter id would make collisions likely enough to suppress real events.
 
-Sixteen hex characters is 64 bits. At 200 machines the pipeline produces roughly 7 million window ids a day, where the chance of a collision is about one in a million. A shorter id would make a collision likely enough to suppress a real event, which is why the id is not as short as the example in the brief.
+A work order id is derived from its event id. The alerting service also consumes from a standard queue.
 
-A work order id is derived from its event id for the same reason, since the alerting service also consumes from a standard queue.
+## Deduplication points
 
-## Where deduplication happens
+Each service has one point where it decides whether it has already done this work. Each is a single conditional write.
 
-Each service has exactly one point where it decides whether it has seen this work before, and that point is always a single conditional write rather than a read followed by a write.
-
-| Service | Barrier |
+| Service | Deduplication point |
 |---|---|
 | detection | Alert episode claim, then the conditional event write |
 | alerting | Conditional work order write |
 
-Reading first and writing second would let two tasks both conclude they were first.
+A read followed by a write would let two concurrent tasks both conclude they were first.

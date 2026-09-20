@@ -62,11 +62,12 @@ Partition key `machine_id#sensor_type`, sort key `window_start`, so the api serv
 **Work orders go to DynamoDB.**
 RDS creation is denied.
 
-Even if RDS had been available, a Postgres instance takes several minutes to provision and the brief requires the whole stack to tear down and rebuild in minutes because lab sessions expire.
-Work orders are low-volume key lookups, so nothing is lost by putting them in DynamoDB.
+Even with RDS available, a Postgres instance takes several minutes to provision, and the stack has to tear down and rebuild in minutes because lab sessions expire.
+Work orders are low-volume key lookups, so DynamoDB is sufficient.
 
 Neither choice reaches service code.
-Each service depends on a store interface and the environment decides which adapter is constructed at startup, the same mechanism that lets one container image run against ElasticMQ and DynamoDB Local locally and against AWS on Fargate.
+Each service depends on a store interface and the environment decides which adapter is constructed at startup.
+The same mechanism lets one container image run against ElasticMQ and DynamoDB Local locally and against AWS on Fargate.
 
 ## IAM
 

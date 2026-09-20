@@ -1,0 +1,7 @@
+commands: fault <machine|line> <bearing|overheat|overload|dropout>, clear <machine|line>, burst <line> <fault>, status, quit
+connected to mqtt://localhost:1883
+simulating 200 machines across 4 line(s), 4 sensors each, 1000 ms sample period, seed linesentry
+[2026-09-20T04:42:29.783Z] 720.0 msg/s
+[2026-09-20T04:42:39.785Z] 800.0 msg/s
+[2026-09-20T04:42:49.785Z] 800.0 msg/s
+[2026-09-20T04:42:59.786Z] 800.0 msg/s

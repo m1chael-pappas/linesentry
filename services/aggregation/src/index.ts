@@ -1,4 +1,5 @@
 import {
+  LATENCY_METRICS,
   createDeadLetterWatcher,
   createDynamoClient,
   createDynamoTimeSeriesStore,
@@ -10,6 +11,7 @@ import {
   optionalEnv,
   requiredEnv,
   runConsumerLoop,
+  windowLatencies,
   type ForwardedWindow,
 } from '@linesentry/core';
 
@@ -31,7 +33,15 @@ const loop = runConsumerLoop(consumer, async (message) => {
   metrics.count('MessagesProcessed');
   if (message.receiveCount > 1) metrics.count('MessagesRedelivered');
 
-  await store.put(message.body);
+  const window = message.body;
+  const latencies = windowLatencies(window);
+  if (latencies.edgeToIngest !== undefined) {
+    metrics.record(LATENCY_METRICS.edgeToIngest, latencies.edgeToIngest);
+  }
+
+  await store.put(window);
+
+  metrics.record(LATENCY_METRICS.windowStored, Date.now() - window.edge_ts);
   written++;
   metrics.count('WindowsStored');
 });

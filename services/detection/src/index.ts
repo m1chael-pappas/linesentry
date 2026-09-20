@@ -12,7 +12,6 @@ import {
   createQueueConsumer,
   createSqsClient,
   detectionRegistry,
-  eventLatencies,
   machineAlertKey,
   numberEnv,
   onShutdown,
@@ -98,6 +97,10 @@ const loop = runConsumerLoop(consumer, async (message) => {
     metrics.count('MessagesRedelivered');
   }
 
+  if (window.ingest_ts !== undefined) {
+    metrics.record(LATENCY_METRICS.ingestToDetect, Date.now() - window.ingest_ts);
+  }
+
   const machine = await metadata.get(window.machine_id);
   if (!machine) {
     unknownMachines++;
@@ -131,10 +134,6 @@ const loop = runConsumerLoop(consumer, async (message) => {
     return;
   }
 
-  const latencies = eventLatencies(event);
-  if (latencies.ingestToDetect !== undefined) {
-    metrics.record(LATENCY_METRICS.ingestToDetect, latencies.ingestToDetect);
-  }
   metrics.count('EventsWritten');
 
   if (event.type === 'threshold-breach') {

@@ -6,6 +6,7 @@ export const LATENCY_METRICS = {
   ingestToDetect: 'IngestToDetectLatency',
   detectToAlert: 'DetectToAlertLatency',
   endToEnd: 'EndToEndLatency',
+  windowStored: 'WindowStoredLatency',
 } as const;
 
 /** Milliseconds spent in each stage, for stages whose stamps are both present. */
