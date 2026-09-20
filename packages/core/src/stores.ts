@@ -139,3 +139,32 @@ export function alertKey(machineId: string, sensorType: string): string {
 export function machineAlertKey(machineId: string): string {
   return `${machineId}#__machine__`;
 }
+
+/**
+ * Returns an in-process `AlertStateStore`.
+ *
+ * `now` supplies the clock, so a replay can drive episodes from simulated
+ * time. Unbounded and per process. Grants a claim under the same four
+ * conditions as the DynamoDB adapter. See ../DETECTION.md.
+ */
+export function createMemoryAlertStateStore(now: () => number = Date.now): AlertStateStore {
+  const entries = new Map<string, AlertState>();
+
+  return {
+    async claim(key, rank, eventId, ttlMs) {
+      const at = now();
+      const held = entries.get(key);
+      const granted =
+        held === undefined || held.expires_at < at || held.rank < rank || held.event_id === eventId;
+
+      if (!granted) return false;
+
+      entries.set(key, { alert_key: key, rank, event_id: eventId, expires_at: at + ttlMs });
+      return true;
+    },
+
+    async get(key) {
+      return entries.get(key);
+    },
+  };
+}

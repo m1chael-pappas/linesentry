@@ -6,18 +6,15 @@ import {
   type CreateTableCommandInput,
 } from '@aws-sdk/client-dynamodb';
 import {
-  BASELINE_SD,
   EVENTS_BY_SITE_INDEX,
-  SAFETY_THRESHOLDS,
   createDynamoClient,
   createDynamoMetadataStore,
+  machineMetadata,
   numberEnv,
   optionalEnv,
   requiredEnv,
-  type MachineMetadata,
-  type SensorType,
 } from '@linesentry/core';
-import { DEFAULT_SEED, SENSORS, buildPlant } from '@linesentry/simulator';
+import { DEFAULT_SEED, buildPlant } from '@linesentry/simulator';
 
 const CREATE_TABLES = optionalEnv('CREATE_TABLES', 'false') === 'true';
 const SITE_ID = optionalEnv('SITE_ID', 'plant-01');
@@ -101,28 +98,6 @@ async function ensureTable(client: DynamoDBClient, definition: CreateTableComman
   console.log(`created table ${name}`);
 }
 
-/**
- * Builds the metadata row for one machine, taking each baseline mean from
- * `base` and each spread from `BASELINE_SD`, with `SAFETY_THRESHOLDS` as the
- * thresholds.
- *
- * Pure.
- */
-function metadataFor(machineId: string, lineId: string, base: Record<SensorType, number>): MachineMetadata {
-  const baseline: MachineMetadata['baseline'] = {};
-  for (const sensor of SENSORS) {
-    baseline[sensor] = { mean: base[sensor], sd: BASELINE_SD[sensor] };
-  }
-
-  return {
-    machine_id: machineId,
-    site_id: SITE_ID,
-    line_id: lineId,
-    baseline,
-    thresholds: SAFETY_THRESHOLDS,
-  };
-}
-
 async function main(): Promise<void> {
   if (CREATE_TABLES) {
     const raw = new DynamoDBClient(
@@ -137,7 +112,7 @@ async function main(): Promise<void> {
   const machines = buildPlant(MACHINES, LINES, SEED);
 
   for (const machine of machines) {
-    await store.put(metadataFor(machine.id, machine.lineId, machine.base));
+    await store.put(machineMetadata(machine.id, SITE_ID, machine.lineId, machine.base));
   }
 
   console.log(`seeded metadata for ${machines.length} machines, seed ${SEED}`);

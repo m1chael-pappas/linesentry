@@ -1,4 +1,4 @@
-import type { SensorType } from './contracts.js';
+import { SENSOR_TYPES, type MachineMetadata, type SensorType } from './contracts.js';
 
 /**
  * Per-sensor safety limits in each sensor's own unit.
@@ -42,3 +42,24 @@ export const ALARM_DIRECTION: Record<SensorType, AlarmDirection> = {
   current: 'above',
   rpm: 'below',
 };
+
+/**
+ * Returns the metadata row for one machine, taking each baseline mean from
+ * `base`, each spread from `BASELINE_SD`, and `SAFETY_THRESHOLDS` as the
+ * thresholds.
+ *
+ * Pure. See ../DETECTION.md.
+ */
+export function machineMetadata(
+  machineId: string,
+  siteId: string,
+  lineId: string,
+  base: Record<SensorType, number>,
+): MachineMetadata {
+  const baseline: MachineMetadata['baseline'] = {};
+  for (const sensor of SENSOR_TYPES) {
+    baseline[sensor] = { mean: base[sensor], sd: BASELINE_SD[sensor] };
+  }
+
+  return { machine_id: machineId, site_id: siteId, line_id: lineId, baseline, thresholds: SAFETY_THRESHOLDS };
+}

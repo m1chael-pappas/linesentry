@@ -1,7 +1,7 @@
-import type { FaultType, SensorType, Unit } from '@linesentry/core';
+import { SENSOR_TYPES, type FaultType, type SensorType, type Unit } from '@linesentry/core';
 
 /** Publish order of the sensors on every machine. */
-export const SENSORS: readonly SensorType[] = ['vibration', 'temperature', 'current', 'rpm'];
+export const SENSORS = SENSOR_TYPES;
 
 /** Unit reported with each sensor's value. */
 export const UNITS: Record<SensorType, Unit> = {
@@ -13,6 +13,18 @@ export const UNITS: Record<SensorType, Unit> = {
 
 /** Faults that can be injected from the keyboard or the control topic. */
 export const FAULTS: readonly FaultType[] = ['bearing', 'overheat', 'overload', 'dropout'];
+
+/**
+ * Sensors each fault moves, taken from the branches of `Machine.readings`.
+ *
+ * An event on any of a fault's sensors counts as detecting it.
+ */
+export const FAULT_SENSORS: Record<FaultType, readonly SensorType[]> = {
+  bearing: ['vibration', 'temperature'],
+  overheat: ['temperature', 'current'],
+  overload: ['current', 'rpm', 'vibration'],
+  dropout: ['rpm'],
+};
 
 /** Type guard over `FAULTS`. */
 export function isFaultType(value: unknown): value is FaultType {

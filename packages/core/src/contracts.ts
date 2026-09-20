@@ -1,6 +1,9 @@
 /** Sensors fitted to every simulated machine. */
 export type SensorType = 'vibration' | 'temperature' | 'current' | 'rpm';
 
+/** Every `SensorType`, in the order the simulator publishes them. */
+export const SENSOR_TYPES: readonly SensorType[] = ['vibration', 'temperature', 'current', 'rpm'];
+
 /** Unit of measure reported alongside each sensor value. */
 export type Unit = 'mm/s' | 'C' | 'A' | 'rpm';
 
