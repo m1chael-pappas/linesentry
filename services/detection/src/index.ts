@@ -57,15 +57,15 @@ let duplicates = 0;
 let unknownMachines = 0;
 let suppressed = 0;
 let stoppedSkips = 0;
+let redelivered = 0;
 
 const stopCache = new Map<string, { stopped: boolean; expiresAt: number }>();
 
 /**
- * Whether this machine has already been ordered to stop.
+ * True when an unexpired entry exists under `machineAlertKey(machineId)`.
  *
- * Cached briefly rather than read per window, since it changes once per fault
- * at most and a read for every window of every machine would cost more than
- * the check is worth.
+ * Results are cached for `MACHINE_STOP_TTL_MS`, so a stop written by another
+ * task is visible after at most that delay. See ../../packages/core/DETECTION.md.
  */
 async function orderedToStop(machineId: string): Promise<boolean> {
   const now = Date.now();
@@ -85,6 +85,7 @@ console.log(
 const loop = runConsumerLoop(consumer, async (message) => {
   const window = message.body;
   processed++;
+  if (message.receiveCount > 1) redelivered++;
 
   const machine = await metadata.get(window.machine_id);
   if (!machine) {
@@ -133,13 +134,14 @@ const loop = runConsumerLoop(consumer, async (message) => {
 
 const report = setInterval(() => {
   console.log(
-    `detection processed ${processed}, events ${written}, duplicates rejected ${duplicates}, episode suppressed ${suppressed}, stopped machines ${stoppedSkips}, unknown machines ${unknownMachines}`,
+    `detection processed ${processed}, redelivered ${redelivered}, events ${written}, duplicates rejected ${duplicates}, episode suppressed ${suppressed}, stopped machines ${stoppedSkips}, unknown machines ${unknownMachines}`,
   );
   processed = 0;
   written = 0;
   duplicates = 0;
   suppressed = 0;
   stoppedSkips = 0;
+  redelivered = 0;
   unknownMachines = 0;
 }, 10000);
 

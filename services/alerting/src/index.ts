@@ -27,11 +27,10 @@ let alerted = 0;
 let duplicates = 0;
 
 /**
- * The actuator a given event drives.
+ * Returns `shutdown` for a `threshold-breach`, `beacon_on` for any other
+ * `high` severity event, and null otherwise.
  *
- * A safety threshold breach stops the machine. Anything else high raises the
- * beacon so a technician looks at it, and lower severities leave the machine
- * running and wait for the work order to be picked up.
+ * Pure. See ../ALERTING.md.
  */
 function commandFor(event: DetectionEvent): ActuatorCommand['command'] | null {
   if (event.type === 'threshold-breach') return 'shutdown';

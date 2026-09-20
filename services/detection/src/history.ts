@@ -1,12 +1,12 @@
 import type { ForwardedWindow, SensorType } from '@linesentry/core';
 
-/** Below this the machine is not turning. */
+/** rpm below this counts as not turning. */
 const STOPPED_RPM = 50;
 
-/** Below this the machine is drawing no meaningful current. */
+/** Amps below this count as drawing no current. */
 const STOPPED_CURRENT = 0.5;
 
-/** Recent windows per machine and sensor, used for the trend fit. */
+/** `latest` returns the newest window held for a key, or undefined. */
 export interface HistoryBuffer {
   add(window: ForwardedWindow): readonly ForwardedWindow[];
   latest(machineId: string, sensorType: SensorType): ForwardedWindow | undefined;
@@ -18,18 +18,12 @@ function key(window: ForwardedWindow): string {
 }
 
 /**
- * Keeps the last N windows for each machine and sensor, in memory.
+ * Returns an in-memory buffer holding at most `capacity` windows per
+ * machine-and-sensor key, ordered by `window_start` ascending.
  *
- * This is the only state the detection service holds, and it is deliberately
- * disposable. A task that starts with an empty buffer simply cannot make a
- * remaining-useful-life prediction until it has seen enough windows, which the
- * trend rule handles by returning nothing rather than failing. Losing it to a
- * restart costs a few minutes of prediction, never a threshold breach or an
- * anomaly, since both of those judge a single window on its own.
- *
- * Windows are stored in window_start order rather than arrival order, because
- * a redelivery can arrive after a newer window and a trend fitted through
- * shuffled points is meaningless.
+ * `add` replaces any window already held with the same `window_start`, sorts,
+ * trims to the newest `capacity` and returns the resulting list. Unbounded in
+ * the number of keys. See ../../packages/core/DETECTION.md.
  */
 export function createHistoryBuffer(capacity: number): HistoryBuffer {
   const buffers = new Map<string, ForwardedWindow[]>();
@@ -60,16 +54,10 @@ export function createHistoryBuffer(capacity: number): HistoryBuffer {
 }
 
 /**
- * Whether a machine is stopped rather than faulty.
+ * True when the machine's latest rpm window is below `STOPPED_RPM` and its
+ * latest current window is below `STOPPED_CURRENT`.
  *
- * A stopped machine reads zero rpm and zero current, and against a running
- * baseline that looks like a severe anomaly on every sensor it has. Without
- * this check, shutting a machine down because of one fault immediately raises
- * fresh alerts about the machine being shut down, so the system alarms about
- * its own remediation.
- *
- * Both signals are required. A seized motor reads zero rpm while still drawing
- * current, and that is a real fault that has to keep alerting.
+ * False when either window is absent. See ../../packages/core/DETECTION.md.
  */
 export function looksStopped(history: HistoryBuffer, machineId: string): boolean {
   const rpm = history.latest(machineId, 'rpm');

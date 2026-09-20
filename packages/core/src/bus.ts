@@ -19,18 +19,12 @@ export interface QueueConsumer<T> {
   acknowledge(message: QueueMessage<T>): Promise<void>;
 }
 
-/**
- * Sends a message to every subscriber of a logical topic.
- *
- * On AWS this is an SNS topic with queue subscriptions. Locally there is no
- * SNS, so the same fanout is done by writing to each subscribing queue in
- * turn. Services depend on this interface and never learn which one they have.
- */
+/** Delivers one message to every subscriber of a logical topic. */
 export interface TopicPublisher<T> {
   publish(message: T): Promise<void>;
 }
 
-/** Builds an SQS client pointed at AWS, or at ElasticMQ when an endpoint is set. */
+/** Returns an SQS client, overriding the endpoint when `SQS_ENDPOINT` is set. */
 export function createSqsClient(): SQSClient {
   const endpoint = optionalEnv('SQS_ENDPOINT', '');
   return new SQSClient(endpoint ? { endpoint } : {});
@@ -43,10 +37,12 @@ export interface ConsumerOptions {
 }
 
 /**
- * Consumes JSON messages from one SQS queue.
+ * Returns a consumer over one SQS queue.
  *
- * Long polling is on by default, so an idle consumer costs one request per
- * wait rather than spinning, and a burst is picked up as soon as it lands.
+ * Long polls for `waitTimeSeconds`, default 10, and takes at most `batchSize`
+ * messages, default 10. Bodies are parsed as JSON; a message whose body does
+ * not parse is logged and omitted from the batch, leaving it unacknowledged.
+ * See ../QUEUES.md.
  */
 export function createQueueConsumer<T>(
   client: SQSClient,
@@ -97,10 +93,11 @@ export function createQueueConsumer<T>(
 }
 
 /**
- * Publishes to several queues directly, standing in for an SNS fanout.
+ * Returns a `TopicPublisher` that sends each message to every queue in
+ * `queueUrls`, concurrently.
  *
- * Used locally, and by the ingest bridge that replaces the IoT Core topic rule
- * when there is no IoT Core.
+ * Throws at construction when `queueUrls` is empty. `publish` rejects when any
+ * send rejects, with no rollback of the sends that succeeded.
  */
 export function createFanoutPublisher<T>(
   client: SQSClient,
@@ -122,7 +119,7 @@ export function createFanoutPublisher<T>(
   };
 }
 
-/** Splits a comma separated queue url list from configuration. */
+/** Splits on commas, trims each entry and drops empty ones. */
 export function parseQueueUrls(value: string): string[] {
   return value
     .split(',')
@@ -136,18 +133,15 @@ export interface ConsumerLoop {
 }
 
 /**
- * Polls a queue and hands each message to the handler.
+ * Polls `consumer` until stopped, running `prepare` over each batch and then
+ * `handle` on every message in it concurrently.
  *
- * A message is deleted only after its handler resolves. A handler that throws
- * leaves the message on the queue, so it becomes visible again after the
- * visibility timeout and lands on the dead letter queue once it has been
- * received more times than the queue allows. Nothing is lost by a task dying
- * mid-message for the same reason.
+ * A message is acknowledged only after its handler resolves. A handler that
+ * rejects is logged and the message is left unacknowledged. A failing receive
+ * is logged and retried after one second.
  *
- * Messages in a batch are handled in parallel, since each window is
- * independent of the others and the handlers are idempotent. `prepare` runs
- * over the whole batch first, for state that every handler in the batch should
- * see regardless of which of them the scheduler runs first.
+ * `stop` clears the running flag, awaits the batch in flight and resolves once
+ * the loop has exited. See ../QUEUES.md.
  */
 export function runConsumerLoop<T>(
   consumer: QueueConsumer<T>,

@@ -8,17 +8,17 @@ import {
   type ForwardedWindow,
 } from '@linesentry/core';
 
-/** A straight line fitted through a set of points. */
+/** `v = slope * t + intercept`. */
 export interface Trend {
   slope: number;
   intercept: number;
 }
 
 /**
- * Fits a least-squares line to the points, or returns null when it cannot.
+ * Least-squares fit over the points, or null when there are fewer than two
+ * points or every point shares one `t`.
  *
- * Fewer than two points has no trend, and points sharing one timestamp give a
- * vertical line whose slope is meaningless.
+ * Pure.
  */
 export function fitTrend(points: readonly { t: number; v: number }[]): Trend | null {
   if (points.length < 2) return null;
@@ -42,11 +42,10 @@ export function fitTrend(points: readonly { t: number; v: number }[]): Trend | n
 }
 
 /**
- * When a rising trend will reach the threshold, or null if it will not.
+ * The `t` at which `trend` reaches `threshold`, or null when the slope is not
+ * positive or `current` is already at or above `threshold`.
  *
- * A flat or falling trend never crosses, and a value already past the
- * threshold is a breach rather than a prediction, so both return null and let
- * the threshold rule handle it.
+ * Pure.
  */
 export function crossingTime(trend: Trend, threshold: number, current: number): number | null {
   if (trend.slope <= 0) return null;
@@ -54,7 +53,7 @@ export function crossingTime(trend: Trend, threshold: number, current: number): 
   return (threshold - trend.intercept) / trend.slope;
 }
 
-/** How far a value sits from its baseline, in standard deviations. */
+/** `(value - mean) / sd`, or 0 when `sd` is not positive. Pure. */
 export function zScore(value: number, mean: number, sd: number): number {
   if (sd <= 0) return 0;
   return (value - mean) / sd;
@@ -128,12 +127,11 @@ function predictionFinding(
 }
 
 /**
- * The detection rules this build ships with.
+ * Returns the `baseline` detection strategy: a safety threshold rule, a
+ * directional z-score rule and a least-squares trend rule.
  *
- * The three rules are independent and all of them run. A safety threshold
- * breach fires regardless of the z-score, because a machine whose baseline is
- * already high, or whose recent history has drifted, can be in obvious danger
- * while looking statistically unremarkable.
+ * All three run on every window and each may contribute a finding. See
+ * ../../../packages/core/DETECTION.md.
  */
 export function createBaselineDetection(config: DetectionConfig): DetectionStrategy {
   return {

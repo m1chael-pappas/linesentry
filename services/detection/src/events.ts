@@ -9,12 +9,7 @@ import {
 
 const SEVERITY_ORDER: Record<Severity, number> = { low: 0, medium: 1, high: 2 };
 
-/**
- * Event types in the order they take precedence.
- *
- * A safety threshold breach outranks the others because it is the one the
- * alerting service turns into a shutdown rather than a beacon.
- */
+/** Event types in descending precedence order. */
 const TYPE_PRECEDENCE: readonly EventType[] = ['threshold-breach', 'predicted-failure', 'anomaly'];
 
 function highestSeverity(findings: readonly DetectionFinding[]): Severity {
@@ -30,13 +25,12 @@ function leadingType(findings: readonly DetectionFinding[]): EventType {
 }
 
 /**
- * Folds every finding about one window into the single event that window gets.
+ * Folds the findings for one window into one event, or null when `findings` is
+ * empty.
  *
- * One window produces at most one event, because the event id is derived from
- * the machine, the sensor and the window start and nothing else. Several rules
- * firing on the same window is normal rather than exceptional, since an
- * overheating machine breaches its safety limit and looks statistically odd at
- * the same time, and that has to read as one fault needing one technician.
+ * Pure. `type` is the highest-precedence type present, `severity` the highest
+ * present, and `reason` the findings' reasons joined by `; `. `status` is
+ * always `open`. See ../../packages/core/DETECTION.md.
  */
 export function buildEvent(
   window: ForwardedWindow,
@@ -70,12 +64,9 @@ const TYPE_RANK: Record<EventType, number> = {
 };
 
 /**
- * How serious an event is, as one number.
+ * Returns `typeRank * 10 + severityRank`, so type dominates severity.
  *
- * Used to decide whether an event escalates a running alert episode or is
- * another report of a fault already being handled. Type dominates severity, so
- * a threshold breach always outranks an anomaly however severe the anomaly
- * looked, because the breach is what stops the machine.
+ * Pure. Range 0 to 22. See ../../packages/core/DETECTION.md.
  */
 export function eventRank(event: DetectionEvent): number {
   return TYPE_RANK[event.type] * 10 + SEVERITY_ORDER[event.severity];

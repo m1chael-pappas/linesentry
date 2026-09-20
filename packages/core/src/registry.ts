@@ -9,11 +9,11 @@ export interface StrategyRegistry<TStrategy, TConfig> {
 }
 
 /**
- * Creates an empty registry for one kind of strategy.
+ * Creates an empty registry.
  *
- * Both the edge filter and the detection algorithm are selected this way, so
- * adding a pipeline variant is a new file plus one register call. See
- * ../STRATEGIES.md.
+ * `kind` appears in the error messages only. `register` throws on a duplicate
+ * name. `create` throws on an unknown name, listing the registered names, and
+ * returns a fresh instance per call. See ../STRATEGIES.md.
  */
 export function createStrategyRegistry<TStrategy, TConfig>(
   kind: string,

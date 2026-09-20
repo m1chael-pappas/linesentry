@@ -9,7 +9,7 @@ import type {
 } from './contracts.js';
 import { createStrategyRegistry } from './registry.js';
 
-/** Whether the gateway sends this window on, and anything it wants to attach. */
+/** `reason` and `ext` are set only when `forward` is true. */
 export interface EdgeFilterDecision {
   forward: boolean;
   reason?: ForwardReason;
@@ -19,9 +19,8 @@ export interface EdgeFilterDecision {
 /**
  * Decides which aggregated windows leave the gateway.
  *
- * The baseline registers a deadband with a heartbeat. A variant may drop or
- * rewrite that rule entirely, so implementations hold their own state and are
- * built once per gateway from config.
+ * Stateful. One instance is built per gateway and keeps its state across
+ * calls. See ../STRATEGIES.md.
  */
 export interface EdgeFilterStrategy {
   readonly name: string;
@@ -34,7 +33,7 @@ export interface EdgeFilterConfig {
   heartbeatMs: number;
 }
 
-/** Everything the detection strategy may read about a window's machine. */
+/** `history` is ordered by `window_start` ascending and includes the window being judged. */
 export interface DetectionContext {
   metadata: MachineMetadata;
   history: readonly ForwardedWindow[];
@@ -48,30 +47,29 @@ export interface DetectionFinding {
 }
 
 /**
- * Judges a single window against a machine's baseline and recent history.
+ * Judges one window against a machine's baseline and recent history.
  *
- * Implementations are pure. The detection service owns event identity,
- * deduplication and persistence, so a strategy never learns whether the window
- * it was handed is a first delivery, a redelivery or a reconstruction.
+ * `evaluate` is pure: no stored state, no IO, no mutation of its arguments.
+ * Returns zero or more findings. See ../STRATEGIES.md.
  */
 export interface DetectionStrategy {
   readonly name: string;
   evaluate(window: ForwardedWindow, context: DetectionContext): readonly DetectionFinding[];
 }
 
-/** Sigma count, trend sample count and prediction horizon for detection. */
+/** `historyWindows` is both the trend sample count and the minimum required to predict. */
 export interface DetectionConfig {
   zScoreSigma: number;
   historyWindows: number;
   rulHorizonMs: number;
 }
 
-/** Edge filter implementations, keyed by the name given in gateway config. */
+/** Edge filter registry, keyed by the `EDGE_FILTER_STRATEGY` config value. */
 export const edgeFilterRegistry = createStrategyRegistry<EdgeFilterStrategy, EdgeFilterConfig>(
   'edge filter',
 );
 
-/** Detection implementations, keyed by the name given in service config. */
+/** Detection registry, keyed by the `DETECTION_STRATEGY` config value. */
 export const detectionRegistry = createStrategyRegistry<DetectionStrategy, DetectionConfig>(
   'detection',
 );

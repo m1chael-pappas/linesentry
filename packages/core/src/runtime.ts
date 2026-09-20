@@ -1,4 +1,4 @@
-/** Reads a required environment variable, failing at startup when it is absent. */
+/** Returns the variable, throwing when it is unset or empty. */
 export function requiredEnv(name: string): string {
   const value = process.env[name];
   if (value === undefined || value === '') {
@@ -7,13 +7,13 @@ export function requiredEnv(name: string): string {
   return value;
 }
 
-/** Reads an environment variable, falling back to the given default. */
+/** Returns the variable, or `fallback` when it is unset or empty. */
 export function optionalEnv(name: string, fallback: string): string {
   const value = process.env[name];
   return value === undefined || value === '' ? fallback : value;
 }
 
-/** Reads a numeric environment variable, failing when it is set but unparsable. */
+/** Returns the variable as a number, or `fallback` when unset or empty. Throws when set but not finite. */
 export function numberEnv(name: string, fallback: number): number {
   const value = process.env[name];
   if (value === undefined || value === '') return fallback;
@@ -25,11 +25,10 @@ export function numberEnv(name: string, fallback: number): number {
 }
 
 /**
- * Runs the handler once on SIGTERM or SIGINT, then exits.
+ * Registers SIGTERM and SIGINT handlers that run `handler` once, then exit.
  *
- * Fargate sends SIGTERM before stopping a task, so a consumer uses this to
- * finish the message it holds rather than letting the visibility timeout
- * redeliver work it had already done.
+ * Subsequent signals are ignored while shutting down. Exits 0 once `handler`
+ * resolves, or 1 when it rejects.
  */
 export function onShutdown(handler: () => Promise<void> | void): void {
   let shuttingDown = false;

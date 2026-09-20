@@ -20,20 +20,24 @@ export interface TimeSeriesPoint {
   unit: string;
 }
 
-/** Where aggregated windows are kept for the api's time-series endpoint. */
+/**
+ * Window storage.
+ *
+ * `range` returns points for one machine and sensor with `window_start`
+ * inclusive of both bounds, ascending.
+ */
 export interface TimeSeriesStore {
   put(window: ForwardedWindow): Promise<void>;
   range(machineId: string, sensorType: SensorType, from: number, to: number): Promise<TimeSeriesPoint[]>;
 }
 
 /**
- * Where detection events are kept.
+ * Event storage.
  *
- * `putIfAbsent` is the idempotency guarantee for the whole pipeline. It
- * returns false when an event with that id already exists, which is how a
- * redelivered window is told apart from a new one. Implementations must do
- * this as one conditional write, not a read followed by a write, because
- * several detection tasks can be judging the same window at the same time.
+ * `putIfAbsent` returns false when `event_id` already exists and must be a
+ * single conditional write rather than a read followed by a write. `recent`
+ * returns newest first. `acknowledge` sets `status` to `acked` and returns the
+ * updated event, or undefined when the id does not exist. See ../QUEUES.md.
  */
 export interface EventStore {
   putIfAbsent(event: DetectionEvent): Promise<boolean>;
@@ -42,13 +46,18 @@ export interface EventStore {
   acknowledge(eventId: string): Promise<DetectionEvent | undefined>;
 }
 
-/** Where maintenance jobs are kept. Idempotent for the same reason as events. */
+/**
+ * Work order storage.
+ *
+ * `putIfAbsent` returns false when `work_order_id` already exists and must be
+ * a single conditional write. See ../QUEUES.md.
+ */
 export interface WorkOrderStore {
   putIfAbsent(workOrder: WorkOrder): Promise<boolean>;
   list(limit: number): Promise<WorkOrder[]>;
 }
 
-/** Where per-machine baselines and safety limits are kept. */
+/** Per-machine baseline and threshold storage, keyed by `machine_id`. */
 export interface MetadataStore {
   get(machineId: string): Promise<MachineMetadata | undefined>;
   put(metadata: MachineMetadata): Promise<void>;
@@ -62,12 +71,11 @@ interface CacheEntry<T> {
 }
 
 /**
- * Wraps a metadata store with a per-task cache.
+ * Returns a `MetadataStore` that caches `get` results, including misses, for
+ * `ttlMs`.
  *
- * Every window needs its machine's baseline, so an uncached store would mean
- * one read per window per task. The entries are small and change rarely, and a
- * stale baseline for up to the TTL changes a z-score slightly rather than
- * breaking anything.
+ * The cache is per process and unbounded. `put` writes through and evicts that
+ * machine's entry. `list` is not cached.
  */
 export function cacheMetadata(store: MetadataStore, ttlMs: number): MetadataStore {
   const cache = new Map<string, CacheEntry<MachineMetadata | undefined>>();
@@ -101,26 +109,15 @@ export interface AlertState {
 }
 
 /**
- * Tracks which machine and sensor pairs already have an alert running.
+ * Alert episode storage, keyed by `alertKey` or `machineAlertKey`.
  *
- * A fault lasts many windows, and without this every window of one fault
- * raises its own event and opens its own work order. `claim` returns true only
- * when the caller's event opens a new episode or escalates the running one,
- * which is what keeps a sustained fault to one event per escalation step
- * rather than one per window.
+ * `claim` returns true and records `rank`, `eventId` and an expiry of
+ * `Date.now() + ttlMs` when any of these hold: no entry exists, the existing
+ * entry has expired, `rank` exceeds the stored rank, or `eventId` equals the
+ * stored event id. Otherwise it returns false and writes nothing.
  *
- * Escalation matters more than deduplication here. Suppressing everything
- * after the first event would also suppress the safety threshold breach that
- * stops the machine, so the rank has to be able to rise.
- *
- * Implementations must do this as one conditional write. Several detection
- * tasks judge windows from the same machine at the same time, so a read
- * followed by a write would let two of them both believe they opened the
- * episode.
- *
- * The same event id re-claiming its own episode always succeeds, so a task
- * that claimed and then died before publishing can retry rather than having
- * locked itself out of an event it never delivered.
+ * Must be a single conditional write rather than a read followed by a write.
+ * See ../DETECTION.md.
  */
 export interface AlertStateStore {
   claim(key: string, rank: number, eventId: string, ttlMs: number): Promise<boolean>;
@@ -133,12 +130,11 @@ export function alertKey(machineId: string, sensorType: string): string {
 }
 
 /**
- * The key recording that a whole machine has been ordered to stop.
+ * Returns `<machineId>#__machine__`, the episode key covering a whole machine
+ * rather than one of its sensors.
  *
- * A commanded shutdown looks exactly like a catastrophic rpm collapse in the
- * signal, because it is one, so no rule reading the readings alone can tell
- * the two apart. Only the decision to stop the machine carries that, and this
- * is where that decision is written down for the rest of the pipeline.
+ * Distinct from every `alertKey` value, since `__machine__` is not a
+ * `SensorType`. See ../DETECTION.md.
  */
 export function machineAlertKey(machineId: string): string {
   return `${machineId}#__machine__`;

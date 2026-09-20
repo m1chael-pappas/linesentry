@@ -48,6 +48,17 @@ for q in aggregation-q detection-q alerting-q aggregation-dlq detection-dlq aler
 done
 
 echo
+echo "windows in versus rows stored"
+FORWARDED=$(docker compose logs ingest 2>&1 |
+  grep -oE 'ingest forwarded [0-9]+' | awk '{s+=$3} END {print s+0}')
+STORED=$(AWS_ACCESS_KEY_ID=local AWS_SECRET_ACCESS_KEY=local \
+  aws dynamodb scan --table-name "${TIMESERIES_TABLE:-linesentry-timeseries}" \
+    --select COUNT --endpoint-url "${DYNAMO_HOST:-http://localhost:8000}" \
+    --region us-east-1 --query Count --output text 2>/dev/null)
+printf '  forwarded by ingest %s\n  stored by aggregation %s\n  lost %s\n' \
+  "$FORWARDED" "$STORED" "$((FORWARDED - STORED))"
+
+echo
 echo "event ids"
 curl -s "$API/events?limit=500" | python3 -c '
 import json, sys
@@ -56,3 +67,10 @@ ids = [e["event_id"] for e in events]
 print(f"  {len(ids)} events, {len(set(ids))} distinct")
 print("  duplicate event ids:", len(ids) - len(set(ids)))
 '
+
+echo
+echo "conditional write rejections, which is the duplicate counter"
+docker compose logs detection 2>&1 |
+  grep -oE 'duplicates rejected [0-9]+' | awk '{s+=$3} END {print "  detection:", s+0}'
+docker compose logs alerting 2>&1 |
+  grep -oE 'duplicates rejected [0-9]+' | awk '{s+=$3} END {print "  alerting: ", s+0}'

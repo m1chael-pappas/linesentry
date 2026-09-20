@@ -102,14 +102,11 @@ async function ensureTable(client: DynamoDBClient, definition: CreateTableComman
 }
 
 /**
- * Builds the metadata row for one machine.
+ * Builds the metadata row for one machine, taking each baseline mean from
+ * `base` and each spread from `BASELINE_SD`, with `SAFETY_THRESHOLDS` as the
+ * thresholds.
  *
- * The baseline mean is the machine's own resting value, derived from the run
- * seed and the machine id by the same function the simulator uses, so the
- * stored baseline is what the machine actually produces rather than an
- * approximation of it. The spread is the expected variability of the smoothed
- * window value, which is a property of the pipeline rather than of the
- * machine. See packages/core/src/plant-config.ts.
+ * Pure.
  */
 function metadataFor(machineId: string, lineId: string, base: Record<SensorType, number>): MachineMetadata {
   const baseline: MachineMetadata['baseline'] = {};

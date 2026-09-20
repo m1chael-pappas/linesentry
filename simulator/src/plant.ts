@@ -1,6 +1,6 @@
 import type { FaultType, SensorType, Unit } from '@linesentry/core';
 
-/** Sensors fitted to every machine, in publish order. */
+/** Publish order of the sensors on every machine. */
 export const SENSORS: readonly SensorType[] = ['vibration', 'temperature', 'current', 'rpm'];
 
 /** Unit reported with each sensor's value. */
@@ -14,15 +14,15 @@ export const UNITS: Record<SensorType, Unit> = {
 /** Faults that can be injected from the keyboard or the control topic. */
 export const FAULTS: readonly FaultType[] = ['bearing', 'overheat', 'overload', 'dropout'];
 
-/** Returns true when the value is one of the injectable fault names. */
+/** Type guard over `FAULTS`. */
 export function isFaultType(value: unknown): value is FaultType {
   return typeof value === 'string' && (FAULTS as readonly string[]).includes(value);
 }
 
-/** One sample from every sensor on a machine. */
+/** One value per sensor. */
 export type Readings = Record<SensorType, number>;
 
-/** Returns numbers in [0, 1), deterministic for a given seed. */
+/** Returns values in [0, 1). Stateful: each call advances the stream. */
 export type Random = () => number;
 
 function mulberry32(seed: number): Random {
@@ -46,12 +46,8 @@ function hash(text: string): number {
 }
 
 /**
- * Builds the random stream for one machine.
- *
- * Streams are per machine and derived from the run seed and the machine id, so
- * the plant produces the same signal on every run with the same seed and the
- * same machine still behaves the same whether the run has 5 machines or 200.
- * Two arms of an experiment can therefore be compared on identical load.
+ * Returns a stream seeded by `seed` and `machineId`, independent of every
+ * other machine's stream and of plant size. See ../SIMULATION.md.
  */
 export function machineRandom(seed: string, machineId: string): Random {
   return mulberry32(hash(`${seed}:${machineId}`));
@@ -69,11 +65,10 @@ function round(n: number, dp: number): number {
 }
 
 /**
- * The resting value of each sensor on one machine.
+ * Resting value of each sensor for one machine.
  *
- * Derived from the run seed and the machine id rather than drawn at startup,
- * so the metadata store can be seeded with the same numbers the machine will
- * actually produce. Called by the bootstrap tool as well as by the machine.
+ * Pure and deterministic in `seed` and `machineId`, drawn from a stream
+ * separate from the machine's noise stream. See ../SIMULATION.md.
  */
 export function machineBaseline(seed: string, machineId: string): Readings {
   const random = mulberry32(hash(`${seed}:${machineId}:baseline`));
@@ -86,13 +81,8 @@ export function machineBaseline(seed: string, machineId: string): Readings {
 }
 
 /**
- * A single machine with its own idea of normal.
- *
- * Normal differs machine to machine, which is what makes a per-machine
- * baseline worth storing rather than one plant-wide threshold. Both the
- * baseline and the noise come from a stream seeded by the run seed and the
- * machine id, so a machine behaves identically across runs. See
- * ../SIMULATION.md.
+ * One machine. `id` is `press-NN` from `index`. Every reading is drawn from a
+ * stream seeded by `seed` and `id`. See ../SIMULATION.md.
  */
 export class Machine {
   readonly lineId: string;
@@ -113,12 +103,18 @@ export class Machine {
     this.random = machineRandom(seed, this.id);
   }
 
-  /** Seconds since the current fault or shutdown started. */
+  /** Seconds since `faultStart`, or 0 when no fault is set. */
   faultAge(now: number): number {
     return this.fault ? (now - this.faultStart) / 1000 : 0;
   }
 
-  /** Samples every sensor at the given instant, applying any active fault. */
+  /**
+   * Samples every sensor at `now`, applying the active fault.
+   *
+   * Advances the machine's random stream and its load, so repeated calls with
+   * the same `now` do not return the same readings. While `shutdown` is set,
+   * returns zero rpm and current with a cooling temperature.
+   */
   readings(now: number): Readings {
     const random = this.random;
     if (this.shutdown) {
@@ -169,10 +165,13 @@ export class Machine {
   }
 }
 
-/** Seed used when no run seed is given, so a plain run is still reproducible. */
+/** Default value of the `SEED` environment variable. */
 export const DEFAULT_SEED = 'linesentry';
 
-/** Builds the plant as `lines` production lines of `machinesPerLine` machines. */
+/**
+ * Returns `lines * machinesPerLine` machines, line ids `line-A` upward and
+ * machine ids numbered continuously across lines.
+ */
 export function buildPlant(machinesPerLine: number, lines: number, seed = DEFAULT_SEED): Machine[] {
   const machines: Machine[] = [];
   for (let l = 0; l < lines; l++) {

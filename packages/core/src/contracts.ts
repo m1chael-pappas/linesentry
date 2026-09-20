@@ -10,7 +10,7 @@ export type FaultType = 'bearing' | 'overheat' | 'overload' | 'dropout';
 /** Why the edge gateway chose to forward a window rather than drop it. */
 export type ForwardReason = 'first' | 'changed' | 'heartbeat';
 
-/** A single sensor sample published by the simulator once per second. */
+/** One sensor sample, published on `<site>/<line>/<machine>/<sensor>`. */
 export interface RawReading {
   ts: number;
   site_id: string;
@@ -23,20 +23,21 @@ export interface RawReading {
 }
 
 /**
- * Fields a pipeline variant may attach to a forwarded window without the
- * baseline consumer needing to understand them. The baseline never sets this.
- * See ../STRATEGIES.md.
+ * Open extension map on `ForwardedWindow`.
+ *
+ * Unset by the baseline pipeline and ignored by every baseline consumer. See
+ * ../STRATEGIES.md.
  */
 export interface WindowExtension {
   [field: string]: unknown;
 }
 
 /**
- * A 10 second aggregate published by the edge gateway to the cloud.
+ * A 10 second aggregate published by the edge gateway.
  *
- * The four latency timestamps travel with the window through the whole
- * pipeline: edge_ts is stamped here, ingest_ts by the IoT Core topic rule,
- * and the remaining two are stamped on the event derived from this window.
+ * `edge_ts` is stamped at window close by the gateway. `ingest_ts` is stamped
+ * by the IoT Core topic rule, or by the ingest bridge locally, and is absent
+ * until then.
  */
 export interface ForwardedWindow {
   edge_ts: number;
@@ -71,9 +72,10 @@ export type EventStatus = 'open' | 'acked' | 'closed';
 /**
  * An event raised by the detection service.
  *
- * event_id is derived deterministically from machine_id, sensor_type and
- * window_start so that a redelivered window produces a colliding id rather
- * than a second event. See ../STRATEGIES.md.
+ * `event_id` comes from `eventId(machine_id, sensor_type, window_start)`.
+ * `edge_ts` and `ingest_ts` are carried from the window it was derived from.
+ * `alert_ts` is stamped by the alerting service and absent until then. See
+ * ../QUEUES.md.
  */
 export interface DetectionEvent {
   event_id: string;
@@ -97,11 +99,10 @@ export interface DetectionEvent {
 export type ActuatorCommandName = 'beacon_on' | 'beacon_off' | 'shutdown';
 
 /**
- * A command published back to a machine's actuator topic.
+ * A command published to `<site>/<line>/<machine>/actuator`.
  *
- * Only `command` is acted on. The simulator ignores the two traceability
- * fields, which exist so an actuation can be tied back to the event that
- * caused it when reading an experiment run.
+ * Only `command` changes machine state. `event_id` and `issued_at` are
+ * carried for traceability and ignored by the simulator.
  */
 export interface ActuatorCommand {
   command: ActuatorCommandName;
@@ -112,7 +113,7 @@ export interface ActuatorCommand {
 /** Progress of the maintenance job opened for an event. */
 export type WorkOrderStatus = 'open' | 'in-progress' | 'closed';
 
-/** A maintenance job opened by the alerting service against an event. */
+/** A maintenance job. `work_order_id` comes from `workOrderId(event_id)`. */
 export interface WorkOrder {
   work_order_id: string;
   event_id: string;
@@ -131,7 +132,12 @@ export interface SensorBaseline {
   sd: number;
 }
 
-/** Baselines and fixed safety limits for one machine. */
+/**
+ * Baselines and safety limits for one machine.
+ *
+ * Both maps are partial. A sensor absent from `baseline` is not z-scored, and
+ * one absent from `thresholds` has no threshold or trend rule applied.
+ */
 export interface MachineMetadata {
   machine_id: string;
   site_id: string;

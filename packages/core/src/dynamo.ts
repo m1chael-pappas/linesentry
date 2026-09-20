@@ -19,10 +19,10 @@ import type {
 } from './stores.js';
 import { optionalEnv } from './runtime.js';
 
-/** Secondary index listing events newest first within a site. */
+/** Name of the events table index on `site_id` and `detected_at`. */
 export const EVENTS_BY_SITE_INDEX = 'by-site';
 
-/** Builds a document client pointed at AWS, or at DynamoDB Local when an endpoint is set. */
+/** Returns a document client, overriding the endpoint when `DYNAMODB_ENDPOINT` is set. Undefined values are stripped on write. */
 export function createDynamoClient(): DynamoDBDocumentClient {
   const endpoint = optionalEnv('DYNAMODB_ENDPOINT', '');
   const client = new DynamoDBClient(endpoint ? { endpoint } : {});
@@ -40,16 +40,14 @@ function isConditionalFailure(error: unknown): boolean {
   );
 }
 
-/** The partition key pairing a machine with one of its sensors. */
+/** Returns `<machineId>#<sensorType>`. */
 export function timeSeriesKey(machineId: string, sensorType: SensorType): string {
   return `${machineId}#${sensorType}`;
 }
 
 /**
- * Stores windows keyed by machine and sensor, sorted by window start.
- *
- * The key pair means the api's time-series-by-machine-and-range endpoint is a
- * single query inside one partition rather than a scan across the table.
+ * `TimeSeriesStore` over a table with partition key `pk` and sort key
+ * `window_start`. `range` is one query within a single partition.
  */
 export function createDynamoTimeSeriesStore(
   client: DynamoDBDocumentClient,
@@ -99,7 +97,13 @@ export function createDynamoTimeSeriesStore(
   };
 }
 
-/** Stores events under their deterministic id, refusing to overwrite one. */
+/**
+ * `EventStore` over a table with partition key `event_id` and a
+ * `EVENTS_BY_SITE_INDEX` index on `site_id` and `detected_at`.
+ *
+ * `recent` queries that index descending, scoped to `SITE_ID`, default
+ * `plant-01`.
+ */
 export function createDynamoEventStore(
   client: DynamoDBDocumentClient,
   tableName: string,
@@ -159,7 +163,7 @@ export function createDynamoEventStore(
   };
 }
 
-/** Stores work orders under an id derived from their event. */
+/** `WorkOrderStore` over a table with partition key `work_order_id`. `list` scans. */
 export function createDynamoWorkOrderStore(
   client: DynamoDBDocumentClient,
   tableName: string,
@@ -188,7 +192,7 @@ export function createDynamoWorkOrderStore(
   };
 }
 
-/** Stores per-machine baselines and safety limits. */
+/** `MetadataStore` over a table with partition key `machine_id`. `list` scans. */
 export function createDynamoMetadataStore(
   client: DynamoDBDocumentClient,
   tableName: string,
@@ -213,11 +217,11 @@ export function createDynamoMetadataStore(
 }
 
 /**
- * Tracks alert episodes with a single conditional update.
+ * `AlertStateStore` over a table with partition key `alert_key`.
  *
- * The condition accepts the write when there is no episode, when the last one
- * has expired, or when this event outranks the running one. Anything else is
- * a repeat of a fault already being dealt with and is rejected.
+ * `claim` is one `UpdateItem` conditional on
+ * `attribute_not_exists(alert_key) OR expires_at < now OR rank < :rank OR
+ * event_id = :event`.
  */
 export function createDynamoAlertStateStore(
   client: DynamoDBDocumentClient,
