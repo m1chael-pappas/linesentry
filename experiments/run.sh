@@ -19,9 +19,10 @@ REGION="${AWS_REGION:-us-east-1}"
 SEED="${SEED:-linesentry}"
 BOUND="${BOUND:-}"
 HEARTBEAT_S="${HEARTBEAT_S:-}"
+EDGE_FILTER="${EDGE_FILTER:-$([[ -n $BOUND ]] && echo dual-prediction || echo deadband)}"
 
 if [[ -z $RUN ]]; then
-  echo "usage: run.sh <baseline|ramp|burst|overload|scale-in|failure>" >&2
+  echo "usage: run.sh <baseline|ramp|burst|overload|scale|scale-in|failure>" >&2
   exit 1
 fi
 
@@ -96,6 +97,22 @@ case "$RUN" in
     LOAD_PID=$!
     node experiments/sample.mjs "$OUT/samples.csv" $((SECONDS_OF_LOAD + 420)) | tee "$OUT/sampling.log"
     kill $LOAD_PID 2>/dev/null
+    ;;
+
+  scale)
+    MACHINES_AT_SCALE="${SCALE_MACHINES:-6000}"
+    SECONDS_OF_LOAD="${LOAD_SECONDS:-600}"
+    WARMUP="${WARMUP_SECONDS:-90}"
+    export WINDOWS_TOPIC_ARN="${WINDOWS_TOPIC_ARN:-$(aws sns list-topics --region "$REGION" \
+      --query "Topics[?contains(TopicArn,'linesentry-windows')].TopicArn|[0]" --output text)}"
+
+    echo "plant load: $MACHINES_AT_SCALE machines through the $EDGE_FILTER filter for ${SECONDS_OF_LOAD}s"
+    EDGE_FILTER="$EDGE_FILTER" ERROR_BOUND_SIGMA="${BOUND:-1}" \
+      HEARTBEAT_MS=$(( ${HEARTBEAT_S:-60} * 1000 )) WARMUP_SECONDS="$WARMUP" \
+      node experiments/load.mjs plant "$MACHINES_AT_SCALE" "$SECONDS_OF_LOAD" > "$OUT/load.log" 2>&1 &
+    LOAD_PID=$!
+    node experiments/sample.mjs "$OUT/samples.csv" $((WARMUP + SECONDS_OF_LOAD + 180)) | tee "$OUT/sampling.log"
+    wait $LOAD_PID
     ;;
 
   scale-in)

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildPlant, machineBaseline } from './plant.js';
+import { buildPlant, lineIdFor, machineBaseline } from './plant.js';
 
 describe('deterministic plant', () => {
   it('gives a machine the same baseline on every run with the same seed', () => {
@@ -29,5 +29,25 @@ describe('deterministic plant', () => {
     const seqA = [0, 1, 2].map((i) => a.readings(now + i * 1000));
     const seqB = [0, 1, 2].map((i) => b.readings(now + i * 1000));
     expect(seqA).toEqual(seqB);
+  });
+});
+
+describe('lineIdFor', () => {
+  it('keeps single letters for the first 26 lines', () => {
+    expect(lineIdFor(0)).toBe('line-A');
+    expect(lineIdFor(3)).toBe('line-D');
+    expect(lineIdFor(25)).toBe('line-Z');
+  });
+
+  it('continues with two letters', () => {
+    expect(lineIdFor(26)).toBe('line-AA');
+    expect(lineIdFor(27)).toBe('line-AB');
+    expect(lineIdFor(51)).toBe('line-AZ');
+    expect(lineIdFor(52)).toBe('line-BA');
+    expect(lineIdFor(119)).toBe('line-DP');
+  });
+
+  it('never leaves the letters A to Z', () => {
+    for (let i = 0; i < 1000; i++) expect(lineIdFor(i)).toMatch(/^line-[A-Z]+$/);
   });
 });

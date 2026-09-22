@@ -21,6 +21,7 @@ const SITE_ID = optionalEnv('SITE_ID', 'plant-01');
 const SEED = optionalEnv('SEED', DEFAULT_SEED);
 const MACHINES = numberEnv('SEED_MACHINES', 5);
 const LINES = numberEnv('SEED_LINES', 1);
+const CONCURRENCY = numberEnv('SEED_CONCURRENCY', 32);
 
 const TIMESERIES_TABLE = requiredEnv('TIMESERIES_TABLE');
 const EVENTS_TABLE = requiredEnv('EVENTS_TABLE');
@@ -111,9 +112,14 @@ async function main(): Promise<void> {
   const store = createDynamoMetadataStore(createDynamoClient(), METADATA_TABLE);
   const machines = buildPlant(MACHINES, LINES, SEED);
 
-  for (const machine of machines) {
-    await store.put(machineMetadata(machine.id, SITE_ID, machine.lineId, machine.base));
-  }
+  let next = 0;
+  const worker = async (): Promise<void> => {
+    while (next < machines.length) {
+      const machine = machines[next++]!;
+      await store.put(machineMetadata(machine.id, SITE_ID, machine.lineId, machine.base));
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(CONCURRENCY, machines.length) }, worker));
 
   console.log(`seeded metadata for ${machines.length} machines, seed ${SEED}`);
 }

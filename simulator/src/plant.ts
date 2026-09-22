@@ -181,13 +181,27 @@ export class Machine {
 export const DEFAULT_SEED = 'linesentry';
 
 /**
- * Returns `lines * machinesPerLine` machines, line ids `line-A` upward and
+ * Returns the line id for zero-based `index`: `line-A` to `line-Z`, then
+ * `line-AA`, `line-AB` and so on.
+ *
+ * Pure. Letters only, so the id is safe inside an MQTT topic level.
+ */
+export function lineIdFor(index: number): string {
+  let name = '';
+  for (let n = index + 1; n > 0; n = Math.floor((n - 1) / 26)) {
+    name = String.fromCharCode(65 + ((n - 1) % 26)) + name;
+  }
+  return `line-${name}`;
+}
+
+/**
+ * Returns `lines * machinesPerLine` machines, line ids from `lineIdFor` and
  * machine ids numbered continuously across lines.
  */
 export function buildPlant(machinesPerLine: number, lines: number, seed = DEFAULT_SEED): Machine[] {
   const machines: Machine[] = [];
   for (let l = 0; l < lines; l++) {
-    const lineId = `line-${String.fromCharCode(65 + l)}`;
+    const lineId = lineIdFor(l);
     for (let m = 1; m <= machinesPerLine; m++) {
       machines.push(new Machine(lineId, l * machinesPerLine + m, seed));
     }
