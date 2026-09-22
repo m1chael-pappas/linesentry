@@ -6,7 +6,7 @@ const variants = process.argv.slice(2);
 if (variants.length === 0) variants.push('baseline');
 
 /** Run order in the written table, so it does not follow directory order. */
-const RUN_ORDER = ['baseline', 'ramp', 'burst', 'overload', 'scale-in', 'failure'];
+const RUN_ORDER = ['baseline', 'ramp', 'burst', 'overload', 'scale', 'scale-in', 'failure'];
 
 function summaries(variant) {
   const root = join('evidence', variant);
@@ -92,6 +92,27 @@ if (variants.length === 2) {
   }
 }
 
+/**
+ * One row per variant's `scale` run: the same seeded plant through each arm's
+ * filter, published at plant scale, so only the filter differs between rows.
+ */
+function scaleTable(variantNames) {
+  const rows = variantNames
+    .map((name) => summaries(name).find((s) => s.run === 'scale'))
+    .filter(Boolean);
+  if (rows.length === 0) return '';
+
+  let table = '\n## Plant scale on AWS\n\n';
+  table += 'The seeded plant run through each arm\'s filter by `load.mjs plant` and published to the ingest topic. Every arm sees the same plant, so the message rate and the task count differ only by the filter.\n\n';
+  table += '| Variant | Machines | Published msg/s | Detection tasks | Aggregation tasks | Det depth max | Messages to detection | Windows judged | Windows rebuilt | p95 ms |\n';
+  table += '|---|---|---|---|---|---|---|---|---|---|\n';
+  for (const s of rows) {
+    const m = s.measured;
+    table += `| ${s.variant} | ${cell(m.plant_load?.machines)} | ${cell(m.plant_load?.forwarded_per_second)} | ${cell(m.detection_tasks?.min)} to ${cell(m.detection_tasks?.max)} | ${cell(m.aggregation_tasks?.min)} to ${cell(m.aggregation_tasks?.max)} | ${cell(m.detection_queue_depth?.max)} | ${cell(m.detection_work?.messages_processed)} | ${cell(m.detection_work?.windows_evaluated)} | ${cell(m.detection_work?.windows_reconstructed)} | ${cell(m.latency_ms?.window_stored?.p95)} |\n`;
+  }
+  return table;
+}
+
 /** Reads every offline sweep written under evidence/sweep/. */
 function sweeps() {
   const root = join('evidence', 'sweep');
@@ -123,6 +144,8 @@ function against(control, arm, field) {
   if (!control[field] || !arm[field]) return '-';
   return `${(control[field] / arm[field]).toFixed(2)}x`;
 }
+
+document += scaleTable(variants);
 
 for (const sweep of sweeps()) {
   const control = sweep.arms.find((arm) => arm.arm === 'deadband/hb60');

@@ -2,13 +2,20 @@
 """Plots the LineSentry metrics CloudWatch extracted from the service logs.
 
     python3 experiments/plot-cloudwatch.py [hours] [output.png]
+    python3 experiments/plot-cloudwatch.py widgets <run-dir>
 
 Reads the CloudWatch metrics rather than the harness CSVs, so the figure shows
 what CloudWatch itself holds after extracting the embedded metric format lines.
+
+`widgets` asks CloudWatch to render its own graphs for one run's time window
+and variant, through GetMetricWidgetImage, and writes them beside the run's
+summary. They are the graphs the CloudWatch console draws for the same query.
 """
 
+import base64
 import json
 import subprocess
+import time
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -121,7 +128,104 @@ def plot(hours: float, output: Path) -> None:
     print(f"wrote {output}")
 
 
+CLUSTER = "linesentry"
+
+
+def render_widget(widget: dict, target: Path) -> bool:
+    """Writes the PNG CloudWatch renders for `widget` to `target`."""
+    result = subprocess.run(
+        [
+            "aws", "cloudwatch", "get-metric-widget-image",
+            "--metric-widget", json.dumps(widget),
+            "--output-format", "png",
+            "--region", REGION,
+            "--output", "json",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        print(f"  {target.name}: {result.stderr.strip()[:200]}", file=sys.stderr)
+        return False
+
+    target.write_bytes(base64.b64decode(json.loads(result.stdout)["MetricWidgetImage"]))
+    print(f"wrote {target}")
+    return True
+
+
+def run_widgets(run_dir: Path) -> None:
+    """Renders the CloudWatch graphs for the run whose summary is in `run_dir`."""
+    summary = json.loads((run_dir / "summary.json").read_text())
+    variant = summary["variant"]
+    start, end = summary["started_at"], summary["finished_at"]
+    title = f"{summary['run']} / {variant}"
+
+    base = {
+        "width": 1000,
+        "height": 400,
+        "start": start,
+        "end": end,
+        "region": REGION,
+        "period": 60,
+        "timezone": time.strftime("%z"),
+    }
+
+    queues_and_tasks = {
+        **base,
+        "title": f"Queue depth and running tasks, {title}",
+        "metrics": [
+            ["AWS/SQS", "ApproximateNumberOfMessagesVisible", "QueueName", "linesentry-detection-q",
+             {"label": "detection queue", "stat": "Maximum"}],
+            ["AWS/SQS", "ApproximateNumberOfMessagesVisible", "QueueName", "linesentry-aggregation-q",
+             {"label": "aggregation queue", "stat": "Maximum"}],
+            ["ECS/ContainerInsights", "RunningTaskCount", "ClusterName", CLUSTER, "ServiceName",
+             "linesentry-detection", {"label": "detection tasks", "stat": "Maximum", "yAxis": "right"}],
+            ["ECS/ContainerInsights", "RunningTaskCount", "ClusterName", CLUSTER, "ServiceName",
+             "linesentry-aggregation", {"label": "aggregation tasks", "stat": "Maximum", "yAxis": "right"}],
+        ],
+        "yAxis": {"left": {"label": "messages waiting", "min": 0}, "right": {"label": "tasks", "min": 0}},
+    }
+
+    work_against_messages = {
+        **base,
+        "title": f"Messages received against windows judged by detection, {title}",
+        "metrics": [
+            [NAMESPACE, "MessagesProcessed", "service", "detection", "variant", variant,
+             {"label": "messages received", "stat": "Sum"}],
+            [NAMESPACE, "WindowsEvaluated", "service", "detection", "variant", variant,
+             {"label": "windows judged", "stat": "Sum"}],
+            [NAMESPACE, "WindowsReconstructed", "service", "detection", "variant", variant,
+             {"label": "windows reconstructed", "stat": "Sum"}],
+        ],
+        "yAxis": {"left": {"label": "per minute", "min": 0}},
+    }
+
+    latency = {
+        **base,
+        "title": f"Gateway to stored row latency, {title}",
+        "metrics": [
+            [NAMESPACE, "WindowStoredLatency", "service", "aggregation", "variant", variant,
+             {"label": "p50", "stat": "p50"}],
+            [NAMESPACE, "WindowStoredLatency", "service", "aggregation", "variant", variant,
+             {"label": "p95", "stat": "p95"}],
+        ],
+        "yAxis": {"left": {"label": "ms", "min": 0}},
+    }
+
+    for name, widget in (
+        ("cw-queues-tasks.png", queues_and_tasks),
+        ("cw-messages-windows.png", work_against_messages),
+        ("cw-latency.png", latency),
+    ):
+        render_widget(widget, run_dir / name)
+
+
 if __name__ == "__main__":
+    if len(sys.argv) >= 3 and sys.argv[1] == "widgets":
+        run_widgets(Path(sys.argv[2]))
+        raise SystemExit(0)
+
     hours = float(sys.argv[1]) if len(sys.argv) > 1 else 3
     target = Path(sys.argv[2]) if len(sys.argv) > 2 else Path("evidence/cloudwatch-metrics.png")
     target.parent.mkdir(parents=True, exist_ok=True)
