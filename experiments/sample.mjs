@@ -72,9 +72,13 @@ function runningCount(service) {
  * Total rows in the time-series table.
  *
  * `scan --select COUNT` paginates past 1 MB and the CLI prints one count per
- * page, so the pages are summed. Returns an empty string when the call fails.
+ * page, so the pages are summed. Returns an empty string when the call fails,
+ * or unless `COUNT_ROWS=1`, since the scan reads the whole table every sample
+ * and slows sampling as the table grows. collect.mjs takes the stored window
+ * count from the `WindowsStored` metric instead.
  */
 function timeSeriesRows() {
+  if (process.env.COUNT_ROWS !== '1') return '';
   const output = aws([
     'dynamodb',
     'scan',

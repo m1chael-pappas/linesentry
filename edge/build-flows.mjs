@@ -272,9 +272,7 @@ function toDualPredictionFlow(flow, body) {
 
   const comment = rewritten.find((node) => node.type === 'comment');
   if (comment) {
-    comment.name =
-      'Raw MQTT in -> 10 s window (mean/min/max/rms) -> EWMA -> dual prediction filter -> ' +
-      'linesentry/edge/... . ERROR_BOUND_SIGMA and HEARTBEAT_MS set the bound and the heartbeat.';
+    comment.name = 'Raw MQTT -> 10 s window -> EWMA -> dual prediction filter -> linesentry/edge/...';
   }
 
   return rewritten;

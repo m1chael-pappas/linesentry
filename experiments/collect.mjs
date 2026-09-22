@@ -12,6 +12,26 @@ if (!outDir || !startedAt || !finishedAt) {
 
 const region = process.env.AWS_REGION ?? 'us-east-1';
 
+/**
+ * Start of the window CloudWatch measures are taken over.
+ *
+ * For a plant-mode load this is when publishing began: the arm publishes
+ * nothing during its warm-up, so anything processed then belongs to an earlier
+ * run or another producer. Otherwise it is the start of the run.
+ */
+function measurementStart() {
+  try {
+    const log = readFileSync(join(outDir, 'load.log'), 'utf8');
+    const warmup = log.match(/plant load: .*warm-up (\d+)s/);
+    if (!warmup) return startedAt;
+    return new Date(Date.parse(startedAt) + Number(warmup[1]) * 1000).toISOString().replace(/\.\d{3}Z$/, 'Z');
+  } catch {
+    return startedAt;
+  }
+}
+
+const measuredFrom = measurementStart();
+
 /** Targets from the brief, reported alongside what was measured. */
 const TARGETS = {
   edge_output_msg_per_second: 80,
@@ -38,7 +58,7 @@ function aws(args) {
  * metric has no data, which is normal for a metric no service emitted during
  * this run.
  */
-function metric(namespace, name, dimensions, stat, period = 60) {
+function metric(namespace, name, dimensions, stat, period = 60, from = measuredFrom, to = finishedAt) {
   const query = {
     Id: 'm1',
     MetricStat: {
@@ -57,9 +77,9 @@ function metric(namespace, name, dimensions, stat, period = 60) {
     'cloudwatch',
     'get-metric-data',
     '--start-time',
-    startedAt,
+    from,
     '--end-time',
-    finishedAt,
+    to,
     '--metric-data-queries',
     JSON.stringify([query]),
     '--output',
@@ -110,10 +130,32 @@ const aggDepths = samples.map((s) => s.aggregation_depth).filter(Number.isFinite
 const rows = samples.map((s) => s.timeseries_rows).filter(Number.isFinite);
 
 const elapsed = samples.length > 1 ? samples[samples.length - 1].elapsed_seconds : 0;
+
+/**
+ * Windows aggregation stored during the sampling window, from its
+ * `WindowsStored` counter.
+ *
+ * The sampling window is the last `elapsed` seconds of the run, which for a
+ * burst starts at the fault injection rather than at the run's start, so the
+ * rate covers what the row count covered. Preferred over the row count, which
+ * needs a full-table scan per sample. The row delta is used when the counter
+ * has no data.
+ */
+const samplingFrom = new Date(Date.parse(finishedAt) - elapsed * 1000).toISOString().replace(/\.\d{3}Z$/, 'Z');
+const storedByMetric = metric(
+  'LineSentry',
+  'WindowsStored',
+  { service: 'aggregation', variant },
+  'Sum',
+  60,
+  samplingFrom,
+  finishedAt,
+).reduce((sum, value) => sum + value, 0);
+const storedByRows = rows.length > 1 ? rows[rows.length - 1] - rows[0] : null;
+const windowsStored = storedByMetric > 0 ? storedByMetric : storedByRows;
+
 const edgeOutputRate =
-  rows.length > 1 && elapsed > 0
-    ? Number(((rows[rows.length - 1] - rows[0]) / elapsed).toFixed(2))
-    : null;
+  windowsStored !== null && elapsed > 0 ? Number((windowsStored / elapsed).toFixed(2)) : null;
 
 const latency = {
   window_stored: summarise(
@@ -246,12 +288,99 @@ function detectionQuality() {
   };
 }
 
+/**
+ * Running tasks summed over one-minute datapoints from Container Insights, so
+ * it counts task-minutes: what a run cost in compute, independent of whether
+ * the peak task count hit the scaling ceiling.
+ */
+function taskMinutes(service) {
+  const values = metric(
+    'ECS/ContainerInsights',
+    'RunningTaskCount',
+    { ClusterName: 'linesentry', ServiceName: `linesentry-${service}` },
+    'Average',
+  );
+  return values.length ? Number(values.reduce((sum, value) => sum + value, 0).toFixed(1)) : null;
+}
+
+/** One metric over the run as a map from minute timestamp to value. */
+function series(namespace, name, dimensions, stat) {
+  const query = {
+    Id: 'm1',
+    MetricStat: {
+      Metric: {
+        Namespace: namespace,
+        MetricName: name,
+        Dimensions: Object.entries(dimensions).map(([Name, Value]) => ({ Name, Value })),
+      },
+      Period: 60,
+      Stat: stat,
+    },
+    ReturnData: true,
+  };
+  const raw = aws([
+    'cloudwatch',
+    'get-metric-data',
+    '--start-time',
+    measuredFrom,
+    '--end-time',
+    finishedAt,
+    '--metric-data-queries',
+    JSON.stringify([query]),
+    '--output',
+    'json',
+  ]);
+  if (!raw) return new Map();
+  try {
+    const result = JSON.parse(raw).MetricDataResults?.[0] ?? { Timestamps: [], Values: [] };
+    return new Map(result.Timestamps.map((stamp, i) => [Date.parse(stamp), result.Values[i]]));
+  } catch {
+    return new Map();
+  }
+}
+
+/**
+ * Messages one detection task processed per second while saturated.
+ *
+ * A minute counts when the detection queue's smallest visible depth that
+ * minute stayed above 500, so the tasks never ran out of work. Returns the
+ * median over those minutes, or null when the queue never held a backlog.
+ */
+function saturatedThroughput() {
+  const processed = series('LineSentry', 'MessagesProcessed', { service: 'detection', variant }, 'Sum');
+  const tasks = series(
+    'ECS/ContainerInsights',
+    'RunningTaskCount',
+    { ClusterName: 'linesentry', ServiceName: 'linesentry-detection' },
+    'Average',
+  );
+  const floor = series('AWS/SQS', 'ApproximateNumberOfMessagesVisible', { QueueName: 'linesentry-detection-q' }, 'Minimum');
+
+  const rates = [];
+  for (const [minute, depth] of floor) {
+    const count = processed.get(minute);
+    const running = tasks.get(minute);
+    if (depth > 500 && count && running) rates.push(count / running / 60);
+  }
+  if (rates.length === 0) return null;
+
+  const sorted = rates.sort((a, b) => a - b);
+  return {
+    minutes: sorted.length,
+    per_task_per_second_p50: Number(sorted[Math.floor(sorted.length / 2)].toFixed(1)),
+    per_task_per_second_max: Number(sorted[sorted.length - 1].toFixed(1)),
+  };
+}
+
 const detectionWork = {
   messages_processed: total('MessagesProcessed', 'detection'),
   windows_evaluated: total('WindowsEvaluated', 'detection'),
   windows_reconstructed: total('WindowsReconstructed', 'detection'),
   events_written: total('EventsWritten', 'detection'),
   unknown_machines: total('UnknownMachines', 'detection'),
+  detection_task_minutes: taskMinutes('detection'),
+  aggregation_task_minutes: taskMinutes('aggregation'),
+  saturated_throughput: saturatedThroughput(),
 };
 
 const summary = {
@@ -261,6 +390,7 @@ const summary = {
   heartbeat_seconds: process.env.HEARTBEAT_S ? Number(process.env.HEARTBEAT_S) : null,
   started_at: startedAt,
   finished_at: finishedAt,
+  measured_from: measuredFrom,
   duration_seconds: elapsed,
   measured: {
     edge_output_msg_per_second: edgeOutputRate,
@@ -276,7 +406,8 @@ const summary = {
       max: aggTasks.length ? Math.max(...aggTasks) : null,
       final: aggTasks.length ? aggTasks[aggTasks.length - 1] : null,
     },
-    windows_stored: rows.length ? rows[rows.length - 1] - rows[0] : null,
+    windows_stored: windowsStored,
+    windows_stored_source: storedByMetric > 0 ? 'WindowsStored metric' : 'row count delta',
     detection_work: detectionWork,
     detection_quality: detectionQuality(),
     plant_load: plantLoad(),

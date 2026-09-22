@@ -3,6 +3,7 @@
 
     python3 experiments/plot.py <outDir> <run> <variant>
     python3 experiments/plot.py sweep <scenario>
+    python3 experiments/plot.py compare <output.png> <runDir> [<runDir> ...]
 """
 
 import json
@@ -156,7 +157,49 @@ def plot_sweep(scenario: str) -> None:
     print(f"wrote {target}")
 
 
+ARM_COLOURS = ["#5c5c5c", "#1f6feb", "#2a7f3f", "#c1440e", "#7d3c98"]
+
+
+def plot_compare(target: Path, run_dirs: list[Path]) -> None:
+    """Plots detection queue depth and running tasks for several runs of one scenario."""
+    figure, (depth, tasks) = plt.subplots(
+        2, 1, figsize=(11, 7), sharex=True, gridspec_kw={"height_ratios": [2, 1]}
+    )
+
+    for index, run_dir in enumerate(run_dirs):
+        frame = load(run_dir)
+        if frame is None:
+            continue
+        summary = json.loads((run_dir / "summary.json").read_text())
+        plant = summary["measured"].get("plant_load") or {}
+        rate = plant.get("forwarded_per_second")
+        label = summary["variant"] + (f", {rate:g} msg/s" if rate else "")
+        colour = ARM_COLOURS[index % len(ARM_COLOURS)]
+        minutes = frame["elapsed_seconds"] / 60
+
+        depth.plot(minutes, frame["detection_depth"], linewidth=1.6, color=colour, label=label)
+        tasks.step(minutes, frame["detection_tasks"], where="post", linewidth=1.8, color=colour, label=label)
+
+    depth.set_ylabel("detection queue depth")
+    depth.set_title("Same plant, one arm per line: detection backlog and running tasks")
+    depth.legend(loc="upper right", frameon=False, fontsize=9)
+    depth.grid(alpha=0.25)
+
+    tasks.set_ylim(0, 7)
+    tasks.set_ylabel("detection tasks")
+    tasks.set_xlabel("minutes into run")
+    tasks.grid(alpha=0.25)
+
+    figure.tight_layout()
+    target.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(target, dpi=140)
+    print(f"wrote {target}")
+
+
 if __name__ == "__main__":
+    if len(sys.argv) >= 4 and sys.argv[1] == "compare":
+        plot_compare(Path(sys.argv[2]), [Path(d) for d in sys.argv[3:]])
+        raise SystemExit(0)
     if len(sys.argv) >= 3 and sys.argv[1] == "sweep":
         plot_sweep(sys.argv[2])
     elif len(sys.argv) >= 4:

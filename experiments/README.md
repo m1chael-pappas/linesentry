@@ -16,10 +16,12 @@ Each run writes into `evidence/<variant>/<run>/`:
 
 | File | Contents |
 |---|---|
-| `samples.csv` | Queue depths, detection task count and stored row count, sampled every 10 seconds |
+| `samples.csv` | Queue depths and task counts, sampled every 10 seconds. The stored row count only with `COUNT_ROWS=1`, since it scans the whole table each sample |
 | `summary.json` | Latency percentiles, peak and steady queue depth, task range, measured against the targets |
 | `<run>.png` | Queue depth and task count over the run |
 | `simulator.log` | Simulator output, including the fault injections |
+| `faults.jsonl` | One line per fault injection, which `collect.mjs` matches events against |
+| `load.log` | Load generator output, for `overload` and `scale` |
 
 `VARIANT` sets the variant label and defaults to `baseline`. Metrics are dimensioned by it, so two arms of a comparison do not mix.
 
@@ -32,6 +34,7 @@ After each run, `evidence.mjs` rewrites `evidence/EVIDENCE.md` with one row per 
 | `baseline` | 20 machines, no faults | 10 min |
 | `ramp` | 20 to 200 machines in steps, 5 min each | 30 min |
 | `burst` | 200 machines, overheat across a full line of 50 | 12 min |
+| `scale` | 6,000 machines through the arm's filter, published at plant scale | 15 min |
 | `scale-in` | Clear the fault and wait for the task count to return to 1 | 20 min |
 | `failure` | Stop a detection task mid-burst | 11 min |
 
@@ -56,6 +59,31 @@ The conditional write rejection counts are reported too. A run where the detecti
 Stopping the container is what makes this a real test. The messages the task held were never acknowledged, so SQS makes them visible again after the visibility timeout and another task picks them up.
 
 Environment overrides: `MACHINES`, `LINE`, `FAULT`, `SETTLE_SECONDS`, `SQS_HOST`, `API_HOST`, `DYNAMO_HOST`.
+
+## Plant scale
+
+```
+VARIANT=baseline ./experiments/run.sh scale
+VARIANT=dual-prediction-b0.5-hb600 BOUND=0.5 HEARTBEAT_S=600 ./experiments/run.sh scale
+```
+
+The `scale` scenario runs `load.mjs plant`, which builds the seeded plant, runs every reading through the TypeScript edge chain and the arm's filter, and publishes only what that filter forwards to the ingest topic. `edge.test.ts` proves that chain equal to the deployed Node-RED flow, so the generator stands in for many gateways on one plant. Every arm sees the same plant, so the message rate and the task count differ only by the filter.
+
+`overload` publishes identical synthetic windows at a fixed rate. Every arm receives the same rate, so it measures the cloud side's capacity and cannot show a filter.
+
+Machines join across the first minute and nothing is published for the first 90 seconds. Otherwise every key makes its first forward in the same second, and that burst alone triggers scale-out in every arm. `SCALE_MACHINES`, `LOAD_SECONDS` and `WARMUP_SECONDS` override the defaults of 6,000, 600 and 90.
+
+The metadata table needs a row for every generated machine, or detection skips its windows as unknown: `SEED_MACHINES=50 SEED_LINES=120 make seed`.
+
+Task-minutes, summed from Container Insights `RunningTaskCount`, are the measure to compare. Target tracking holds backlog per task at 50, so a sawtooth of forwards landing on every 10 second boundary sends it to the task ceiling in one step whenever backlog builds, and the peak task count can match across arms that need very different capacity.
+
+## CloudWatch graphs
+
+```
+python3 experiments/plot-cloudwatch.py widgets evidence/<variant>/<run>
+```
+
+Asks CloudWatch to render its own graphs for a run's time window and variant through `GetMetricWidgetImage`: queue depth against running tasks, messages received against windows judged, and gateway-to-row latency. They are the graphs the CloudWatch console draws for the same query, written beside the run's summary.
 
 ## Offline sweep
 
