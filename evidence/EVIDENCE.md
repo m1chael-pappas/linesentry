@@ -27,6 +27,78 @@ Targets come from the project brief. A missed target is reported as missed rathe
 | burst | all targets met |
 | overload | MISSED: p95_end_to_end, steady_queue_depth |
 
+## deadband-hb60
+
+| Run | p50 ms | p95 ms | Agg depth max | Det depth max | Agg tasks | Det tasks | Windows |
+|---|---|---|---|---|---|---|---|
+| baseline | 1111 | 1306 | 0 | 0 | 1 to 1 | 3 to 6 | 1482 |
+| burst | 1561 | 3587 | 231 | 3 | 1 to 1 | 6 to 6 | 10521 |
+| scale | 83157 | 183151 | 71936 | 106675 | 1 to 6 | 1 to 6 | 252767 |
+
+| Run | Against targets |
+|---|---|
+| baseline | all targets met |
+| burst | all targets met |
+| scale | MISSED: edge_output, p95_end_to_end, steady_queue_depth |
+
+## dual-prediction-b0.5-hb600
+
+| Run | p50 ms | p95 ms | Agg depth max | Det depth max | Agg tasks | Det tasks | Windows |
+|---|---|---|---|---|---|---|---|
+| baseline | 628 | 2142 | 0 | 46 | 1 to 1 | 1 to 1 | 588 |
+| burst | 1288 | 2155 | 32 | 79 | 1 to 1 | 1 to 1 | 7722 |
+| scale | 48769 | 109016 | 21352 | 38572 | 1 to 6 | 1 to 6 | 140098 |
+
+| Run | Against targets |
+|---|---|
+| baseline | all targets met |
+| burst | all targets met |
+| scale | MISSED: edge_output, p95_end_to_end, steady_queue_depth |
+
+## dual-prediction-b1-hb600
+
+| Run | p50 ms | p95 ms | Agg depth max | Det depth max | Agg tasks | Det tasks | Windows |
+|---|---|---|---|---|---|---|---|
+| scale | 11582 | 59333 | 2689 | 15074 | 1 to 6 | 1 to 6 | 80611 |
+
+| Run | Against targets |
+|---|---|
+| scale | MISSED: edge_output, p95_end_to_end, steady_queue_depth |
+
+## dual-prediction-b2-hb600
+
+| Run | p50 ms | p95 ms | Agg depth max | Det depth max | Agg tasks | Det tasks | Windows |
+|---|---|---|---|---|---|---|---|
+| baseline | 626 | 2040 | 0 | 0 | 1 to 1 | 1 to 1 | 182 |
+| burst | 1277 | 1878 | 32 | 53 | 1 to 1 | 1 to 1 | 4618 |
+| scale | 2679 | 9147 | 1375 | 5643 | 1 to 1 | 1 to 1 | 38885 |
+
+| Run | Against targets |
+|---|---|
+| baseline | all targets met |
+| burst | all targets met |
+| scale | MISSED: p95_end_to_end, steady_queue_depth |
+
+## Plant scale on AWS
+
+The seeded plant run through each arm's filter by `load.mjs plant` and published to the ingest topic. Every arm sees the same plant, so the message rate and the task count differ only by the filter.
+
+| Variant | Machines | Published msg/s | Per machine msg/s | Detection tasks | Det depth max | p95 ms | Messages to detection | Windows judged | Windows rebuilt |
+|---|---|---|---|---|---|---|---|---|---|
+| deadband-hb60 | 6000 | 421.28 | 0.07021 | 1 to 6 | 106675 | 183151 | 252772 | 252772 | - |
+| dual-prediction-b0.5-hb600 | 6000 | 233.5 | 0.03892 | 1 to 6 | 38572 | 109016 | 140098 | 779618 | 639520 |
+| dual-prediction-b1-hb600 | 6000 | 134.13 | 0.02236 | 1 to 6 | 15074 | 59333 | 80479 | 543227 | 462748 |
+| dual-prediction-b2-hb600 | 6000 | 64.77 | 0.0108 | 1 to 1 | 5643 | 9147 | 38863 | 269073 | 230210 |
+
+Per-task capacity is the median messages per second one detection task processed in the minutes its queue never emptied. Machines per task divides the control arm's capacity by each arm's published rate per machine, so only the filter differs between rows.
+
+| Variant | Per-task msg/s, saturated | Saturated minutes | Tasks needed at control capacity | Machines per task at control capacity | Detection task-minutes |
+|---|---|---|---|---|---|
+| deadband-hb60 | 101.3 | 12 | 4.16 | 1443 | 46 |
+| dual-prediction-b0.5-hb600 | 114.8 | 7 | 2.31 | 2603 | 48 |
+| dual-prediction-b1-hb600 | 91.7 | 6 | 1.32 | 4530 | 48 |
+| dual-prediction-b2-hb600 | 85.2 | 2 | 0.64 | 9380 | 14 |
+
 ## Offline sweep, faults
 
 200 machines over 1800s, seed `linesentry`, 16 faults injected, 144000 windows produced.

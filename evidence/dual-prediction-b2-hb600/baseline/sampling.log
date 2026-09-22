@@ -1,0 +1,31 @@
+sampling every 10s for 600s into evidence/dual-prediction-b2-hb600/baseline/samples.csv
+  t+   0s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 150785
+  t+  18s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 150866
+  t+  36s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 150866
+  t+  58s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 150867
+  t+  76s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 150870
+  t+  94s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 150872
+  t+ 114s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 150875
+  t+ 133s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 150878
+  t+ 152s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 150881
+  t+ 171s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 150893
+  t+ 190s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 150898
+  t+ 209s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 150901
+  t+ 228s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 150904
+  t+ 246s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 150905
+  t+ 265s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 150909
+  t+ 284s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 150918
+  t+ 303s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 150933
+  t+ 323s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 150939
+  t+ 343s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 150939
+  t+ 361s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 150939
+  t+ 380s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 150942
+  t+ 400s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 150943
+  t+ 427s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 150946
+  t+ 455s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 150947
+  t+ 483s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 150951
+  t+ 510s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 150953
+  t+ 533s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 150962
+  t+ 555s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 150973
+  t+ 579s  agg queue     0 tasks 1  det queue     0 tasks 1  rows 150976
+sampling finished, evidence/dual-prediction-b2-hb600/baseline/samples.csv

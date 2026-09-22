@@ -1,0 +1,115 @@
+{
+  "run": "scale",
+  "variant": "dual-prediction-b2-hb600",
+  "error_bound_sigma": 2,
+  "heartbeat_seconds": 600,
+  "started_at": "2026-09-22T06:13:28Z",
+  "finished_at": "2026-09-22T06:28:11Z",
+  "measured_from": "2026-09-22T06:14:58Z",
+  "duration_seconds": 869,
+  "measured": {
+    "edge_output_msg_per_second": 44.75,
+    "detection_queue_depth": {
+      "samples": 85,
+      "min": 0,
+      "p50": 11,
+      "p95": 3581,
+      "max": 5643,
+      "mean": 520.33
+    },
+    "aggregation_queue_depth": {
+      "samples": 85,
+      "min": 0,
+      "p50": 0,
+      "p95": 569,
+      "max": 1375,
+      "mean": 87.55
+    },
+    "detection_tasks": {
+      "min": 1,
+      "max": 1,
+      "final": 1
+    },
+    "aggregation_tasks": {
+      "min": 1,
+      "max": 1,
+      "final": 1
+    },
+    "windows_stored": 38885,
+    "windows_stored_source": "WindowsStored metric",
+    "detection_work": {
+      "messages_processed": 38863,
+      "windows_evaluated": 269073,
+      "windows_reconstructed": 230210,
+      "events_written": 2354,
+      "unknown_machines": null,
+      "detection_task_minutes": 14,
+      "aggregation_task_minutes": 14,
+      "saturated_throughput": {
+        "minutes": 2,
+        "per_task_per_second_p50": 85.2,
+        "per_task_per_second_max": 85.2
+      }
+    },
+    "detection_quality": null,
+    "plant_load": {
+      "machines": 6000,
+      "forwarded": 38863,
+      "seconds": 600,
+      "forwarded_per_second": 64.77,
+      "forwarded_per_machine_second": 0.0108
+    },
+    "latency_ms": {
+      "window_stored": {
+        "samples": 10,
+        "min": 2558,
+        "p50": 2679,
+        "p95": 9147,
+        "max": 9147,
+        "mean": 3330
+      },
+      "edge_to_ingest": {
+        "samples": 10,
+        "min": 1766,
+        "p50": 1901,
+        "p95": 3395,
+        "max": 3395,
+        "mean": 2049.6
+      },
+      "ingest_to_detect": {
+        "samples": 11,
+        "min": 2752,
+        "p50": 9161,
+        "p95": 78438,
+        "max": 78438,
+        "mean": 18007.18
+      },
+      "detect_to_alert": {
+        "samples": 12,
+        "min": 46,
+        "p50": 320,
+        "p95": 620,
+        "max": 620,
+        "mean": 308.67
+      },
+      "end_to_end_event": {
+        "samples": 12,
+        "min": 6317,
+        "p50": 8526,
+        "p95": 80163,
+        "max": 80163,
+        "mean": 25751
+      }
+    }
+  },
+  "targets": {
+    "edge_output_msg_per_second": 80,
+    "p95_end_to_end_ms": 5000,
+    "steady_queue_depth": 100
+  },
+  "against_targets": {
+    "edge_output": "met",
+    "p95_end_to_end": "MISSED",
+    "steady_queue_depth": "MISSED"
+  }
+}

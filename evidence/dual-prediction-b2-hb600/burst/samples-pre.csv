@@ -1,0 +1,13 @@
+elapsed_seconds,aggregation_depth,detection_depth,alerting_depth,detection_tasks,aggregation_tasks,timeseries_rows
+0,71,125,0,1,1,0
+12,41,0,0,1,1,0
+25,41,0,0,1,1,0
+36,0,125,0,1,1,0
+47,0,0,0,1,1,0
+57,0,0,0,1,1,0
+67,0,0,0,1,1,0
+77,0,0,0,1,1,0
+87,0,0,0,1,1,0
+98,0,13,0,1,1,0
+109,0,0,0,1,1,0
+119,0,0,0,1,1,0
