@@ -77,6 +77,23 @@ The metadata table needs a row for every generated machine, or detection skips i
 
 Task-minutes, summed from Container Insights `RunningTaskCount`, are the measure to compare. Target tracking holds backlog per task at 50, so a sawtooth of forwards landing on every 10 second boundary sends it to the task ceiling in one step whenever backlog builds, and the peak task count can match across arms that need very different capacity.
 
+### Per-task capacity
+
+`collect.mjs` reports `saturated_throughput`, the messages per second one detection task processed in minutes where it never ran out of work. A minute counts when every harness sample of the detection queue in it, taken about every 10 seconds, read above 500. The CloudWatch depth metric cannot decide this: SQS pushes one `ApproximateNumberOfMessagesVisible` datapoint a minute, so its minute `Minimum` is a single reading, and a burst on a 10 second boundary can put it above 500 in a minute the task spent mostly idle.
+
+The task count for each minute is the mean ECS `runningCount` across the same samples. Container Insights `RunningTaskCount` can still read 1 in the minute a service scales from one task to six. `one_task_per_second_p50` repeats the median over the minutes in which every sample saw exactly one task. Pinning detection to one task with `DETECTION_MAX_TASKS=1` turns a `scale` run into a probe of that capacity:
+
+```
+make arm VARIANT=deadband-hb60-pinned DETECTION_STRATEGY=baseline DETECTION_MAX_TASKS=1
+VARIANT=deadband-hb60-pinned HEARTBEAT_S=60 SCALE_MACHINES=2500 LOAD_SECONDS=240 RUN_TAG=m2500 ./experiments/run.sh scale
+```
+
+A probe that keeps up drains its queue within seconds of the load stopping, which `load_end.drained_after_seconds` records. One that falls behind takes minutes, and its backlogged minutes measure the task's capacity at that arm's traffic.
+
+`saturated_throughput.cpu_ms_per_message` divides the detection service's CPU time in the same minutes, from Container Insights `CpuUtilized` summed over tasks at 1024 units per vCPU, by the messages it processed in them. A detection task has 256 CPU units at the default `task_cpu`, and a backlogged task runs at 250 or more, so this is the cost that sets one task's capacity. Only backlogged minutes count, because an idle task still spends CPU polling an empty queue.
+
+`metadata_reads_per_message` and `alert_reads_per_message` divide each table's `ConsumedReadCapacityUnits` by the messages detection processed, at two reads per unit for eventually consistent reads of items under 4 KB. Detection caches metadata for 60 seconds and stop state for 5 seconds per task, so these ratios rise as each task sees a given machine less often, whether because the machine sends less or because more tasks share its messages.
+
 ## CloudWatch graphs
 
 ```
@@ -85,12 +102,14 @@ python3 experiments/plot-cloudwatch.py widgets evidence/<variant>/<run>
 
 Asks CloudWatch to render its own graphs for a run's time window and variant through `GetMetricWidgetImage`: queue depth against running tasks, messages received against windows judged, and gateway-to-row latency. They are the graphs the CloudWatch console draws for the same query, written beside the run's summary.
 
+Detection series are drawn last, so where a detection and an aggregation line hold the same value, as the task counts do on a run that never scales, the detection line is the one visible. A widget is 85 px wide per minute of the run, between 600 and 1000 px. CloudWatch labels ticks to the minute and spaces them by width, so a nine-minute run drawn 1000 px wide repeats every label.
+
 ## Offline sweep
 
 ```
 node experiments/sweep.mjs steady
 node experiments/sweep.mjs faults
-MACHINES=50 LINES=4 SECONDS=1800 node experiments/sweep.mjs faults
+MACHINES=50 LINES=4 SWEEP_SECONDS=1800 SEED=seed-2 node experiments/sweep.mjs faults
 python3 experiments/plot.py sweep faults
 ```
 

@@ -4,7 +4,7 @@
 //
 //   node experiments/sweep.mjs steady
 //   node experiments/sweep.mjs faults
-//   MACHINES=50 LINES=4 SECONDS=900 node experiments/sweep.mjs faults
+//   MACHINES=50 LINES=4 SWEEP_SECONDS=1800 SEED=seed-2 node experiments/sweep.mjs faults
 //
 // Writes evidence/sweep/<scenario>/sweep.json and sweep.csv, or
 // evidence/sweep/<scenario>-<seed>/ when SEED is not the default.
@@ -36,7 +36,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SCENARIO = process.argv[2] ?? 'steady';
 const MACHINES_PER_LINE = Number(process.env.MACHINES ?? 50);
 const LINES = Number(process.env.LINES ?? 4);
-const SECONDS = Number(process.env.SECONDS ?? 900);
+const SECONDS = Number(process.env.SWEEP_SECONDS ?? 1800);
 const SEED = process.env.SEED ?? 'linesentry';
 const SITE_ID = process.env.SITE_ID ?? 'plant-01';
 const START = 1789000000000;
@@ -55,12 +55,14 @@ const EPISODE_MS = 600000;
 
 /**
  * Messages one detection task sustains while saturated, measured on AWS at
- * 6,000 machines on the deadband arm over 12 backlogged minutes.
+ * 6,000 machines on the deadband arm over 11 backlogged minutes, the
+ * `saturated_throughput.per_task_per_second_p50` of
+ * evidence/deadband-hb60/scale/summary.json.
  *
  * Used to derive machines supported per task, so the offline curve and the
  * plant-scale table divide by the same capacity.
  */
-const MESSAGES_PER_TASK_SECOND = 101.3;
+const MESSAGES_PER_TASK_SECOND = 100.8;
 
 /** Faults injected in the `faults` scenario, one per machine. */
 function faultSchedule(machines) {

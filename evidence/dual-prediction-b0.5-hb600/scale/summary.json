@@ -45,10 +45,19 @@
       "unknown_machines": null,
       "detection_task_minutes": 48,
       "aggregation_task_minutes": 48,
+      "metadata_reads_per_message": 0.601,
+      "alert_reads_per_message": 0.947,
       "saturated_throughput": {
         "minutes": 7,
-        "per_task_per_second_p50": 114.8,
-        "per_task_per_second_max": 204.7
+        "per_task_per_second_p50": 114.7,
+        "per_task_per_second_max": 116.7,
+        "one_task_minutes": 4,
+        "one_task_per_second_p50": 115,
+        "one_task_per_second_range": [
+          114.7,
+          116.7
+        ],
+        "cpu_ms_per_message": 2.62
       }
     },
     "detection_quality": null,
@@ -58,6 +67,10 @@
       "seconds": 600,
       "forwarded_per_second": 233.5,
       "forwarded_per_machine_second": 0.03892
+    },
+    "load_end": {
+      "detection_depth": 0,
+      "drained_after_seconds": 18
     },
     "latency_ms": {
       "window_stored": {

@@ -6,7 +6,7 @@
   "seconds": 1800,
   "windows_produced": 144000,
   "windows_per_second": 80,
-  "machines_per_task_basis": "101.3 messages/s/task, measured on AWS",
+  "machines_per_task_basis": "100.8 messages/s/task, measured on AWS",
   "faults": [
     {
       "machine_id": "press-01",
@@ -151,7 +151,7 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 1325,
+      "machines_per_task": 1318,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -224,7 +224,7 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 2447,
+      "machines_per_task": 2435,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -297,7 +297,7 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 3008,
+      "machines_per_task": 2993,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -370,7 +370,7 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 3362,
+      "machines_per_task": 3345,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -450,7 +450,7 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 908,
+      "machines_per_task": 903,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -530,7 +530,7 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 1265,
+      "machines_per_task": 1259,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -610,7 +610,7 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 1384,
+      "machines_per_task": 1377,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -690,7 +690,7 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 1428,
+      "machines_per_task": 1420,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -770,7 +770,7 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 1442,
+      "machines_per_task": 1435,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -850,7 +850,7 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 1446,
+      "machines_per_task": 1439,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -930,7 +930,7 @@
         "max": 4,
         "mean": 0.9
       },
-      "machines_per_task": 1450,
+      "machines_per_task": 1443,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -1010,7 +1010,7 @@
         "max": 3,
         "mean": 1.2
       },
-      "machines_per_task": 1451,
+      "machines_per_task": 1444,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -1090,7 +1090,7 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 1111,
+      "machines_per_task": 1106,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -1170,7 +1170,7 @@
         "max": 3,
         "mean": 0.7
       },
-      "machines_per_task": 1979,
+      "machines_per_task": 1969,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -1250,7 +1250,7 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 2476,
+      "machines_per_task": 2464,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -1330,7 +1330,7 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 2647,
+      "machines_per_task": 2634,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -1410,7 +1410,7 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 3021,
+      "machines_per_task": 3006,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -1490,7 +1490,7 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 3119,
+      "machines_per_task": 3103,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -1571,7 +1571,7 @@
         "max": 3,
         "mean": 0.9
       },
-      "machines_per_task": 3278,
+      "machines_per_task": 3262,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -1652,7 +1652,7 @@
         "max": 4,
         "mean": 1.3
       },
-      "machines_per_task": 3360,
+      "machines_per_task": 3344,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -1732,7 +1732,7 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 1148,
+      "machines_per_task": 1143,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -1812,7 +1812,7 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 2227,
+      "machines_per_task": 2216,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -1892,7 +1892,7 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 3080,
+      "machines_per_task": 3065,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -1972,7 +1972,7 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 3366,
+      "machines_per_task": 3349,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -2052,7 +2052,7 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 4378,
+      "machines_per_task": 4356,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -2132,7 +2132,7 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 4791,
+      "machines_per_task": 4767,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -2214,7 +2214,7 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 5051,
+      "machines_per_task": 5026,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -2296,7 +2296,7 @@
         "max": 3,
         "mean": 1.2
       },
-      "machines_per_task": 5179,
+      "machines_per_task": 5153,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -2376,7 +2376,7 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 1158,
+      "machines_per_task": 1153,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -2456,7 +2456,7 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 2327,
+      "machines_per_task": 2315,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -2536,7 +2536,7 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 3359,
+      "machines_per_task": 3342,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -2616,7 +2616,7 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 3732,
+      "machines_per_task": 3713,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -2696,7 +2696,7 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 5179,
+      "machines_per_task": 5154,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -2776,7 +2776,7 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 5991,
+      "machines_per_task": 5962,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -2856,7 +2856,7 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 6691,
+      "machines_per_task": 6658,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -2937,7 +2937,7 @@
         "max": 4,
         "mean": 1.4
       },
-      "machines_per_task": 7128,
+      "machines_per_task": 7093,
       "per_sensor": {
         "vibration": {
           "windows": 36000,

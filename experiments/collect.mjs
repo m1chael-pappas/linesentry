@@ -12,6 +12,16 @@ if (!outDir || !startedAt || !finishedAt) {
 
 const region = process.env.AWS_REGION ?? 'us-east-1';
 
+/** Seconds a plant-mode load warmed up before publishing, or null for any other run. */
+function warmupSeconds() {
+  try {
+    const warmup = readFileSync(join(outDir, 'load.log'), 'utf8').match(/plant load: .*warm-up (\d+)s/);
+    return warmup ? Number(warmup[1]) : null;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Start of the window CloudWatch measures are taken over.
  *
@@ -20,14 +30,9 @@ const region = process.env.AWS_REGION ?? 'us-east-1';
  * run or another producer. Otherwise it is the start of the run.
  */
 function measurementStart() {
-  try {
-    const log = readFileSync(join(outDir, 'load.log'), 'utf8');
-    const warmup = log.match(/plant load: .*warm-up (\d+)s/);
-    if (!warmup) return startedAt;
-    return new Date(Date.parse(startedAt) + Number(warmup[1]) * 1000).toISOString().replace(/\.\d{3}Z$/, 'Z');
-  } catch {
-    return startedAt;
-  }
+  const warmup = warmupSeconds();
+  if (warmup === null) return startedAt;
+  return new Date(Date.parse(startedAt) + warmup * 1000).toISOString().replace(/\.\d{3}Z$/, 'Z');
 }
 
 const measuredFrom = measurementStart();
@@ -340,46 +345,131 @@ function series(namespace, name, dimensions, stat) {
 }
 
 /**
+ * Minutes in which every harness sample of the detection queue read above
+ * `floor`, each as its start in epoch milliseconds with the mean and maximum
+ * ECS `runningCount` of detection across its samples. A minute needs at least
+ * three samples to count. Sample times are `samplingFrom` plus each sample's
+ * `elapsed_seconds`.
+ */
+function backloggedMinutes(floor) {
+  const start = Date.parse(samplingFrom);
+  const minutes = new Map();
+  for (const s of samples) {
+    if (!Number.isFinite(s.detection_depth) || !Number.isFinite(s.detection_tasks)) continue;
+    const minute = Math.floor((start + s.elapsed_seconds * 1000) / 60000) * 60000;
+    minutes.set(minute, [...(minutes.get(minute) ?? []), s]);
+  }
+  return [...minutes]
+    .filter(([, bucket]) => bucket.length >= 3 && bucket.every((s) => s.detection_depth > floor))
+    .map(([minute, bucket]) => ({
+      minute,
+      tasks: bucket.reduce((sum, s) => sum + s.detection_tasks, 0) / bucket.length,
+      maxTasks: Math.max(...bucket.map((s) => s.detection_tasks)),
+    }));
+}
+
+/**
  * Messages one detection task processed per second while saturated.
  *
- * A minute counts when the detection queue's smallest visible depth that
- * minute stayed above 500, so the tasks never ran out of work. Returns the
- * median over those minutes, or null when the queue never held a backlog.
+ * A minute counts when every harness sample of the detection queue that
+ * minute read above 500, and divides by the mean running task count the
+ * harness sampled in it (see ./README.md#per-task-capacity). Returns the
+ * median over those minutes, separately over the minutes whose every sample
+ * saw exactly one task, and the detection CPU time per message across them:
+ * Container Insights `CpuUtilized` summed over tasks, at 1024 units per vCPU,
+ * divided by the messages processed. Null when the queue never held a backlog.
  */
 function saturatedThroughput() {
   const processed = series('LineSentry', 'MessagesProcessed', { service: 'detection', variant }, 'Sum');
-  const tasks = series(
+  const cpu = series(
     'ECS/ContainerInsights',
-    'RunningTaskCount',
+    'CpuUtilized',
     { ClusterName: 'linesentry', ServiceName: 'linesentry-detection' },
-    'Average',
+    'Sum',
   );
-  const floor = series('AWS/SQS', 'ApproximateNumberOfMessagesVisible', { QueueName: 'linesentry-detection-q' }, 'Minimum');
 
   const rates = [];
-  for (const [minute, depth] of floor) {
+  const single = [];
+  let cpuUnits = 0;
+  let cpuMessages = 0;
+  for (const { minute, tasks, maxTasks } of backloggedMinutes(500)) {
     const count = processed.get(minute);
-    const running = tasks.get(minute);
-    if (depth > 500 && count && running) rates.push(count / running / 60);
+    if (!count || !tasks) continue;
+    rates.push(count / tasks / 60);
+    if (maxTasks === 1) single.push(count / 60);
+    if (cpu.has(minute)) {
+      cpuUnits += cpu.get(minute);
+      cpuMessages += count;
+    }
   }
   if (rates.length === 0) return null;
 
-  const sorted = rates.sort((a, b) => a - b);
+  const median = (values) => {
+    const sorted = [...values].sort((a, b) => a - b);
+    return Number(sorted[Math.floor(sorted.length / 2)].toFixed(1));
+  };
+
   return {
-    minutes: sorted.length,
-    per_task_per_second_p50: Number(sorted[Math.floor(sorted.length / 2)].toFixed(1)),
-    per_task_per_second_max: Number(sorted[sorted.length - 1].toFixed(1)),
+    minutes: rates.length,
+    per_task_per_second_p50: median(rates),
+    per_task_per_second_max: Number(Math.max(...rates).toFixed(1)),
+    one_task_minutes: single.length,
+    one_task_per_second_p50: single.length ? median(single) : null,
+    one_task_per_second_range: single.length
+      ? [Number(Math.min(...single).toFixed(1)), Number(Math.max(...single).toFixed(1))]
+      : null,
+    cpu_ms_per_message: cpuMessages ? Number((((cpuUnits / 1024) * 60 * 1000) / cpuMessages).toFixed(2)) : null,
   };
 }
 
+/**
+ * DynamoDB item reads per detection message on `linesentry-<table>`.
+ *
+ * Every read on the table is an eventually consistent GetItem of an item under
+ * 4 KB, which consumes 0.5 read capacity units, so reads are twice the units.
+ * Counts every reader of the table. Null when the table recorded no reads or
+ * detection processed no messages.
+ */
+function readsPerMessage(table, messages) {
+  const units = metric('AWS/DynamoDB', 'ConsumedReadCapacityUnits', { TableName: `linesentry-${table}` }, 'Sum');
+  if (units.length === 0 || !messages) return null;
+  return Number(((units.reduce((sum, value) => sum + value, 0) * 2) / messages).toFixed(3));
+}
+
+/**
+ * Detection queue depth at the first sample after a plant-mode load stopped
+ * publishing, and the seconds from the stop until a sample first read zero.
+ * Null for any other run. `drained_after_seconds` is null when the queue never
+ * read zero before sampling ended.
+ */
+function loadEnd() {
+  const load = plantLoad();
+  const warmup = warmupSeconds();
+  if (!load || warmup === null) return null;
+
+  const stop = warmup + load.seconds;
+  const after = samples.filter((s) => s.elapsed_seconds >= stop && Number.isFinite(s.detection_depth));
+  if (after.length === 0) return null;
+
+  const empty = after.find((s) => s.detection_depth === 0);
+  return {
+    detection_depth: after[0].detection_depth,
+    drained_after_seconds: empty ? empty.elapsed_seconds - stop : null,
+  };
+}
+
+const messagesProcessed = total('MessagesProcessed', 'detection');
+
 const detectionWork = {
-  messages_processed: total('MessagesProcessed', 'detection'),
+  messages_processed: messagesProcessed,
   windows_evaluated: total('WindowsEvaluated', 'detection'),
   windows_reconstructed: total('WindowsReconstructed', 'detection'),
   events_written: total('EventsWritten', 'detection'),
   unknown_machines: total('UnknownMachines', 'detection'),
   detection_task_minutes: taskMinutes('detection'),
   aggregation_task_minutes: taskMinutes('aggregation'),
+  metadata_reads_per_message: readsPerMessage('metadata', messagesProcessed),
+  alert_reads_per_message: readsPerMessage('alerts', messagesProcessed),
   saturated_throughput: saturatedThroughput(),
 };
 
@@ -411,6 +501,7 @@ const summary = {
     detection_work: detectionWork,
     detection_quality: detectionQuality(),
     plant_load: plantLoad(),
+    load_end: loadEnd(),
     latency_ms: latency,
   },
   targets: TARGETS,

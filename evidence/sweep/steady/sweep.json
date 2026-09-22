@@ -6,7 +6,7 @@
   "seconds": 1800,
   "windows_produced": 144000,
   "windows_per_second": 80,
-  "machines_per_task_basis": "101.3 messages/s/task, measured on AWS",
+  "machines_per_task_basis": "100.8 messages/s/task, measured on AWS",
   "faults": [],
   "arms": [
     {
@@ -47,7 +47,7 @@
         "current": 51
       },
       "detection_delay_windows": null,
-      "machines_per_task": 1346,
+      "machines_per_task": 1339,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -113,7 +113,7 @@
         "current": 34
       },
       "detection_delay_windows": null,
-      "machines_per_task": 2541,
+      "machines_per_task": 2529,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -179,7 +179,7 @@
         "current": 37
       },
       "detection_delay_windows": null,
-      "machines_per_task": 3166,
+      "machines_per_task": 3150,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -245,7 +245,7 @@
         "current": 37
       },
       "detection_delay_windows": null,
-      "machines_per_task": 3563,
+      "machines_per_task": 3545,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -317,7 +317,7 @@
         "current": 79
       },
       "detection_delay_windows": null,
-      "machines_per_task": 918,
+      "machines_per_task": 913,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -389,7 +389,7 @@
         "current": 89
       },
       "detection_delay_windows": null,
-      "machines_per_task": 1288,
+      "machines_per_task": 1282,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -462,7 +462,7 @@
         "current": 93
       },
       "detection_delay_windows": null,
-      "machines_per_task": 1411,
+      "machines_per_task": 1404,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -535,7 +535,7 @@
         "current": 98
       },
       "detection_delay_windows": null,
-      "machines_per_task": 1456,
+      "machines_per_task": 1449,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -608,7 +608,7 @@
         "current": 100
       },
       "detection_delay_windows": null,
-      "machines_per_task": 1468,
+      "machines_per_task": 1461,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -681,7 +681,7 @@
         "current": 100
       },
       "detection_delay_windows": null,
-      "machines_per_task": 1470,
+      "machines_per_task": 1463,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -754,7 +754,7 @@
         "current": 100
       },
       "detection_delay_windows": null,
-      "machines_per_task": 1470,
+      "machines_per_task": 1463,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -827,7 +827,7 @@
         "current": 100
       },
       "detection_delay_windows": null,
-      "machines_per_task": 1470,
+      "machines_per_task": 1463,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -899,7 +899,7 @@
         "current": 49
       },
       "detection_delay_windows": null,
-      "machines_per_task": 1126,
+      "machines_per_task": 1120,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -972,7 +972,7 @@
         "current": 61
       },
       "detection_delay_windows": null,
-      "machines_per_task": 2052,
+      "machines_per_task": 2041,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -1045,7 +1045,7 @@
         "current": 68
       },
       "detection_delay_windows": null,
-      "machines_per_task": 2572,
+      "machines_per_task": 2559,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -1118,7 +1118,7 @@
         "current": 98
       },
       "detection_delay_windows": null,
-      "machines_per_task": 2760,
+      "machines_per_task": 2747,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -1191,7 +1191,7 @@
         "current": 145
       },
       "detection_delay_windows": null,
-      "machines_per_task": 3156,
+      "machines_per_task": 3140,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -1264,7 +1264,7 @@
         "current": 169
       },
       "detection_delay_windows": null,
-      "machines_per_task": 3251,
+      "machines_per_task": 3235,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -1338,7 +1338,7 @@
         "temperature": 2
       },
       "detection_delay_windows": null,
-      "machines_per_task": 3411,
+      "machines_per_task": 3395,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -1411,7 +1411,7 @@
         "current": 166
       },
       "detection_delay_windows": null,
-      "machines_per_task": 3489,
+      "machines_per_task": 3472,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -1483,7 +1483,7 @@
         "current": 48
       },
       "detection_delay_windows": null,
-      "machines_per_task": 1164,
+      "machines_per_task": 1158,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -1556,7 +1556,7 @@
         "current": 53
       },
       "detection_delay_windows": null,
-      "machines_per_task": 2303,
+      "machines_per_task": 2291,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -1629,7 +1629,7 @@
         "current": 63
       },
       "detection_delay_windows": null,
-      "machines_per_task": 3235,
+      "machines_per_task": 3219,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -1702,7 +1702,7 @@
         "current": 97
       },
       "detection_delay_windows": null,
-      "machines_per_task": 3547,
+      "machines_per_task": 3530,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -1775,7 +1775,7 @@
         "current": 159
       },
       "detection_delay_windows": null,
-      "machines_per_task": 4715,
+      "machines_per_task": 4691,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -1848,7 +1848,7 @@
         "current": 197
       },
       "detection_delay_windows": null,
-      "machines_per_task": 5148,
+      "machines_per_task": 5123,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -1921,7 +1921,7 @@
         "current": 214
       },
       "detection_delay_windows": null,
-      "machines_per_task": 5380,
+      "machines_per_task": 5354,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -1995,7 +1995,7 @@
         "temperature": 5
       },
       "detection_delay_windows": null,
-      "machines_per_task": 5486,
+      "machines_per_task": 5459,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -2067,7 +2067,7 @@
         "current": 48
       },
       "detection_delay_windows": null,
-      "machines_per_task": 1176,
+      "machines_per_task": 1170,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -2140,7 +2140,7 @@
         "current": 45
       },
       "detection_delay_windows": null,
-      "machines_per_task": 2403,
+      "machines_per_task": 2391,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -2213,7 +2213,7 @@
         "current": 69
       },
       "detection_delay_windows": null,
-      "machines_per_task": 3545,
+      "machines_per_task": 3528,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -2286,7 +2286,7 @@
         "current": 85
       },
       "detection_delay_windows": null,
-      "machines_per_task": 3981,
+      "machines_per_task": 3961,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -2359,7 +2359,7 @@
         "current": 170
       },
       "detection_delay_windows": null,
-      "machines_per_task": 5646,
+      "machines_per_task": 5618,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -2432,7 +2432,7 @@
         "current": 199
       },
       "detection_delay_windows": null,
-      "machines_per_task": 6527,
+      "machines_per_task": 6495,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -2505,7 +2505,7 @@
         "current": 185
       },
       "detection_delay_windows": null,
-      "machines_per_task": 7305,
+      "machines_per_task": 7269,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
@@ -2579,7 +2579,7 @@
         "temperature": 10
       },
       "detection_delay_windows": null,
-      "machines_per_task": 7772,
+      "machines_per_task": 7734,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
