@@ -8,6 +8,7 @@
 
 import json
 import sys
+from datetime import datetime
 from pathlib import Path
 
 import matplotlib
@@ -166,6 +167,9 @@ def plot_compare(target: Path, run_dirs: list[Path]) -> None:
         2, 1, figsize=(11, 7), sharex=True, gridspec_kw={"height_ratios": [2, 1]}
     )
 
+    offset_step = 0.08
+    load_window = None
+
     for index, run_dir in enumerate(run_dirs):
         frame = load(run_dir)
         if frame is None:
@@ -177,8 +181,28 @@ def plot_compare(target: Path, run_dirs: list[Path]) -> None:
         colour = ARM_COLOURS[index % len(ARM_COLOURS)]
         minutes = frame["elapsed_seconds"] / 60
 
+        if load_window is None and summary.get("measured_from") and plant.get("seconds"):
+            warmup = (
+                datetime.fromisoformat(summary["measured_from"].replace("Z", "+00:00"))
+                - datetime.fromisoformat(summary["started_at"].replace("Z", "+00:00"))
+            ).total_seconds() / 60
+            load_window = (warmup, warmup + plant["seconds"] / 60)
+
+        offset = (index - (len(run_dirs) - 1) / 2) * offset_step
         depth.plot(minutes, frame["detection_depth"], linewidth=1.6, color=colour, label=label)
-        tasks.step(minutes, frame["detection_tasks"], where="post", linewidth=1.8, color=colour, label=label)
+        tasks.step(
+            minutes, frame["detection_tasks"] + offset, where="post", linewidth=1.8, color=colour, label=label
+        )
+
+    if load_window:
+        for axis in (depth, tasks):
+            axis.axvspan(0, load_window[0], color="#000", alpha=0.05, linewidth=0)
+            axis.axvline(load_window[1], color="#555", linestyle="--", linewidth=1)
+        depth.text(load_window[0] / 2, 0.97, "warm-up", transform=depth.get_xaxis_transform(),
+                   ha="center", va="top", fontsize=8, color="#555")
+        depth.text(load_window[1], 0.35, " load ends", transform=depth.get_xaxis_transform(),
+                   ha="left", va="center", fontsize=8, color="#555",
+                   bbox={"facecolor": "white", "edgecolor": "none", "pad": 1})
 
     depth.set_ylabel("detection queue depth")
     depth.set_title("Same plant, one arm per line: detection backlog and running tasks")
@@ -186,7 +210,7 @@ def plot_compare(target: Path, run_dirs: list[Path]) -> None:
     depth.grid(alpha=0.25)
 
     tasks.set_ylim(0, 7)
-    tasks.set_ylabel("detection tasks")
+    tasks.set_ylabel(f"detection tasks\n(lines {offset_step} apart)")
     tasks.set_xlabel("minutes into run")
     tasks.grid(alpha=0.25)
 
