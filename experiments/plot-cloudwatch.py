@@ -154,15 +154,21 @@ def render_widget(widget: dict, target: Path) -> bool:
     return True
 
 
+def widget_width(start: str, end: str) -> int:
+    """Pixel width for a widget spanning `start` to `end`: 85 px per minute, clamped to 600 to 1000."""
+    minutes = (datetime.fromisoformat(end) - datetime.fromisoformat(start)).total_seconds() / 60
+    return int(min(1000, max(600, 85 * minutes)))
+
+
 def run_widgets(run_dir: Path) -> None:
     """Renders the CloudWatch graphs for the run whose summary is in `run_dir`."""
     summary = json.loads((run_dir / "summary.json").read_text())
     variant = summary["variant"]
     start, end = summary["started_at"], summary["finished_at"]
-    title = f"{summary['run']} / {variant}"
+    title = f"{run_dir.name} / {variant}"
 
     base = {
-        "width": 1000,
+        "width": widget_width(start, end),
         "height": 400,
         "start": start,
         "end": end,
@@ -175,21 +181,23 @@ def run_widgets(run_dir: Path) -> None:
         **base,
         "title": f"Queue depth and running tasks, {title}",
         "metrics": [
-            ["AWS/SQS", "ApproximateNumberOfMessagesVisible", "QueueName", "linesentry-detection-q",
-             {"label": "detection queue", "stat": "Maximum"}],
             ["AWS/SQS", "ApproximateNumberOfMessagesVisible", "QueueName", "linesentry-aggregation-q",
-             {"label": "aggregation queue", "stat": "Maximum"}],
+             {"label": "aggregation queue", "stat": "Maximum", "color": "#ff7f0e"}],
+            ["AWS/SQS", "ApproximateNumberOfMessagesVisible", "QueueName", "linesentry-detection-q",
+             {"label": "detection queue", "stat": "Maximum", "color": "#1f77b4"}],
             ["ECS/ContainerInsights", "RunningTaskCount", "ClusterName", CLUSTER, "ServiceName",
-             "linesentry-detection", {"label": "detection tasks", "stat": "Maximum", "yAxis": "right"}],
+             "linesentry-aggregation",
+             {"label": "aggregation tasks", "stat": "Maximum", "yAxis": "right", "color": "#d62728"}],
             ["ECS/ContainerInsights", "RunningTaskCount", "ClusterName", CLUSTER, "ServiceName",
-             "linesentry-aggregation", {"label": "aggregation tasks", "stat": "Maximum", "yAxis": "right"}],
+             "linesentry-detection",
+             {"label": "detection tasks", "stat": "Maximum", "yAxis": "right", "color": "#2ca02c"}],
         ],
         "yAxis": {"left": {"label": "messages waiting", "min": 0}, "right": {"label": "tasks", "min": 0}},
     }
 
     work_against_messages = {
         **base,
-        "title": f"Messages received against windows judged by detection, {title}",
+        "title": f"Messages received and windows judged, {title}",
         "metrics": [
             [NAMESPACE, "MessagesProcessed", "service", "detection", "variant", variant,
              {"label": "messages received", "stat": "Sum"}],
