@@ -1,0 +1,37 @@
+plant load: 1000 machines, filter deadband, heartbeat 60s, warm-up 90s, then 240s published to linesentry-windows
+  warm-up    t -90s  forwarded 0, sent 0, failed 0, queued 0, judged 0, worst tick lag 0ms
+  warm-up    t -80s  forwarded 0, sent 0, failed 0, queued 0, judged 544, worst tick lag 0ms
+  warm-up    t -70s  forwarded 0, sent 0, failed 0, queued 0, judged 1768, worst tick lag 0ms
+  warm-up    t -60s  forwarded 0, sent 0, failed 0, queued 0, judged 3672, worst tick lag 0ms
+  warm-up    t -50s  forwarded 0, sent 0, failed 0, queued 0, judged 6256, worst tick lag 0ms
+  warm-up    t -40s  forwarded 0, sent 0, failed 0, queued 0, judged 9488, worst tick lag 0ms
+  warm-up    t -30s  forwarded 0, sent 0, failed 0, queued 0, judged 13360, worst tick lag 0ms
+  warm-up    t -20s  forwarded 0, sent 0, failed 0, queued 0, judged 17360, worst tick lag 0ms
+  warm-up    t -10s  forwarded 0, sent 0, failed 0, queued 0, judged 21360, worst tick lag 0ms
+  publishing t+   0s  forwarded 0, sent 0, failed 0, queued 0, judged 25360, worst tick lag 1ms
+  publishing t+  10s  forwarded 739, sent 719, failed 0, queued 0, judged 29360, worst tick lag 2ms
+  publishing t+  20s  forwarded 1526, sent 1516, failed 0, queued 0, judged 33360, worst tick lag 2ms
+  publishing t+  30s  forwarded 2280, sent 2268, failed 0, queued 0, judged 37360, worst tick lag 2ms
+  publishing t+  40s  forwarded 3196, sent 3186, failed 0, queued 0, judged 41360, worst tick lag 2ms
+  publishing t+  50s  forwarded 3529, sent 3529, failed 0, queued 0, judged 45360, worst tick lag 2ms
+  publishing t+  60s  forwarded 4734, sent 4734, failed 0, queued 0, judged 49360, worst tick lag 2ms
+  publishing t+  70s  forwarded 5493, sent 5493, failed 0, queued 0, judged 53360, worst tick lag 2ms
+  publishing t+  80s  forwarded 6381, sent 6381, failed 0, queued 0, judged 57360, worst tick lag 2ms
+  publishing t+  90s  forwarded 6992, sent 6992, failed 0, queued 0, judged 61360, worst tick lag 2ms
+  publishing t+ 100s  forwarded 7190, sent 7190, failed 0, queued 0, judged 65360, worst tick lag 2ms
+  publishing t+ 110s  forwarded 7939, sent 7929, failed 0, queued 0, judged 69360, worst tick lag 2ms
+  publishing t+ 120s  forwarded 8974, sent 8974, failed 0, queued 0, judged 73360, worst tick lag 2ms
+  publishing t+ 130s  forwarded 9077, sent 9077, failed 0, queued 0, judged 77360, worst tick lag 2ms
+  publishing t+ 140s  forwarded 10611, sent 10601, failed 0, queued 0, judged 81360, worst tick lag 2ms
+  publishing t+ 150s  forwarded 11234, sent 11234, failed 0, queued 0, judged 85360, worst tick lag 2ms
+  publishing t+ 160s  forwarded 11473, sent 11473, failed 0, queued 0, judged 89360, worst tick lag 2ms
+  publishing t+ 170s  forwarded 12188, sent 12188, failed 0, queued 0, judged 93360, worst tick lag 2ms
+  publishing t+ 180s  forwarded 13202, sent 13182, failed 0, queued 0, judged 97360, worst tick lag 2ms
+  publishing t+ 190s  forwarded 13347, sent 13347, failed 0, queued 0, judged 101360, worst tick lag 2ms
+  publishing t+ 200s  forwarded 14029, sent 14027, failed 0, queued 0, judged 105360, worst tick lag 2ms
+  publishing t+ 210s  forwarded 15621, sent 15621, failed 0, queued 0, judged 109360, worst tick lag 2ms
+  publishing t+ 220s  forwarded 15972, sent 15972, failed 0, queued 0, judged 113360, worst tick lag 2ms
+  publishing t+ 230s  forwarded 16544, sent 16544, failed 0, queued 0, judged 117360, worst tick lag 2ms
+  publishing t+ 240s  forwarded 17984, sent 17974, failed 0, queued 0, judged 121360, worst tick lag 2ms
+finished: forwarded 17984 over 240s, 74.93/s, 0.07493/machine/s, sent 17984, failed 0, worst tick lag 2ms
+reasons {"changed":6593,"heartbeat":11391}

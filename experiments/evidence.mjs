@@ -8,15 +8,18 @@ if (variants.length === 0) variants.push('baseline');
 /** Run order in the written table, so it does not follow directory order. */
 const RUN_ORDER = ['baseline', 'ramp', 'burst', 'overload', 'scale', 'scale-in', 'failure'];
 
+/**
+ * Every run summary under evidence/<variant>/, in run order, each with `dir`
+ * set to its directory name, which carries the `RUN_TAG` suffix when present.
+ */
 function summaries(variant) {
   const root = join('evidence', variant);
   if (!existsSync(root)) return [];
 
   return readdirSync(root)
-    .map((run) => join(root, run, 'summary.json'))
-    .filter((path) => existsSync(path))
-    .map((path) => JSON.parse(readFileSync(path, 'utf8')))
-    .sort((a, b) => RUN_ORDER.indexOf(a.run) - RUN_ORDER.indexOf(b.run));
+    .filter((dir) => existsSync(join(root, dir, 'summary.json')))
+    .map((dir) => ({ ...JSON.parse(readFileSync(join(root, dir, 'summary.json'), 'utf8')), dir }))
+    .sort((a, b) => RUN_ORDER.indexOf(a.run) - RUN_ORDER.indexOf(b.run) || a.dir.localeCompare(b.dir, 'en', { numeric: true }));
 }
 
 function cell(value) {
@@ -31,7 +34,7 @@ function row(summary) {
   const aggDepth = m.aggregation_queue_depth;
 
   return [
-    summary.run,
+    summary.dir,
     cell(latency?.p50),
     cell(latency?.p95),
     cell(aggDepth?.max),
@@ -73,7 +76,7 @@ for (const variant of variants) {
   for (const summary of runs) document += `| ${row(summary)} |\n`;
 
   document += '\n| Run | Against targets |\n|---|---|\n';
-  for (const summary of runs) document += `| ${summary.run} | ${verdicts(summary)} |\n`;
+  for (const summary of runs) document += `| ${summary.dir} | ${verdicts(summary)} |\n`;
 }
 
 if (variants.length === 2) {
@@ -98,7 +101,7 @@ if (variants.length === 2) {
  */
 function scaleTable(variantNames) {
   const rows = variantNames
-    .map((name) => summaries(name).find((s) => s.run === 'scale'))
+    .map((name) => summaries(name).find((s) => s.dir === 'scale'))
     .filter(Boolean);
   if (rows.length === 0) return '';
 
@@ -125,6 +128,31 @@ function scaleTable(variantNames) {
     const needed = capacity && rate ? (rate / capacity).toFixed(2) : null;
     const machines = capacity && perMachine ? Math.round(capacity / perMachine) : null;
     table += `| ${s.variant} | ${cell(saturated?.per_task_per_second_p50)} | ${cell(saturated?.minutes)} | ${cell(needed)} | ${cell(machines)} | ${cell(m.detection_work?.detection_task_minutes)} |\n`;
+  }
+  return table;
+}
+
+/**
+ * Every plant-scale run that ran on one detection task throughout, whether
+ * pinned there by `DETECTION_MAX_TASKS=1` or never scaled out.
+ */
+function oneTaskTable(variantNames) {
+  const rows = variantNames
+    .flatMap(summaries)
+    .filter((s) => s.run === 'scale' && s.measured.detection_tasks?.min === 1 && s.measured.detection_tasks?.max === 1);
+  if (rows.length === 0) return '';
+
+  let table = '\n## Plant scale on one detection task\n\n';
+  table += 'Plant-scale runs that held one detection task from start to finish. A run that kept up drains its queue within seconds of the load stopping; one that fell behind takes minutes, and its backlogged minutes measure one task\'s capacity at that arm\'s traffic. Machines per task divides that capacity by the run\'s published rate per machine. Each deployment runs its own task, so runs under one variant share a task and runs under different variants do not.\n\n';
+  table += '| Run | Bound sigma | Machines | Published msg/s | Det depth max | Depth when load stopped | Drained after s | One-task msg/s, backlogged | Backlogged minutes | CPU ms/msg, backlogged | Machines per task | Metadata reads/msg | Alert reads/msg |\n';
+  table += '|---|---|---|---|---|---|---|---|---|---|---|---|---|\n';
+  for (const s of rows) {
+    const m = s.measured;
+    const saturated = m.detection_work?.saturated_throughput;
+    const capacity = saturated?.one_task_per_second_p50;
+    const perMachine = m.plant_load?.forwarded_per_machine_second;
+    const machines = capacity && perMachine ? Math.round(capacity / perMachine) : null;
+    table += `| ${s.variant}/${s.dir} | ${cell(s.error_bound_sigma)} | ${cell(m.plant_load?.machines)} | ${cell(m.plant_load?.forwarded_per_second)} | ${cell(m.detection_queue_depth?.max)} | ${cell(m.load_end?.detection_depth)} | ${cell(m.load_end?.drained_after_seconds)} | ${cell(capacity)} | ${cell(saturated?.one_task_minutes)} | ${cell(saturated?.cpu_ms_per_message)} | ${cell(machines)} | ${cell(m.detection_work?.metadata_reads_per_message)} | ${cell(m.detection_work?.alert_reads_per_message)} |\n`;
   }
   return table;
 }
@@ -212,6 +240,7 @@ function against(control, arm, field) {
 }
 
 document += scaleTable(variants);
+document += oneTaskTable(variants);
 document += seedTable();
 
 for (const sweep of sweeps()) {

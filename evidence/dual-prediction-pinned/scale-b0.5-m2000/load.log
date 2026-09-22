@@ -1,0 +1,36 @@
+plant load: 2000 machines, filter dual-prediction at 0.5 sigma, heartbeat 600s, warm-up 90s, then 240s published to linesentry-windows
+  warm-up    t -90s  forwarded 0, sent 0, failed 0, queued 0, judged 0, worst tick lag 0ms
+  warm-up    t -80s  forwarded 0, sent 0, failed 0, queued 0, judged 1224, worst tick lag 0ms
+  warm-up    t -70s  forwarded 0, sent 0, failed 0, queued 0, judged 3808, worst tick lag 0ms
+  warm-up    t -60s  forwarded 0, sent 0, failed 0, queued 0, judged 7716, worst tick lag 0ms
+  warm-up    t -50s  forwarded 0, sent 0, failed 0, queued 0, judged 12944, worst tick lag 0ms
+  warm-up    t -40s  forwarded 0, sent 0, failed 0, queued 0, judged 19492, worst tick lag 0ms
+  warm-up    t -30s  forwarded 0, sent 0, failed 0, queued 0, judged 27360, worst tick lag 0ms
+  warm-up    t -20s  forwarded 0, sent 0, failed 0, queued 0, judged 35360, worst tick lag 0ms
+  warm-up    t -10s  forwarded 0, sent 0, failed 0, queued 0, judged 43360, worst tick lag 0ms
+  publishing t+   0s  forwarded 0, sent 0, failed 0, queued 0, judged 51360, worst tick lag 1ms
+  publishing t+  10s  forwarded 1020, sent 32, failed 0, queued 636, judged 59360, worst tick lag 2ms
+  publishing t+  20s  forwarded 2183, sent 1046, failed 0, queued 839, judged 67360, worst tick lag 2ms
+  publishing t+  30s  forwarded 3412, sent 2213, failed 0, queued 865, judged 75360, worst tick lag 2ms
+  publishing t+  40s  forwarded 4527, sent 3448, failed 0, queued 691, judged 83360, worst tick lag 2ms
+  publishing t+  50s  forwarded 5392, sent 4562, failed 0, queued 451, judged 91360, worst tick lag 2ms
+  publishing t+  60s  forwarded 6196, sent 5426, failed 0, queued 400, judged 99360, worst tick lag 2ms
+  publishing t+  70s  forwarded 7054, sent 6232, failed 0, queued 434, judged 107360, worst tick lag 2ms
+  publishing t+  80s  forwarded 7830, sent 7086, failed 0, queued 392, judged 115360, worst tick lag 2ms
+  publishing t+  90s  forwarded 8591, sent 7865, failed 0, queued 347, judged 123360, worst tick lag 2ms
+  publishing t+ 100s  forwarded 9217, sent 8621, failed 0, queued 262, judged 131360, worst tick lag 2ms
+  publishing t+ 110s  forwarded 9747, sent 9251, failed 0, queued 126, judged 139360, worst tick lag 2ms
+  publishing t+ 120s  forwarded 10232, sent 9782, failed 0, queued 71, judged 147360, worst tick lag 2ms
+  publishing t+ 130s  forwarded 10754, sent 10263, failed 0, queued 148, judged 155360, worst tick lag 2ms
+  publishing t+ 140s  forwarded 11210, sent 10781, failed 0, queued 122, judged 163360, worst tick lag 2ms
+  publishing t+ 150s  forwarded 11983, sent 11238, failed 0, queued 429, judged 171360, worst tick lag 2ms
+  publishing t+ 160s  forwarded 13167, sent 12008, failed 0, queued 870, judged 179360, worst tick lag 2ms
+  publishing t+ 170s  forwarded 13915, sent 13204, failed 0, queued 314, judged 187360, worst tick lag 2ms
+  publishing t+ 180s  forwarded 14659, sent 13947, failed 0, queued 360, judged 195360, worst tick lag 2ms
+  publishing t+ 190s  forwarded 15703, sent 14681, failed 0, queued 760, judged 203360, worst tick lag 2ms
+  publishing t+ 200s  forwarded 17033, sent 15734, failed 0, queued 956, judged 211360, worst tick lag 2ms
+  publishing t+ 210s  forwarded 17762, sent 17066, failed 0, queued 335, judged 219360, worst tick lag 2ms
+  publishing t+ 220s  forwarded 18488, sent 17794, failed 0, queued 342, judged 227360, worst tick lag 2ms
+  publishing t+ 230s  forwarded 19452, sent 18507, failed 0, queued 710, judged 235360, worst tick lag 2ms
+finished: forwarded 20508 over 240s, 85.45/s, 0.04272/machine/s, sent 20508, failed 0, worst tick lag 2ms
+reasons {"divergence":20499,"safety":9}
