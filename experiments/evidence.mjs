@@ -102,13 +102,29 @@ function scaleTable(variantNames) {
     .filter(Boolean);
   if (rows.length === 0) return '';
 
+  const control = rows.find((s) => !s.measured.detection_work?.windows_reconstructed);
+  const capacity = control?.measured.detection_work?.saturated_throughput?.per_task_per_second_p50 ?? null;
+
   let table = '\n## Plant scale on AWS\n\n';
   table += 'The seeded plant run through each arm\'s filter by `load.mjs plant` and published to the ingest topic. Every arm sees the same plant, so the message rate and the task count differ only by the filter.\n\n';
-  table += '| Variant | Machines | Published msg/s | Detection tasks | Aggregation tasks | Det depth max | Messages to detection | Windows judged | Windows rebuilt | p95 ms |\n';
+  table += '| Variant | Machines | Published msg/s | Per machine msg/s | Detection tasks | Det depth max | p95 ms | Messages to detection | Windows judged | Windows rebuilt |\n';
   table += '|---|---|---|---|---|---|---|---|---|---|\n';
   for (const s of rows) {
     const m = s.measured;
-    table += `| ${s.variant} | ${cell(m.plant_load?.machines)} | ${cell(m.plant_load?.forwarded_per_second)} | ${cell(m.detection_tasks?.min)} to ${cell(m.detection_tasks?.max)} | ${cell(m.aggregation_tasks?.min)} to ${cell(m.aggregation_tasks?.max)} | ${cell(m.detection_queue_depth?.max)} | ${cell(m.detection_work?.messages_processed)} | ${cell(m.detection_work?.windows_evaluated)} | ${cell(m.detection_work?.windows_reconstructed)} | ${cell(m.latency_ms?.window_stored?.p95)} |\n`;
+    table += `| ${s.variant} | ${cell(m.plant_load?.machines)} | ${cell(m.plant_load?.forwarded_per_second)} | ${cell(m.plant_load?.forwarded_per_machine_second)} | ${cell(m.detection_tasks?.min)} to ${cell(m.detection_tasks?.max)} | ${cell(m.detection_queue_depth?.max)} | ${cell(m.latency_ms?.window_stored?.p95)} | ${cell(m.detection_work?.messages_processed)} | ${cell(m.detection_work?.windows_evaluated)} | ${cell(m.detection_work?.windows_reconstructed)} |\n`;
+  }
+
+  table += '\nPer-task capacity is the median messages per second one detection task processed in the minutes its queue never emptied. Machines per task divides the control arm\'s capacity by each arm\'s published rate per machine, so only the filter differs between rows.\n\n';
+  table += '| Variant | Per-task msg/s, saturated | Saturated minutes | Tasks needed at control capacity | Machines per task at control capacity | Detection task-minutes |\n';
+  table += '|---|---|---|---|---|---|\n';
+  for (const s of rows) {
+    const m = s.measured;
+    const saturated = m.detection_work?.saturated_throughput;
+    const rate = m.plant_load?.forwarded_per_second;
+    const perMachine = m.plant_load?.forwarded_per_machine_second;
+    const needed = capacity && rate ? (rate / capacity).toFixed(2) : null;
+    const machines = capacity && perMachine ? Math.round(capacity / perMachine) : null;
+    table += `| ${s.variant} | ${cell(saturated?.per_task_per_second_p50)} | ${cell(saturated?.minutes)} | ${cell(needed)} | ${cell(machines)} | ${cell(m.detection_work?.detection_task_minutes)} |\n`;
   }
   return table;
 }
