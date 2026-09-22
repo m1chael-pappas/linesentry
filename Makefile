@@ -15,15 +15,17 @@ EDGE_FLOW ?= linesentry-edge-flow-aws.json
 TF := terraform -chdir=infra
 TFVARS := -var variant=$(VARIANT) -var detection_strategy=$(DETECTION_STRATEGY)
 
-.PHONY: help deploy destroy plan images push seed outputs tasks scale-status gateway reset-scale
+.PHONY: help deploy arm destroy plan images push seed certs outputs tasks scale-status gateway reset-scale
 
 help:
 	@echo "deploy        provision, build and push images, then roll the services"
+	@echo "arm           switch the deployed services to VARIANT and DETECTION_STRATEGY"
 	@echo "destroy       tear the whole stack down"
 	@echo "plan          show what deploy would change"
 	@echo "images        build the service images locally"
 	@echo "push          push the service images to ECR"
 	@echo "seed          write machine metadata into DynamoDB"
+	@echo "certs         write the gateway's IoT certificate into local/certs"
 	@echo "outputs       print the Terraform outputs"
 	@echo "tasks         show running task counts per service"
 	@echo "scale-status  show detection queue depth and task count"
@@ -38,12 +40,19 @@ deploy:
 	$(TF) apply -input=false -auto-approve -target=aws_ecr_repository.service
 	$(MAKE) push
 	$(TF) apply -input=false -auto-approve $(TFVARS)
+	$(MAKE) certs
 	$(MAKE) seed
 	@for s in $(SERVICES); do \
 		aws ecs update-service --cluster linesentry --service linesentry-$$s \
 			--force-new-deployment --region $(REGION) >/dev/null; \
 	done
 	@echo "deployed"
+
+arm:
+	$(TF) apply -input=false -auto-approve $(TFVARS)
+	aws ecs wait services-stable --cluster linesentry --region $(REGION) \
+		--services $(foreach s,$(SERVICES),linesentry-$(s))
+	@echo "services running variant $(VARIANT), strategy $(DETECTION_STRATEGY)"
 
 destroy:
 	$(TF) destroy -input=false -auto-approve
@@ -100,6 +109,15 @@ seed:
 	ALERTS_TABLE=linesentry-alerts \
 	METADATA_TABLE=linesentry-metadata \
 	node tools/bootstrap/dist/index.js
+
+certs:
+	@mkdir -p local/certs
+	@$(TF) output -raw certificate_pem > local/certs/device.pem.crt
+	@$(TF) output -raw private_key > local/certs/private.pem.key
+	@chmod 600 local/certs/private.pem.key
+	@[ -s local/certs/AmazonRootCA1.pem ] || \
+		curl -fsS https://www.amazontrust.com/repository/AmazonRootCA1.pem -o local/certs/AmazonRootCA1.pem
+	@echo "wrote certificate $$($(TF) output -raw certificate_id | cut -c1-12) into local/certs"
 
 outputs:
 	$(TF) output
