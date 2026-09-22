@@ -234,15 +234,41 @@ function toAwsFlow(flow) {
   return rewritten;
 }
 
-/** Returns the flow with its deadband node replaced by the generated filter. */
+/** Id the generated filter node takes in place of `ls-deadband`. */
+const FILTER_NODE_ID = 'ls-dual-prediction';
+
+/**
+ * Returns the flow with its deadband node replaced by the generated filter.
+ *
+ * The node takes a new id and every wire into it is repointed, so nothing in
+ * the generated flow is still named after the filter it replaced.
+ */
 function toDualPredictionFlow(flow, body) {
   const rewritten = structuredClone(flow);
 
   const filter = rewritten.find((node) => node.id === 'ls-deadband');
   if (!filter) throw new Error('flow has no ls-deadband node to replace');
 
+  filter.id = FILTER_NODE_ID;
   filter.name = 'Dual prediction filter';
   filter.func = body;
+
+  for (const node of rewritten) {
+    if (!Array.isArray(node.wires)) continue;
+    node.wires = node.wires.map((port) => port.map((target) => (target === 'ls-deadband' ? FILTER_NODE_ID : target)));
+  }
+  if (rewritten.some((node) => JSON.stringify(node.wires ?? []).includes('ls-deadband'))) {
+    throw new Error('a wire still targets ls-deadband');
+  }
+
+  const tab = rewritten.find((node) => node.type === 'tab');
+  if (tab) {
+    tab.info =
+      'Edge processing for LineSentry: window aggregation, EWMA smoothing and dual prediction ' +
+      'filtering of raw sensor readings. A window is forwarded when it diverges from a least-squares ' +
+      'prediction by more than ERROR_BOUND_SIGMA standard deviations, reaches a safety limit, or the ' +
+      'heartbeat is due, and carries the model that governed the gap it closes.';
+  }
 
   const comment = rewritten.find((node) => node.type === 'comment');
   if (comment) {
