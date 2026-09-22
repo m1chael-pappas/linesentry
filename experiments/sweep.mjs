@@ -6,7 +6,8 @@
 //   node experiments/sweep.mjs faults
 //   MACHINES=50 LINES=4 SECONDS=900 node experiments/sweep.mjs faults
 //
-// Writes evidence/sweep/<scenario>/sweep.json and sweep.csv.
+// Writes evidence/sweep/<scenario>/sweep.json and sweep.csv, or
+// evidence/sweep/<scenario>-<seed>/ when SEED is not the default.
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -53,13 +54,13 @@ const DETECTION = { zScoreSigma: 3, historyWindows: 6, rulHorizonMs: 300000 };
 const EPISODE_MS = 600000;
 
 /**
- * Messages one detection task sustains, measured on AWS in the Distinction
- * overload run.
+ * Messages one detection task sustains while saturated, measured on AWS at
+ * 6,000 machines on the deadband arm over 12 backlogged minutes.
  *
- * Used to derive machines supported per task. The HD runs re-measure it per
- * arm; this is the figure the offline curve is scaled by.
+ * Used to derive machines supported per task, so the offline curve and the
+ * plant-scale table divide by the same capacity.
  */
-const MESSAGES_PER_TASK_SECOND = 160;
+const MESSAGES_PER_TASK_SECOND = 101.3;
 
 /** Faults injected in the `faults` scenario, one per machine. */
 function faultSchedule(machines) {
@@ -434,7 +435,7 @@ const summary = {
   arms: rows,
 };
 
-const outDir = join(root, 'evidence', 'sweep', SCENARIO);
+const outDir = join(root, 'evidence', 'sweep', SEED === 'linesentry' ? SCENARIO : `${SCENARIO}-${SEED}`);
 mkdirSync(outDir, { recursive: true });
 writeFileSync(join(outDir, 'sweep.json'), `${JSON.stringify(summary, null, 2)}\n`);
 

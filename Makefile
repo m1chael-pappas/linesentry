@@ -13,7 +13,9 @@ HEARTBEAT_S ?= 60
 EDGE_FLOW ?= linesentry-edge-flow-aws.json
 
 TF := terraform -chdir=infra
-TFVARS := -var variant=$(VARIANT) -var detection_strategy=$(DETECTION_STRATEGY)
+DETECTION_MAX_TASKS ?=
+TFVARS := -var variant=$(VARIANT) -var detection_strategy=$(DETECTION_STRATEGY) \
+	$(if $(DETECTION_MAX_TASKS),-var detection_max_tasks=$(DETECTION_MAX_TASKS))
 
 .PHONY: help deploy arm destroy plan images push seed certs outputs tasks scale-status gateway reset-scale
 

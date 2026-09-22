@@ -135,9 +135,59 @@ function sweeps() {
   if (!existsSync(root)) return [];
 
   return readdirSync(root)
+    .filter((scenario) => !scenario.includes('-seed-'))
     .map((scenario) => join(root, scenario, 'sweep.json'))
     .filter((path) => existsSync(path))
     .map((path) => JSON.parse(readFileSync(path, 'utf8')));
+}
+
+/** The faults sweep for every seed, the default seed first. */
+function seededSweeps() {
+  const root = join('evidence', 'sweep');
+  if (!existsSync(root)) return [];
+
+  return readdirSync(root)
+    .filter((scenario) => scenario === 'faults' || scenario.startsWith('faults-seed-'))
+    .sort()
+    .map((scenario) => JSON.parse(readFileSync(join(root, scenario, 'sweep.json'), 'utf8')));
+}
+
+/** `mean (min to max)` of `values` to `dp` decimal places. */
+function spread(values, dp) {
+  const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
+  const fixed = (value) => value.toFixed(dp);
+  return `${fixed(mean)} (${fixed(Math.min(...values))} to ${fixed(Math.max(...values))})`;
+}
+
+/** Headline arms of the faults sweep as a mean and range across seeds. */
+function seedTable() {
+  const runs = seededSweeps();
+  if (runs.length < 2) return '';
+
+  const arms = [
+    'deadband/hb60',
+    'deadband/hb600',
+    'dual-prediction/0.5sigma/hb600',
+    'dual-prediction/1sigma/hb600',
+    'dual-prediction/2sigma/hb600',
+  ];
+
+  let table = `\n## Offline sweep across seeds\n\n`;
+  table += `The faults sweep repeated on ${runs.length} seeds (${runs.map((r) => `\`${r.seed}\``).join(', ')}), each a different plant with the same fault schedule. Each cell is the mean with the range across seeds.\n\n`;
+  table += '| Arm | msg/s | Consumer coverage % | Worst error sigma | Faults | Events on healthy machines | Fewer messages than deadband/hb60 |\n';
+  table += '|---|---|---|---|---|---|---|\n';
+
+  for (const name of arms) {
+    const rows = runs.map((run) => run.arms.find((arm) => arm.arm === name)).filter(Boolean);
+    if (rows.length !== runs.length) continue;
+    const control = runs.map((run) => run.arms.find((arm) => arm.arm === 'deadband/hb60'));
+    const errors = rows.map((row) => row.reconstruction_error_sigma?.max);
+    const found = [...new Set(rows.map((row) => `${row.faults_matched}/${row.faults_injected}`))].join(', ');
+    const ratio = rows.map((row, i) => control[i].forwarded_per_second / row.forwarded_per_second);
+
+    table += `| ${name} | ${spread(rows.map((r) => r.forwarded_per_second), 2)} | ${spread(rows.map((r) => r.consumer_coverage_pct), 1)} | ${errors.every((v) => v === undefined) ? '-' : spread(errors, 2)} | ${found} | ${spread(rows.map((r) => r.events_on_healthy_machines), 0)} | ${spread(ratio, 2)}x |\n`;
+  }
+  return table;
 }
 
 function sweepRow(arm) {
@@ -162,6 +212,7 @@ function against(control, arm, field) {
 }
 
 document += scaleTable(variants);
+document += seedTable();
 
 for (const sweep of sweeps()) {
   const control = sweep.arms.find((arm) => arm.arm === 'deadband/hb60');

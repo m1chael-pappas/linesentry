@@ -7,7 +7,8 @@
 #   VARIANT=dual-prediction-b1-hb600 BOUND=1 HEARTBEAT_S=600 ./experiments/run.sh burst
 #
 # VARIANT must match the variant the stack was deployed with, since it is both
-# the metric dimension and the output directory. BOUND and HEARTBEAT_S are
+# the metric dimension and the output directory. RUN_TAG suffixes the run's
+# directory, so repeated runs of one scenario do not overwrite each other. BOUND and HEARTBEAT_S are
 # recorded in the summary and must match what the gateway was started with.
 set -uo pipefail
 
@@ -26,7 +27,7 @@ if [[ -z $RUN ]]; then
   exit 1
 fi
 
-OUT="evidence/$VARIANT/$RUN"
+OUT="evidence/$VARIANT/$RUN${RUN_TAG:+-$RUN_TAG}"
 mkdir -p "$OUT"
 
 SIM_PID=""

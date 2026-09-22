@@ -1,6 +1,6 @@
 {
   "scenario": "faults",
-  "seed": "linesentry",
+  "seed": "seed-2",
   "machines": 200,
   "lines": 4,
   "seconds": 1800,
@@ -113,35 +113,36 @@
       "error_bound_sigma": null,
       "heartbeat_ms": 60000,
       "windows_produced": 144000,
-      "forwarded": 27475,
-      "forwarded_per_second": 15.26,
-      "forwarded_per_machine_second": 0.07632,
+      "forwarded": 27481,
+      "forwarded_per_second": 15.27,
+      "forwarded_per_machine_second": 0.07634,
       "dropped_pct": 80.9,
       "reasons": {
         "first": 800,
-        "changed": 8741,
-        "heartbeat": 17934
+        "changed": 8726,
+        "heartbeat": 17955
       },
-      "content_forwards": 8741,
-      "heartbeat_forwards": 17934,
+      "content_forwards": 8726,
+      "heartbeat_forwards": 17955,
       "safety_forwards": 0,
       "reconstructed": 0,
       "gap_windows": 0,
-      "windows_in_closed_gaps": 143308,
+      "windows_in_closed_gaps": 143299,
       "consumer_coverage_pct": 19.2,
       "reconstruction_error_sigma": null,
-      "windows_evaluated": 27475,
-      "windows_evaluated_per_second": 15.26,
-      "events": 106,
+      "windows_evaluated": 27481,
+      "windows_evaluated_per_second": 15.27,
+      "events": 111,
       "faults_injected": 16,
       "faults_matched": 16,
       "faults_missed": 0,
-      "events_on_healthy_machines": 50,
+      "events_on_healthy_machines": 57,
       "healthy_events_by_type": {
-        "predicted-failure": 50
+        "predicted-failure": 56,
+        "threshold-breach": 1
       },
       "healthy_events_by_sensor": {
-        "current": 50
+        "current": 57
       },
       "detection_delay_windows": {
         "samples": 16,
@@ -154,25 +155,25 @@
       "per_sensor": {
         "vibration": {
           "windows": 36000,
-          "forwarded": 6314,
+          "forwarded": 6318,
           "dropped_pct": 82.5,
           "deadband_sigma": 1.88
         },
         "temperature": {
           "windows": 36000,
-          "forwarded": 7356,
+          "forwarded": 7351,
           "dropped_pct": 79.6,
           "deadband_sigma": 0.67
         },
         "current": {
           "windows": 36000,
-          "forwarded": 7521,
+          "forwarded": 7524,
           "dropped_pct": 79.1,
           "deadband_sigma": 0.25
         },
         "rpm": {
           "windows": 36000,
-          "forwarded": 6284,
+          "forwarded": 6288,
           "dropped_pct": 82.5,
           "deadband_sigma": 2
         }
@@ -185,35 +186,36 @@
       "error_bound_sigma": null,
       "heartbeat_ms": 150000,
       "windows_produced": 144000,
-      "forwarded": 14824,
-      "forwarded_per_second": 8.24,
-      "forwarded_per_machine_second": 0.04118,
+      "forwarded": 14763,
+      "forwarded_per_second": 8.2,
+      "forwarded_per_machine_second": 0.04101,
       "dropped_pct": 89.7,
       "reasons": {
         "first": 800,
-        "changed": 8036,
-        "heartbeat": 5988
+        "changed": 7908,
+        "heartbeat": 6055
       },
-      "content_forwards": 8036,
-      "heartbeat_forwards": 5988,
+      "content_forwards": 7908,
+      "heartbeat_forwards": 6055,
       "safety_forwards": 0,
       "reconstructed": 0,
       "gap_windows": 0,
-      "windows_in_closed_gaps": 142715,
-      "consumer_coverage_pct": 10.4,
+      "windows_in_closed_gaps": 142670,
+      "consumer_coverage_pct": 10.3,
       "reconstruction_error_sigma": null,
-      "windows_evaluated": 14824,
-      "windows_evaluated_per_second": 8.24,
-      "events": 92,
+      "windows_evaluated": 14763,
+      "windows_evaluated_per_second": 8.2,
+      "events": 107,
       "faults_injected": 16,
       "faults_matched": 16,
       "faults_missed": 0,
-      "events_on_healthy_machines": 34,
+      "events_on_healthy_machines": 49,
       "healthy_events_by_type": {
-        "predicted-failure": 34
+        "predicted-failure": 48,
+        "threshold-breach": 1
       },
       "healthy_events_by_sensor": {
-        "current": 34
+        "current": 49
       },
       "detection_delay_windows": {
         "samples": 16,
@@ -222,29 +224,29 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 2460,
+      "machines_per_task": 2470,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
-          "forwarded": 2738,
+          "forwarded": 2737,
           "dropped_pct": 92.4,
           "deadband_sigma": 1.88
         },
         "temperature": {
           "windows": 36000,
-          "forwarded": 4311,
-          "dropped_pct": 88,
+          "forwarded": 4272,
+          "dropped_pct": 88.1,
           "deadband_sigma": 0.67
         },
         "current": {
           "windows": 36000,
-          "forwarded": 5066,
-          "dropped_pct": 85.9,
+          "forwarded": 5044,
+          "dropped_pct": 86,
           "deadband_sigma": 0.25
         },
         "rpm": {
           "windows": 36000,
-          "forwarded": 2709,
+          "forwarded": 2710,
           "dropped_pct": 92.5,
           "deadband_sigma": 2
         }
@@ -257,35 +259,36 @@
       "error_bound_sigma": null,
       "heartbeat_ms": 300000,
       "windows_produced": 144000,
-      "forwarded": 11984,
-      "forwarded_per_second": 6.66,
-      "forwarded_per_machine_second": 0.03329,
+      "forwarded": 11939,
+      "forwarded_per_second": 6.63,
+      "forwarded_per_machine_second": 0.03316,
       "dropped_pct": 91.7,
       "reasons": {
         "first": 800,
-        "changed": 8730,
-        "heartbeat": 2454
+        "changed": 8668,
+        "heartbeat": 2471
       },
-      "content_forwards": 8730,
-      "heartbeat_forwards": 2454,
+      "content_forwards": 8668,
+      "heartbeat_forwards": 2471,
       "safety_forwards": 0,
       "reconstructed": 0,
       "gap_windows": 0,
-      "windows_in_closed_gaps": 141919,
+      "windows_in_closed_gaps": 142162,
       "consumer_coverage_pct": 8.4,
       "reconstruction_error_sigma": null,
-      "windows_evaluated": 11984,
-      "windows_evaluated_per_second": 6.66,
-      "events": 94,
+      "windows_evaluated": 11939,
+      "windows_evaluated_per_second": 6.63,
+      "events": 104,
       "faults_injected": 16,
       "faults_matched": 16,
       "faults_missed": 0,
-      "events_on_healthy_machines": 37,
+      "events_on_healthy_machines": 47,
       "healthy_events_by_type": {
-        "predicted-failure": 37
+        "predicted-failure": 46,
+        "threshold-breach": 1
       },
       "healthy_events_by_sensor": {
-        "current": 37
+        "current": 47
       },
       "detection_delay_windows": {
         "samples": 16,
@@ -294,29 +297,29 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 3043,
+      "machines_per_task": 3055,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
-          "forwarded": 1542,
+          "forwarded": 1541,
           "dropped_pct": 95.7,
           "deadband_sigma": 1.88
         },
         "temperature": {
           "windows": 36000,
-          "forwarded": 4380,
-          "dropped_pct": 87.8,
+          "forwarded": 4351,
+          "dropped_pct": 87.9,
           "deadband_sigma": 0.67
         },
         "current": {
           "windows": 36000,
-          "forwarded": 4549,
+          "forwarded": 4532,
           "dropped_pct": 87.4,
           "deadband_sigma": 0.25
         },
         "rpm": {
           "windows": 36000,
-          "forwarded": 1513,
+          "forwarded": 1515,
           "dropped_pct": 95.8,
           "deadband_sigma": 2
         }
@@ -329,35 +332,36 @@
       "error_bound_sigma": null,
       "heartbeat_ms": 600000,
       "windows_produced": 144000,
-      "forwarded": 10707,
-      "forwarded_per_second": 5.95,
-      "forwarded_per_machine_second": 0.02974,
+      "forwarded": 10657,
+      "forwarded_per_second": 5.92,
+      "forwarded_per_machine_second": 0.0296,
       "dropped_pct": 92.6,
       "reasons": {
         "first": 800,
-        "changed": 8733,
+        "changed": 8683,
         "heartbeat": 1174
       },
-      "content_forwards": 8733,
+      "content_forwards": 8683,
       "heartbeat_forwards": 1174,
       "safety_forwards": 0,
       "reconstructed": 0,
       "gap_windows": 0,
-      "windows_in_closed_gaps": 141265,
-      "consumer_coverage_pct": 7.6,
+      "windows_in_closed_gaps": 141413,
+      "consumer_coverage_pct": 7.5,
       "reconstruction_error_sigma": null,
-      "windows_evaluated": 10707,
-      "windows_evaluated_per_second": 5.95,
-      "events": 94,
+      "windows_evaluated": 10657,
+      "windows_evaluated_per_second": 5.92,
+      "events": 104,
       "faults_injected": 16,
       "faults_matched": 16,
       "faults_missed": 0,
-      "events_on_healthy_machines": 37,
+      "events_on_healthy_machines": 47,
       "healthy_events_by_type": {
-        "predicted-failure": 37
+        "predicted-failure": 46,
+        "threshold-breach": 1
       },
       "healthy_events_by_sensor": {
-        "current": 37
+        "current": 47
       },
       "detection_delay_windows": {
         "samples": 16,
@@ -366,30 +370,30 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 3406,
+      "machines_per_task": 3422,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
-          "forwarded": 945,
+          "forwarded": 947,
           "dropped_pct": 97.4,
           "deadband_sigma": 1.88
         },
         "temperature": {
           "windows": 36000,
-          "forwarded": 4380,
-          "dropped_pct": 87.8,
+          "forwarded": 4351,
+          "dropped_pct": 87.9,
           "deadband_sigma": 0.67
         },
         "current": {
           "windows": 36000,
-          "forwarded": 4464,
-          "dropped_pct": 87.6,
+          "forwarded": 4440,
+          "dropped_pct": 87.7,
           "deadband_sigma": 0.25
         },
         "rpm": {
           "windows": 36000,
-          "forwarded": 918,
-          "dropped_pct": 97.5,
+          "forwarded": 919,
+          "dropped_pct": 97.4,
           "deadband_sigma": 2
         }
       }
@@ -401,42 +405,43 @@
       "error_bound_sigma": 0.25,
       "heartbeat_ms": 60000,
       "windows_produced": 144000,
-      "forwarded": 40280,
-      "forwarded_per_second": 22.38,
-      "forwarded_per_machine_second": 0.11189,
-      "dropped_pct": 72,
+      "forwarded": 40148,
+      "forwarded_per_second": 22.3,
+      "forwarded_per_machine_second": 0.11152,
+      "dropped_pct": 72.1,
       "reasons": {
         "first": 1600,
-        "divergence": 29032,
-        "heartbeat": 9455,
-        "safety": 193
+        "divergence": 28939,
+        "heartbeat": 9424,
+        "safety": 185
       },
-      "content_forwards": 29032,
-      "heartbeat_forwards": 9455,
-      "safety_forwards": 193,
-      "reconstructed": 101946,
-      "gap_windows": 101946,
-      "windows_in_closed_gaps": 142226,
+      "content_forwards": 28939,
+      "heartbeat_forwards": 9424,
+      "safety_forwards": 185,
+      "reconstructed": 102079,
+      "gap_windows": 102079,
+      "windows_in_closed_gaps": 142227,
       "consumer_coverage_pct": 100,
       "reconstruction_error_sigma": {
-        "samples": 101946,
-        "p50": 0.1054,
-        "p95": 0.2298,
+        "samples": 102079,
+        "p50": 0.1066,
+        "p95": 0.2301,
         "max": 0.25,
-        "mean": 0.11
+        "mean": 0.1107
       },
-      "windows_evaluated": 142226,
-      "windows_evaluated_per_second": 79.01,
-      "events": 131,
+      "windows_evaluated": 142227,
+      "windows_evaluated_per_second": 79.02,
+      "events": 136,
       "faults_injected": 16,
       "faults_matched": 16,
       "faults_missed": 0,
-      "events_on_healthy_machines": 77,
+      "events_on_healthy_machines": 85,
       "healthy_events_by_type": {
-        "predicted-failure": 77
+        "predicted-failure": 84,
+        "threshold-breach": 1
       },
       "healthy_events_by_sensor": {
-        "current": 77
+        "current": 85
       },
       "detection_delay_windows": {
         "samples": 16,
@@ -445,30 +450,30 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 905,
+      "machines_per_task": 908,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
-          "forwarded": 13408,
-          "dropped_pct": 62.8,
+          "forwarded": 13289,
+          "dropped_pct": 63.1,
           "deadband_sigma": 1.88
         },
         "temperature": {
           "windows": 36000,
-          "forwarded": 11478,
-          "dropped_pct": 68.1,
+          "forwarded": 11452,
+          "dropped_pct": 68.2,
           "deadband_sigma": 0.67
         },
         "current": {
           "windows": 36000,
-          "forwarded": 7936,
+          "forwarded": 7928,
           "dropped_pct": 78,
           "deadband_sigma": 0.25
         },
         "rpm": {
           "windows": 36000,
-          "forwarded": 7458,
-          "dropped_pct": 79.3,
+          "forwarded": 7479,
+          "dropped_pct": 79.2,
           "deadband_sigma": 2
         }
       }
@@ -480,42 +485,43 @@
       "error_bound_sigma": 0.5,
       "heartbeat_ms": 60000,
       "windows_produced": 144000,
-      "forwarded": 28833,
-      "forwarded_per_second": 16.02,
-      "forwarded_per_machine_second": 0.08009,
+      "forwarded": 28790,
+      "forwarded_per_second": 15.99,
+      "forwarded_per_machine_second": 0.07997,
       "dropped_pct": 80,
       "reasons": {
         "first": 1600,
-        "divergence": 11696,
-        "heartbeat": 15343,
-        "safety": 194
+        "divergence": 11639,
+        "heartbeat": 15364,
+        "safety": 187
       },
-      "content_forwards": 11696,
-      "heartbeat_forwards": 15343,
-      "safety_forwards": 194,
-      "reconstructed": 113158,
-      "gap_windows": 113158,
-      "windows_in_closed_gaps": 141991,
+      "content_forwards": 11639,
+      "heartbeat_forwards": 15364,
+      "safety_forwards": 187,
+      "reconstructed": 113264,
+      "gap_windows": 113264,
+      "windows_in_closed_gaps": 142054,
       "consumer_coverage_pct": 100,
       "reconstruction_error_sigma": {
-        "samples": 113158,
-        "p50": 0.1462,
-        "p95": 0.4308,
+        "samples": 113264,
+        "p50": 0.1453,
+        "p95": 0.4312,
         "max": 0.5,
         "mean": 0.1749
       },
-      "windows_evaluated": 141991,
-      "windows_evaluated_per_second": 78.88,
-      "events": 142,
+      "windows_evaluated": 142054,
+      "windows_evaluated_per_second": 78.92,
+      "events": 151,
       "faults_injected": 16,
       "faults_matched": 16,
       "faults_missed": 0,
-      "events_on_healthy_machines": 86,
+      "events_on_healthy_machines": 97,
       "healthy_events_by_type": {
-        "predicted-failure": 86
+        "predicted-failure": 96,
+        "threshold-breach": 1
       },
       "healthy_events_by_sensor": {
-        "current": 86
+        "current": 97
       },
       "detection_delay_windows": {
         "samples": 16,
@@ -524,29 +530,29 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 1265,
+      "machines_per_task": 1267,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
-          "forwarded": 8029,
+          "forwarded": 8012,
           "dropped_pct": 77.7,
           "deadband_sigma": 1.88
         },
         "temperature": {
           "windows": 36000,
-          "forwarded": 7733,
-          "dropped_pct": 78.5,
+          "forwarded": 7721,
+          "dropped_pct": 78.6,
           "deadband_sigma": 0.67
         },
         "current": {
           "windows": 36000,
-          "forwarded": 6557,
+          "forwarded": 6553,
           "dropped_pct": 81.8,
           "deadband_sigma": 0.25
         },
         "rpm": {
           "windows": 36000,
-          "forwarded": 6514,
+          "forwarded": 6504,
           "dropped_pct": 81.9,
           "deadband_sigma": 2
         }
@@ -559,42 +565,43 @@
       "error_bound_sigma": 0.75,
       "heartbeat_ms": 60000,
       "windows_produced": 144000,
-      "forwarded": 26345,
-      "forwarded_per_second": 14.64,
-      "forwarded_per_machine_second": 0.07318,
+      "forwarded": 26310,
+      "forwarded_per_second": 14.62,
+      "forwarded_per_machine_second": 0.07308,
       "dropped_pct": 81.7,
       "reasons": {
         "first": 1600,
-        "divergence": 6042,
+        "divergence": 6018,
         "heartbeat": 18505,
-        "safety": 198
+        "safety": 187
       },
-      "content_forwards": 6042,
+      "content_forwards": 6018,
       "heartbeat_forwards": 18505,
-      "safety_forwards": 198,
-      "reconstructed": 115468,
-      "gap_windows": 115468,
-      "windows_in_closed_gaps": 141813,
+      "safety_forwards": 187,
+      "reconstructed": 115417,
+      "gap_windows": 115417,
+      "windows_in_closed_gaps": 141727,
       "consumer_coverage_pct": 100,
       "reconstruction_error_sigma": {
-        "samples": 115468,
-        "p50": 0.1606,
-        "p95": 0.585,
+        "samples": 115417,
+        "p50": 0.1612,
+        "p95": 0.5834,
         "max": 0.75,
-        "mean": 0.2114
+        "mean": 0.212
       },
-      "windows_evaluated": 141813,
-      "windows_evaluated_per_second": 78.79,
-      "events": 143,
+      "windows_evaluated": 141727,
+      "windows_evaluated_per_second": 78.74,
+      "events": 155,
       "faults_injected": 16,
       "faults_matched": 16,
       "faults_missed": 0,
-      "events_on_healthy_machines": 90,
+      "events_on_healthy_machines": 102,
       "healthy_events_by_type": {
-        "predicted-failure": 90
+        "predicted-failure": 101,
+        "threshold-breach": 1
       },
       "healthy_events_by_sensor": {
-        "current": 90
+        "current": 102
       },
       "detection_delay_windows": {
         "samples": 16,
@@ -603,29 +610,29 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 1384,
+      "machines_per_task": 1386,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
-          "forwarded": 6945,
+          "forwarded": 6933,
           "dropped_pct": 80.7,
           "deadband_sigma": 1.88
         },
         "temperature": {
           "windows": 36000,
-          "forwarded": 6702,
+          "forwarded": 6703,
           "dropped_pct": 81.4,
           "deadband_sigma": 0.67
         },
         "current": {
           "windows": 36000,
-          "forwarded": 6312,
+          "forwarded": 6290,
           "dropped_pct": 82.5,
           "deadband_sigma": 0.25
         },
         "rpm": {
           "windows": 36000,
-          "forwarded": 6386,
+          "forwarded": 6384,
           "dropped_pct": 82.3,
           "deadband_sigma": 2
         }
@@ -638,42 +645,43 @@
       "error_bound_sigma": 1,
       "heartbeat_ms": 60000,
       "windows_produced": 144000,
-      "forwarded": 25515,
-      "forwarded_per_second": 14.18,
-      "forwarded_per_machine_second": 0.07088,
+      "forwarded": 25494,
+      "forwarded_per_second": 14.16,
+      "forwarded_per_machine_second": 0.07082,
       "dropped_pct": 82.3,
       "reasons": {
         "first": 1600,
-        "divergence": 2619,
-        "heartbeat": 21099,
-        "safety": 197
+        "divergence": 2658,
+        "heartbeat": 21049,
+        "safety": 187
       },
-      "content_forwards": 2619,
-      "heartbeat_forwards": 21099,
-      "safety_forwards": 197,
-      "reconstructed": 115589,
-      "gap_windows": 115589,
-      "windows_in_closed_gaps": 141104,
+      "content_forwards": 2658,
+      "heartbeat_forwards": 21049,
+      "safety_forwards": 187,
+      "reconstructed": 115650,
+      "gap_windows": 115650,
+      "windows_in_closed_gaps": 141144,
       "consumer_coverage_pct": 100,
       "reconstruction_error_sigma": {
-        "samples": 115589,
-        "p50": 0.1645,
-        "p95": 0.6729,
+        "samples": 115650,
+        "p50": 0.1663,
+        "p95": 0.6733,
         "max": 1,
-        "mean": 0.2298
+        "mean": 0.2311
       },
-      "windows_evaluated": 141104,
-      "windows_evaluated_per_second": 78.39,
-      "events": 149,
+      "windows_evaluated": 141144,
+      "windows_evaluated_per_second": 78.41,
+      "events": 153,
       "faults_injected": 16,
       "faults_matched": 16,
       "faults_missed": 0,
-      "events_on_healthy_machines": 94,
+      "events_on_healthy_machines": 99,
       "healthy_events_by_type": {
-        "predicted-failure": 94
+        "predicted-failure": 98,
+        "threshold-breach": 1
       },
       "healthy_events_by_sensor": {
-        "current": 94
+        "current": 99
       },
       "detection_delay_windows": {
         "samples": 16,
@@ -682,29 +690,29 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 1429,
+      "machines_per_task": 1430,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
-          "forwarded": 6590,
+          "forwarded": 6581,
           "dropped_pct": 81.7,
           "deadband_sigma": 1.88
         },
         "temperature": {
           "windows": 36000,
-          "forwarded": 6340,
+          "forwarded": 6336,
           "dropped_pct": 82.4,
           "deadband_sigma": 0.67
         },
         "current": {
           "windows": 36000,
-          "forwarded": 6233,
+          "forwarded": 6226,
           "dropped_pct": 82.7,
           "deadband_sigma": 0.25
         },
         "rpm": {
           "windows": 36000,
-          "forwarded": 6352,
+          "forwarded": 6351,
           "dropped_pct": 82.4,
           "deadband_sigma": 2
         }
@@ -717,42 +725,43 @@
       "error_bound_sigma": 1.5,
       "heartbeat_ms": 60000,
       "windows_produced": 144000,
-      "forwarded": 25251,
+      "forwarded": 25256,
       "forwarded_per_second": 14.03,
-      "forwarded_per_machine_second": 0.07014,
+      "forwarded_per_machine_second": 0.07016,
       "dropped_pct": 82.5,
       "reasons": {
         "first": 1600,
-        "divergence": 530,
-        "heartbeat": 22923,
-        "safety": 198
+        "divergence": 542,
+        "heartbeat": 22927,
+        "safety": 187
       },
-      "content_forwards": 530,
-      "heartbeat_forwards": 22923,
-      "safety_forwards": 198,
-      "reconstructed": 115661,
-      "gap_windows": 115661,
-      "windows_in_closed_gaps": 140912,
+      "content_forwards": 542,
+      "heartbeat_forwards": 22927,
+      "safety_forwards": 187,
+      "reconstructed": 115718,
+      "gap_windows": 115718,
+      "windows_in_closed_gaps": 140974,
       "consumer_coverage_pct": 100,
       "reconstruction_error_sigma": {
-        "samples": 115661,
-        "p50": 0.1663,
-        "p95": 0.7045,
-        "max": 1.5,
-        "mean": 0.2377
+        "samples": 115718,
+        "p50": 0.1671,
+        "p95": 0.706,
+        "max": 1.4982,
+        "mean": 0.2383
       },
-      "windows_evaluated": 140912,
-      "windows_evaluated_per_second": 78.28,
-      "events": 150,
+      "windows_evaluated": 140974,
+      "windows_evaluated_per_second": 78.32,
+      "events": 155,
       "faults_injected": 16,
       "faults_matched": 16,
       "faults_missed": 0,
-      "events_on_healthy_machines": 95,
+      "events_on_healthy_machines": 101,
       "healthy_events_by_type": {
-        "predicted-failure": 95
+        "predicted-failure": 100,
+        "threshold-breach": 1
       },
       "healthy_events_by_sensor": {
-        "current": 95
+        "current": 101
       },
       "detection_delay_windows": {
         "samples": 16,
@@ -765,7 +774,7 @@
       "per_sensor": {
         "vibration": {
           "windows": 36000,
-          "forwarded": 6370,
+          "forwarded": 6383,
           "dropped_pct": 82.3,
           "deadband_sigma": 1.88
         },
@@ -777,13 +786,13 @@
         },
         "current": {
           "windows": 36000,
-          "forwarded": 6224,
+          "forwarded": 6214,
           "dropped_pct": 82.7,
           "deadband_sigma": 0.25
         },
         "rpm": {
           "windows": 36000,
-          "forwarded": 6329,
+          "forwarded": 6331,
           "dropped_pct": 82.4,
           "deadband_sigma": 2
         }
@@ -796,42 +805,43 @@
       "error_bound_sigma": 2,
       "heartbeat_ms": 60000,
       "windows_produced": 144000,
-      "forwarded": 25188,
-      "forwarded_per_second": 13.99,
-      "forwarded_per_machine_second": 0.06997,
+      "forwarded": 25171,
+      "forwarded_per_second": 13.98,
+      "forwarded_per_machine_second": 0.06992,
       "dropped_pct": 82.5,
       "reasons": {
         "first": 1600,
-        "divergence": 359,
-        "heartbeat": 23031,
-        "safety": 198
+        "divergence": 356,
+        "heartbeat": 23028,
+        "safety": 187
       },
-      "content_forwards": 359,
-      "heartbeat_forwards": 23031,
-      "safety_forwards": 198,
-      "reconstructed": 115642,
-      "gap_windows": 115642,
-      "windows_in_closed_gaps": 140830,
+      "content_forwards": 356,
+      "heartbeat_forwards": 23028,
+      "safety_forwards": 187,
+      "reconstructed": 115635,
+      "gap_windows": 115635,
+      "windows_in_closed_gaps": 140806,
       "consumer_coverage_pct": 100,
       "reconstruction_error_sigma": {
-        "samples": 115642,
-        "p50": 0.1666,
-        "p95": 0.7106,
+        "samples": 115635,
+        "p50": 0.1674,
+        "p95": 0.7126,
         "max": 2,
-        "mean": 0.2397
+        "mean": 0.2408
       },
-      "windows_evaluated": 140830,
-      "windows_evaluated_per_second": 78.24,
-      "events": 150,
+      "windows_evaluated": 140806,
+      "windows_evaluated_per_second": 78.23,
+      "events": 155,
       "faults_injected": 16,
       "faults_matched": 16,
       "faults_missed": 0,
-      "events_on_healthy_machines": 94,
+      "events_on_healthy_machines": 101,
       "healthy_events_by_type": {
-        "predicted-failure": 94
+        "predicted-failure": 100,
+        "threshold-breach": 1
       },
       "healthy_events_by_sensor": {
-        "current": 94
+        "current": 101
       },
       "detection_delay_windows": {
         "samples": 16,
@@ -840,11 +850,11 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 1448,
+      "machines_per_task": 1449,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
-          "forwarded": 6335,
+          "forwarded": 6329,
           "dropped_pct": 82.4,
           "deadband_sigma": 1.88
         },
@@ -856,13 +866,13 @@
         },
         "current": {
           "windows": 36000,
-          "forwarded": 6221,
+          "forwarded": 6212,
           "dropped_pct": 82.7,
           "deadband_sigma": 0.25
         },
         "rpm": {
           "windows": 36000,
-          "forwarded": 6318,
+          "forwarded": 6316,
           "dropped_pct": 82.5,
           "deadband_sigma": 2
         }
@@ -881,36 +891,37 @@
       "dropped_pct": 82.6,
       "reasons": {
         "first": 1600,
-        "divergence": 241,
-        "heartbeat": 23081,
-        "safety": 198
+        "heartbeat": 23088,
+        "divergence": 245,
+        "safety": 187
       },
-      "content_forwards": 241,
-      "heartbeat_forwards": 23081,
-      "safety_forwards": 198,
-      "reconstructed": 115681,
-      "gap_windows": 115681,
-      "windows_in_closed_gaps": 140801,
+      "content_forwards": 245,
+      "heartbeat_forwards": 23088,
+      "safety_forwards": 187,
+      "reconstructed": 115685,
+      "gap_windows": 115685,
+      "windows_in_closed_gaps": 140805,
       "consumer_coverage_pct": 100,
       "reconstruction_error_sigma": {
-        "samples": 115681,
-        "p50": 0.167,
-        "p95": 0.7117,
-        "max": 2.9978,
-        "mean": 0.2415
+        "samples": 115685,
+        "p50": 0.1675,
+        "p95": 0.7142,
+        "max": 2.9866,
+        "mean": 0.2422
       },
-      "windows_evaluated": 140801,
+      "windows_evaluated": 140805,
       "windows_evaluated_per_second": 78.22,
-      "events": 146,
+      "events": 153,
       "faults_injected": 16,
       "faults_matched": 16,
       "faults_missed": 0,
-      "events_on_healthy_machines": 94,
+      "events_on_healthy_machines": 101,
       "healthy_events_by_type": {
-        "predicted-failure": 94
+        "predicted-failure": 100,
+        "threshold-breach": 1
       },
       "healthy_events_by_sensor": {
-        "current": 94
+        "current": 101
       },
       "detection_delay_windows": {
         "samples": 16,
@@ -935,14 +946,14 @@
         },
         "current": {
           "windows": 36000,
-          "forwarded": 6221,
+          "forwarded": 6212,
           "dropped_pct": 82.7,
           "deadband_sigma": 0.25
         },
         "rpm": {
           "windows": 36000,
-          "forwarded": 6279,
-          "dropped_pct": 82.6,
+          "forwarded": 6288,
+          "dropped_pct": 82.5,
           "deadband_sigma": 2
         }
       }
@@ -954,42 +965,43 @@
       "error_bound_sigma": 4,
       "heartbeat_ms": 60000,
       "windows_produced": 144000,
-      "forwarded": 25094,
+      "forwarded": 25091,
       "forwarded_per_second": 13.94,
-      "forwarded_per_machine_second": 0.06971,
+      "forwarded_per_machine_second": 0.0697,
       "dropped_pct": 82.6,
       "reasons": {
         "first": 1600,
-        "heartbeat": 23104,
-        "divergence": 192,
-        "safety": 198
+        "heartbeat": 23106,
+        "divergence": 198,
+        "safety": 187
       },
-      "content_forwards": 192,
-      "heartbeat_forwards": 23104,
-      "safety_forwards": 198,
+      "content_forwards": 198,
+      "heartbeat_forwards": 23106,
+      "safety_forwards": 187,
       "reconstructed": 115742,
       "gap_windows": 115742,
-      "windows_in_closed_gaps": 140836,
+      "windows_in_closed_gaps": 140833,
       "consumer_coverage_pct": 100,
       "reconstruction_error_sigma": {
         "samples": 115742,
-        "p50": 0.1673,
-        "p95": 0.7135,
-        "max": 3.9268,
-        "mean": 0.243
+        "p50": 0.1675,
+        "p95": 0.7161,
+        "max": 3.9418,
+        "mean": 0.2435
       },
-      "windows_evaluated": 140836,
+      "windows_evaluated": 140833,
       "windows_evaluated_per_second": 78.24,
-      "events": 142,
+      "events": 149,
       "faults_injected": 16,
       "faults_matched": 16,
       "faults_missed": 0,
-      "events_on_healthy_machines": 94,
+      "events_on_healthy_machines": 101,
       "healthy_events_by_type": {
-        "predicted-failure": 94
+        "predicted-failure": 100,
+        "threshold-breach": 1
       },
       "healthy_events_by_sensor": {
-        "current": 94
+        "current": 101
       },
       "detection_delay_windows": {
         "samples": 16,
@@ -1002,25 +1014,25 @@
       "per_sensor": {
         "vibration": {
           "windows": 36000,
-          "forwarded": 6319,
-          "dropped_pct": 82.4,
+          "forwarded": 6317,
+          "dropped_pct": 82.5,
           "deadband_sigma": 1.88
         },
         "temperature": {
           "windows": 36000,
-          "forwarded": 6295,
+          "forwarded": 6297,
           "dropped_pct": 82.5,
           "deadband_sigma": 0.67
         },
         "current": {
           "windows": 36000,
-          "forwarded": 6221,
+          "forwarded": 6212,
           "dropped_pct": 82.7,
           "deadband_sigma": 0.25
         },
         "rpm": {
           "windows": 36000,
-          "forwarded": 6259,
+          "forwarded": 6265,
           "dropped_pct": 82.6,
           "deadband_sigma": 2
         }
@@ -1033,42 +1045,43 @@
       "error_bound_sigma": 0.25,
       "heartbeat_ms": 150000,
       "windows_produced": 144000,
-      "forwarded": 32976,
-      "forwarded_per_second": 18.32,
-      "forwarded_per_machine_second": 0.0916,
-      "dropped_pct": 77.1,
+      "forwarded": 32714,
+      "forwarded_per_second": 18.17,
+      "forwarded_per_machine_second": 0.09087,
+      "dropped_pct": 77.3,
       "reasons": {
         "first": 1600,
-        "divergence": 29913,
-        "heartbeat": 1270,
-        "safety": 193
+        "divergence": 29589,
+        "heartbeat": 1340,
+        "safety": 185
       },
-      "content_forwards": 29913,
-      "heartbeat_forwards": 1270,
-      "safety_forwards": 193,
-      "reconstructed": 108183,
-      "gap_windows": 108183,
-      "windows_in_closed_gaps": 141159,
+      "content_forwards": 29589,
+      "heartbeat_forwards": 1340,
+      "safety_forwards": 185,
+      "reconstructed": 108412,
+      "gap_windows": 108412,
+      "windows_in_closed_gaps": 141126,
       "consumer_coverage_pct": 100,
       "reconstruction_error_sigma": {
-        "samples": 108183,
-        "p50": 0.1099,
-        "p95": 0.231,
+        "samples": 108412,
+        "p50": 0.1096,
+        "p95": 0.2316,
         "max": 0.25,
-        "mean": 0.1131
+        "mean": 0.113
       },
-      "windows_evaluated": 117024,
-      "windows_evaluated_per_second": 65.01,
-      "events": 102,
+      "windows_evaluated": 116740,
+      "windows_evaluated_per_second": 64.86,
+      "events": 105,
       "faults_injected": 16,
       "faults_matched": 16,
       "faults_missed": 0,
-      "events_on_healthy_machines": 48,
+      "events_on_healthy_machines": 51,
       "healthy_events_by_type": {
-        "predicted-failure": 48
+        "predicted-failure": 50,
+        "threshold-breach": 1
       },
       "healthy_events_by_sensor": {
-        "current": 48
+        "current": 51
       },
       "detection_delay_windows": {
         "samples": 16,
@@ -1077,30 +1090,30 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 1106,
+      "machines_per_task": 1115,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
-          "forwarded": 12312,
-          "dropped_pct": 65.8,
+          "forwarded": 12155,
+          "dropped_pct": 66.2,
           "deadband_sigma": 1.88
         },
         "temperature": {
           "windows": 36000,
-          "forwarded": 10041,
+          "forwarded": 10042,
           "dropped_pct": 72.1,
           "deadband_sigma": 0.67
         },
         "current": {
           "windows": 36000,
-          "forwarded": 5738,
-          "dropped_pct": 84.1,
+          "forwarded": 5656,
+          "dropped_pct": 84.3,
           "deadband_sigma": 0.25
         },
         "rpm": {
           "windows": 36000,
-          "forwarded": 4885,
-          "dropped_pct": 86.4,
+          "forwarded": 4861,
+          "dropped_pct": 86.5,
           "deadband_sigma": 2
         }
       }
@@ -1112,42 +1125,43 @@
       "error_bound_sigma": 0.5,
       "heartbeat_ms": 150000,
       "windows_produced": 144000,
-      "forwarded": 18364,
-      "forwarded_per_second": 10.2,
-      "forwarded_per_machine_second": 0.05101,
-      "dropped_pct": 87.2,
+      "forwarded": 18263,
+      "forwarded_per_second": 10.15,
+      "forwarded_per_machine_second": 0.05073,
+      "dropped_pct": 87.3,
       "reasons": {
         "first": 1600,
-        "divergence": 13182,
-        "heartbeat": 3386,
-        "safety": 196
+        "divergence": 13127,
+        "heartbeat": 3348,
+        "safety": 188
       },
-      "content_forwards": 13182,
-      "heartbeat_forwards": 3386,
-      "safety_forwards": 196,
-      "reconstructed": 121615,
-      "gap_windows": 121615,
-      "windows_in_closed_gaps": 139979,
+      "content_forwards": 13127,
+      "heartbeat_forwards": 3348,
+      "safety_forwards": 188,
+      "reconstructed": 121491,
+      "gap_windows": 121491,
+      "windows_in_closed_gaps": 139754,
       "consumer_coverage_pct": 100,
       "reconstruction_error_sigma": {
-        "samples": 121615,
-        "p50": 0.176,
-        "p95": 0.4467,
+        "samples": 121491,
+        "p50": 0.1772,
+        "p95": 0.447,
         "max": 0.5,
-        "mean": 0.1986
+        "mean": 0.1995
       },
-      "windows_evaluated": 94371,
-      "windows_evaluated_per_second": 52.43,
-      "events": 114,
+      "windows_evaluated": 93979,
+      "windows_evaluated_per_second": 52.21,
+      "events": 116,
       "faults_injected": 16,
       "faults_matched": 16,
       "faults_missed": 0,
-      "events_on_healthy_machines": 60,
+      "events_on_healthy_machines": 59,
       "healthy_events_by_type": {
-        "predicted-failure": 60
+        "predicted-failure": 58,
+        "threshold-breach": 1
       },
       "healthy_events_by_sensor": {
-        "current": 60
+        "current": 59
       },
       "detection_delay_windows": {
         "samples": 16,
@@ -1156,29 +1170,29 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 1986,
+      "machines_per_task": 1997,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
-          "forwarded": 5626,
-          "dropped_pct": 84.4,
+          "forwarded": 5568,
+          "dropped_pct": 84.5,
           "deadband_sigma": 1.88
         },
         "temperature": {
           "windows": 36000,
-          "forwarded": 5690,
-          "dropped_pct": 84.2,
+          "forwarded": 5656,
+          "dropped_pct": 84.3,
           "deadband_sigma": 0.67
         },
         "current": {
           "windows": 36000,
-          "forwarded": 3681,
+          "forwarded": 3661,
           "dropped_pct": 89.8,
           "deadband_sigma": 0.25
         },
         "rpm": {
           "windows": 36000,
-          "forwarded": 3367,
+          "forwarded": 3378,
           "dropped_pct": 90.6,
           "deadband_sigma": 2
         }
@@ -1191,42 +1205,43 @@
       "error_bound_sigma": 0.75,
       "heartbeat_ms": 150000,
       "windows_produced": 144000,
-      "forwarded": 14743,
-      "forwarded_per_second": 8.19,
-      "forwarded_per_machine_second": 0.04095,
+      "forwarded": 14717,
+      "forwarded_per_second": 8.18,
+      "forwarded_per_machine_second": 0.04088,
       "dropped_pct": 89.8,
       "reasons": {
         "first": 1600,
-        "divergence": 8117,
-        "heartbeat": 4828,
-        "safety": 198
+        "divergence": 8052,
+        "heartbeat": 4877,
+        "safety": 188
       },
-      "content_forwards": 8117,
-      "heartbeat_forwards": 4828,
-      "safety_forwards": 198,
-      "reconstructed": 124472,
-      "gap_windows": 124472,
-      "windows_in_closed_gaps": 139215,
+      "content_forwards": 8052,
+      "heartbeat_forwards": 4877,
+      "safety_forwards": 188,
+      "reconstructed": 124536,
+      "gap_windows": 124536,
+      "windows_in_closed_gaps": 139253,
       "consumer_coverage_pct": 100,
       "reconstruction_error_sigma": {
-        "samples": 124472,
-        "p50": 0.2213,
-        "p95": 0.6465,
+        "samples": 124536,
+        "p50": 0.2232,
+        "p95": 0.6461,
         "max": 0.75,
-        "mean": 0.2652
+        "mean": 0.2657
       },
-      "windows_evaluated": 83498,
-      "windows_evaluated_per_second": 46.39,
-      "events": 122,
+      "windows_evaluated": 83475,
+      "windows_evaluated_per_second": 46.38,
+      "events": 127,
       "faults_injected": 16,
       "faults_matched": 16,
       "faults_missed": 0,
-      "events_on_healthy_machines": 67,
+      "events_on_healthy_machines": 76,
       "healthy_events_by_type": {
-        "predicted-failure": 67
+        "predicted-failure": 75,
+        "threshold-breach": 1
       },
       "healthy_events_by_sensor": {
-        "current": 67
+        "current": 76
       },
       "detection_delay_windows": {
         "samples": 16,
@@ -1235,29 +1250,29 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 2474,
+      "machines_per_task": 2478,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
-          "forwarded": 4154,
+          "forwarded": 4136,
           "dropped_pct": 88.5,
           "deadband_sigma": 1.88
         },
         "temperature": {
           "windows": 36000,
-          "forwarded": 4390,
+          "forwarded": 4400,
           "dropped_pct": 87.8,
           "deadband_sigma": 0.67
         },
         "current": {
           "windows": 36000,
-          "forwarded": 3183,
+          "forwarded": 3155,
           "dropped_pct": 91.2,
           "deadband_sigma": 0.25
         },
         "rpm": {
           "windows": 36000,
-          "forwarded": 3016,
+          "forwarded": 3026,
           "dropped_pct": 91.6,
           "deadband_sigma": 2
         }
@@ -1270,42 +1285,43 @@
       "error_bound_sigma": 1,
       "heartbeat_ms": 150000,
       "windows_produced": 144000,
-      "forwarded": 13748,
-      "forwarded_per_second": 7.64,
-      "forwarded_per_machine_second": 0.03819,
+      "forwarded": 13721,
+      "forwarded_per_second": 7.62,
+      "forwarded_per_machine_second": 0.03811,
       "dropped_pct": 90.5,
       "reasons": {
         "first": 1600,
         "divergence": 6696,
-        "heartbeat": 5253,
-        "safety": 199
+        "heartbeat": 5232,
+        "safety": 193
       },
       "content_forwards": 6696,
-      "heartbeat_forwards": 5253,
-      "safety_forwards": 199,
-      "reconstructed": 125576,
-      "gap_windows": 125576,
-      "windows_in_closed_gaps": 139324,
+      "heartbeat_forwards": 5232,
+      "safety_forwards": 193,
+      "reconstructed": 125728,
+      "gap_windows": 125728,
+      "windows_in_closed_gaps": 139449,
       "consumer_coverage_pct": 100,
       "reconstruction_error_sigma": {
-        "samples": 125576,
-        "p50": 0.2519,
-        "p95": 0.8524,
+        "samples": 125728,
+        "p50": 0.2532,
+        "p95": 0.8533,
         "max": 1,
-        "mean": 0.3229
+        "mean": 0.3241
       },
-      "windows_evaluated": 81455,
-      "windows_evaluated_per_second": 45.25,
-      "events": 149,
+      "windows_evaluated": 81417,
+      "windows_evaluated_per_second": 45.23,
+      "events": 145,
       "faults_injected": 16,
       "faults_matched": 16,
       "faults_missed": 0,
-      "events_on_healthy_machines": 94,
+      "events_on_healthy_machines": 90,
       "healthy_events_by_type": {
-        "predicted-failure": 94
+        "predicted-failure": 89,
+        "threshold-breach": 1
       },
       "healthy_events_by_sensor": {
-        "current": 94
+        "current": 90
       },
       "detection_delay_windows": {
         "samples": 16,
@@ -1314,29 +1330,29 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 2653,
+      "machines_per_task": 2658,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
-          "forwarded": 3578,
-          "dropped_pct": 90.1,
+          "forwarded": 3592,
+          "dropped_pct": 90,
           "deadband_sigma": 1.88
         },
         "temperature": {
           "windows": 36000,
-          "forwarded": 4292,
+          "forwarded": 4282,
           "dropped_pct": 88.1,
           "deadband_sigma": 0.67
         },
         "current": {
           "windows": 36000,
-          "forwarded": 2972,
-          "dropped_pct": 91.7,
+          "forwarded": 2933,
+          "dropped_pct": 91.9,
           "deadband_sigma": 0.25
         },
         "rpm": {
           "windows": 36000,
-          "forwarded": 2906,
+          "forwarded": 2914,
           "dropped_pct": 91.9,
           "deadband_sigma": 2
         }
@@ -1349,42 +1365,43 @@
       "error_bound_sigma": 1.5,
       "heartbeat_ms": 150000,
       "windows_produced": 144000,
-      "forwarded": 12049,
+      "forwarded": 12050,
       "forwarded_per_second": 6.69,
       "forwarded_per_machine_second": 0.03347,
       "dropped_pct": 91.6,
       "reasons": {
         "first": 1600,
-        "divergence": 3246,
-        "heartbeat": 6989,
-        "safety": 214
+        "divergence": 3309,
+        "heartbeat": 6943,
+        "safety": 198
       },
-      "content_forwards": 3246,
-      "heartbeat_forwards": 6989,
-      "safety_forwards": 214,
-      "reconstructed": 126252,
-      "gap_windows": 126252,
-      "windows_in_closed_gaps": 138301,
+      "content_forwards": 3309,
+      "heartbeat_forwards": 6943,
+      "safety_forwards": 198,
+      "reconstructed": 125991,
+      "gap_windows": 125991,
+      "windows_in_closed_gaps": 138041,
       "consumer_coverage_pct": 100,
       "reconstruction_error_sigma": {
-        "samples": 126252,
-        "p50": 0.3099,
-        "p95": 1.2167,
+        "samples": 125991,
+        "p50": 0.3117,
+        "p95": 1.214,
         "max": 1.5,
-        "mean": 0.4328
+        "mean": 0.4321
       },
-      "windows_evaluated": 71577,
-      "windows_evaluated_per_second": 39.77,
-      "events": 200,
+      "windows_evaluated": 71545,
+      "windows_evaluated_per_second": 39.75,
+      "events": 194,
       "faults_injected": 16,
       "faults_matched": 16,
       "faults_missed": 0,
-      "events_on_healthy_machines": 142,
+      "events_on_healthy_machines": 139,
       "healthy_events_by_type": {
-        "predicted-failure": 142
+        "predicted-failure": 138,
+        "threshold-breach": 1
       },
       "healthy_events_by_sensor": {
-        "current": 142
+        "current": 139
       },
       "detection_delay_windows": {
         "samples": 16,
@@ -1393,30 +1410,30 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 3027,
+      "machines_per_task": 3026,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
-          "forwarded": 3075,
-          "dropped_pct": 91.5,
+          "forwarded": 3102,
+          "dropped_pct": 91.4,
           "deadband_sigma": 1.88
         },
         "temperature": {
           "windows": 36000,
-          "forwarded": 3366,
+          "forwarded": 3380,
           "dropped_pct": 90.6,
           "deadband_sigma": 0.67
         },
         "current": {
           "windows": 36000,
-          "forwarded": 2775,
+          "forwarded": 2761,
           "dropped_pct": 92.3,
           "deadband_sigma": 0.25
         },
         "rpm": {
           "windows": 36000,
-          "forwarded": 2833,
-          "dropped_pct": 92.1,
+          "forwarded": 2807,
+          "dropped_pct": 92.2,
           "deadband_sigma": 2
         }
       }
@@ -1428,42 +1445,43 @@
       "error_bound_sigma": 2,
       "heartbeat_ms": 150000,
       "windows_produced": 144000,
-      "forwarded": 11673,
-      "forwarded_per_second": 6.49,
-      "forwarded_per_machine_second": 0.03243,
+      "forwarded": 11631,
+      "forwarded_per_second": 6.46,
+      "forwarded_per_machine_second": 0.03231,
       "dropped_pct": 91.9,
       "reasons": {
         "first": 1600,
-        "divergence": 2631,
-        "heartbeat": 7232,
-        "safety": 210
+        "divergence": 2563,
+        "heartbeat": 7269,
+        "safety": 199
       },
-      "content_forwards": 2631,
-      "heartbeat_forwards": 7232,
-      "safety_forwards": 210,
-      "reconstructed": 126004,
-      "gap_windows": 126004,
-      "windows_in_closed_gaps": 137677,
+      "content_forwards": 2563,
+      "heartbeat_forwards": 7269,
+      "safety_forwards": 199,
+      "reconstructed": 125898,
+      "gap_windows": 125898,
+      "windows_in_closed_gaps": 137529,
       "consumer_coverage_pct": 100,
       "reconstruction_error_sigma": {
-        "samples": 126004,
-        "p50": 0.3458,
-        "p95": 1.4773,
+        "samples": 125898,
+        "p50": 0.3463,
+        "p95": 1.4749,
         "max": 2,
-        "mean": 0.4888
+        "mean": 0.4872
       },
-      "windows_evaluated": 69292,
-      "windows_evaluated_per_second": 38.5,
-      "events": 224,
+      "windows_evaluated": 69075,
+      "windows_evaluated_per_second": 38.38,
+      "events": 205,
       "faults_injected": 16,
       "faults_matched": 16,
       "faults_missed": 0,
-      "events_on_healthy_machines": 169,
+      "events_on_healthy_machines": 150,
       "healthy_events_by_type": {
-        "predicted-failure": 169
+        "predicted-failure": 149,
+        "threshold-breach": 1
       },
       "healthy_events_by_sensor": {
-        "current": 169
+        "current": 150
       },
       "detection_delay_windows": {
         "samples": 16,
@@ -1472,29 +1490,29 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 3124,
+      "machines_per_task": 3135,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
-          "forwarded": 2933,
+          "forwarded": 2926,
           "dropped_pct": 91.9,
           "deadband_sigma": 1.88
         },
         "temperature": {
           "windows": 36000,
-          "forwarded": 3270,
+          "forwarded": 3268,
           "dropped_pct": 90.9,
           "deadband_sigma": 0.67
         },
         "current": {
           "windows": 36000,
-          "forwarded": 2690,
-          "dropped_pct": 92.5,
+          "forwarded": 2671,
+          "dropped_pct": 92.6,
           "deadband_sigma": 0.25
         },
         "rpm": {
           "windows": 36000,
-          "forwarded": 2780,
+          "forwarded": 2766,
           "dropped_pct": 92.3,
           "deadband_sigma": 2
         }
@@ -1507,74 +1525,75 @@
       "error_bound_sigma": 3,
       "heartbeat_ms": 150000,
       "windows_produced": 144000,
-      "forwarded": 11081,
-      "forwarded_per_second": 6.16,
-      "forwarded_per_machine_second": 0.03078,
+      "forwarded": 11075,
+      "forwarded_per_second": 6.15,
+      "forwarded_per_machine_second": 0.03076,
       "dropped_pct": 92.3,
       "reasons": {
         "first": 1600,
-        "divergence": 1382,
-        "heartbeat": 7885,
-        "safety": 214
+        "divergence": 1374,
+        "heartbeat": 7901,
+        "safety": 200
       },
-      "content_forwards": 1382,
-      "heartbeat_forwards": 7885,
-      "safety_forwards": 214,
-      "reconstructed": 125011,
-      "gap_windows": 125011,
-      "windows_in_closed_gaps": 136092,
+      "content_forwards": 1374,
+      "heartbeat_forwards": 7901,
+      "safety_forwards": 200,
+      "reconstructed": 124981,
+      "gap_windows": 124981,
+      "windows_in_closed_gaps": 136056,
       "consumer_coverage_pct": 100,
       "reconstruction_error_sigma": {
-        "samples": 125011,
-        "p50": 0.3482,
-        "p95": 1.9684,
+        "samples": 124981,
+        "p50": 0.3525,
+        "p95": 1.9473,
         "max": 3,
-        "mean": 0.5687
+        "mean": 0.5691
       },
-      "windows_evaluated": 65637,
-      "windows_evaluated_per_second": 36.47,
-      "events": 220,
+      "windows_evaluated": 65602,
+      "windows_evaluated_per_second": 36.45,
+      "events": 208,
       "faults_injected": 16,
       "faults_matched": 16,
       "faults_missed": 0,
-      "events_on_healthy_machines": 170,
+      "events_on_healthy_machines": 157,
       "healthy_events_by_type": {
-        "predicted-failure": 170
+        "predicted-failure": 156,
+        "threshold-breach": 1
       },
       "healthy_events_by_sensor": {
-        "current": 168,
-        "temperature": 2
+        "current": 154,
+        "temperature": 3
       },
       "detection_delay_windows": {
         "samples": 16,
         "p50": 0,
         "p95": 4,
         "max": 4,
-        "mean": 1
+        "mean": 0.9
       },
-      "machines_per_task": 3291,
+      "machines_per_task": 3293,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
-          "forwarded": 2814,
+          "forwarded": 2817,
           "dropped_pct": 92.2,
           "deadband_sigma": 1.88
         },
         "temperature": {
           "windows": 36000,
-          "forwarded": 2916,
+          "forwarded": 2917,
           "dropped_pct": 91.9,
           "deadband_sigma": 0.67
         },
         "current": {
           "windows": 36000,
-          "forwarded": 2643,
+          "forwarded": 2628,
           "dropped_pct": 92.7,
           "deadband_sigma": 0.25
         },
         "rpm": {
           "windows": 36000,
-          "forwarded": 2708,
+          "forwarded": 2713,
           "dropped_pct": 92.5,
           "deadband_sigma": 2
         }
@@ -1587,73 +1606,75 @@
       "error_bound_sigma": 4,
       "heartbeat_ms": 150000,
       "windows_produced": 144000,
-      "forwarded": 10819,
+      "forwarded": 10820,
       "forwarded_per_second": 6.01,
-      "forwarded_per_machine_second": 0.03005,
+      "forwarded_per_machine_second": 0.03006,
       "dropped_pct": 92.5,
       "reasons": {
         "first": 1600,
-        "divergence": 398,
-        "heartbeat": 8604,
-        "safety": 217
+        "divergence": 433,
+        "heartbeat": 8588,
+        "safety": 199
       },
-      "content_forwards": 398,
-      "heartbeat_forwards": 8604,
-      "safety_forwards": 217,
-      "reconstructed": 123420,
-      "gap_windows": 123420,
-      "windows_in_closed_gaps": 134239,
+      "content_forwards": 433,
+      "heartbeat_forwards": 8588,
+      "safety_forwards": 199,
+      "reconstructed": 123482,
+      "gap_windows": 123482,
+      "windows_in_closed_gaps": 134302,
       "consumer_coverage_pct": 100,
       "reconstruction_error_sigma": {
-        "samples": 123420,
-        "p50": 0.338,
-        "p95": 2.0664,
+        "samples": 123482,
+        "p50": 0.3406,
+        "p95": 2.0444,
         "max": 4,
-        "mean": 0.5885
+        "mean": 0.5871
       },
-      "windows_evaluated": 64003,
-      "windows_evaluated_per_second": 35.56,
-      "events": 215,
+      "windows_evaluated": 64024,
+      "windows_evaluated_per_second": 35.57,
+      "events": 203,
       "faults_injected": 16,
       "faults_matched": 16,
       "faults_missed": 0,
-      "events_on_healthy_machines": 168,
+      "events_on_healthy_machines": 156,
       "healthy_events_by_type": {
-        "predicted-failure": 168
+        "predicted-failure": 155,
+        "threshold-breach": 1
       },
       "healthy_events_by_sensor": {
-        "current": 168
+        "current": 154,
+        "temperature": 2
       },
       "detection_delay_windows": {
         "samples": 16,
         "p50": 1,
         "p95": 4,
         "max": 4,
-        "mean": 1.3
+        "mean": 1.1
       },
-      "machines_per_task": 3371,
+      "machines_per_task": 3370,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
-          "forwarded": 2777,
+          "forwarded": 2788,
           "dropped_pct": 92.3,
           "deadband_sigma": 1.88
         },
         "temperature": {
           "windows": 36000,
-          "forwarded": 2714,
+          "forwarded": 2715,
           "dropped_pct": 92.5,
           "deadband_sigma": 0.67
         },
         "current": {
           "windows": 36000,
-          "forwarded": 2639,
+          "forwarded": 2625,
           "dropped_pct": 92.7,
           "deadband_sigma": 0.25
         },
         "rpm": {
           "windows": 36000,
-          "forwarded": 2689,
+          "forwarded": 2692,
           "dropped_pct": 92.5,
           "deadband_sigma": 2
         }
@@ -1666,42 +1687,43 @@
       "error_bound_sigma": 0.25,
       "heartbeat_ms": 300000,
       "windows_produced": 144000,
-      "forwarded": 31940,
-      "forwarded_per_second": 17.74,
-      "forwarded_per_machine_second": 0.08872,
-      "dropped_pct": 77.8,
+      "forwarded": 31707,
+      "forwarded_per_second": 17.61,
+      "forwarded_per_machine_second": 0.08808,
+      "dropped_pct": 78,
       "reasons": {
         "first": 1600,
-        "divergence": 29908,
-        "safety": 193,
-        "heartbeat": 239
+        "divergence": 29667,
+        "safety": 185,
+        "heartbeat": 255
       },
-      "content_forwards": 29908,
-      "heartbeat_forwards": 239,
-      "safety_forwards": 193,
-      "reconstructed": 108404,
-      "gap_windows": 108404,
-      "windows_in_closed_gaps": 140344,
+      "content_forwards": 29667,
+      "heartbeat_forwards": 255,
+      "safety_forwards": 185,
+      "reconstructed": 108788,
+      "gap_windows": 108788,
+      "windows_in_closed_gaps": 140495,
       "consumer_coverage_pct": 100,
       "reconstruction_error_sigma": {
-        "samples": 108404,
-        "p50": 0.1104,
-        "p95": 0.2312,
+        "samples": 108788,
+        "p50": 0.1107,
+        "p95": 0.2317,
         "max": 0.25,
         "mean": 0.1136
       },
-      "windows_evaluated": 111343,
-      "windows_evaluated_per_second": 61.86,
-      "events": 101,
+      "windows_evaluated": 110985,
+      "windows_evaluated_per_second": 61.66,
+      "events": 105,
       "faults_injected": 16,
       "faults_matched": 16,
       "faults_missed": 0,
-      "events_on_healthy_machines": 47,
+      "events_on_healthy_machines": 52,
       "healthy_events_by_type": {
-        "predicted-failure": 47
+        "predicted-failure": 51,
+        "threshold-breach": 1
       },
       "healthy_events_by_sensor": {
-        "current": 47
+        "current": 52
       },
       "detection_delay_windows": {
         "samples": 16,
@@ -1710,12 +1732,12 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 1142,
+      "machines_per_task": 1150,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
-          "forwarded": 12277,
-          "dropped_pct": 65.9,
+          "forwarded": 12117,
+          "dropped_pct": 66.3,
           "deadband_sigma": 1.88
         },
         "temperature": {
@@ -1726,14 +1748,14 @@
         },
         "current": {
           "windows": 36000,
-          "forwarded": 5430,
-          "dropped_pct": 84.9,
+          "forwarded": 5293,
+          "dropped_pct": 85.3,
           "deadband_sigma": 0.25
         },
         "rpm": {
           "windows": 36000,
-          "forwarded": 4192,
-          "dropped_pct": 88.4,
+          "forwarded": 4256,
+          "dropped_pct": 88.2,
           "deadband_sigma": 2
         }
       }
@@ -1745,42 +1767,43 @@
       "error_bound_sigma": 0.5,
       "heartbeat_ms": 300000,
       "windows_produced": 144000,
-      "forwarded": 16435,
-      "forwarded_per_second": 9.13,
-      "forwarded_per_machine_second": 0.04565,
-      "dropped_pct": 88.6,
+      "forwarded": 16265,
+      "forwarded_per_second": 9.04,
+      "forwarded_per_machine_second": 0.04518,
+      "dropped_pct": 88.7,
       "reasons": {
         "first": 1600,
-        "divergence": 13788,
-        "safety": 195,
-        "heartbeat": 852
+        "divergence": 13649,
+        "safety": 187,
+        "heartbeat": 829
       },
-      "content_forwards": 13788,
-      "heartbeat_forwards": 852,
-      "safety_forwards": 195,
-      "reconstructed": 121440,
-      "gap_windows": 121440,
-      "windows_in_closed_gaps": 137875,
+      "content_forwards": 13649,
+      "heartbeat_forwards": 829,
+      "safety_forwards": 187,
+      "reconstructed": 121785,
+      "gap_windows": 121785,
+      "windows_in_closed_gaps": 138050,
       "consumer_coverage_pct": 100,
       "reconstruction_error_sigma": {
-        "samples": 121440,
-        "p50": 0.185,
+        "samples": 121785,
+        "p50": 0.1849,
         "p95": 0.4506,
         "max": 0.5,
-        "mean": 0.205
+        "mean": 0.2051
       },
-      "windows_evaluated": 81801,
-      "windows_evaluated_per_second": 45.45,
-      "events": 103,
+      "windows_evaluated": 81224,
+      "windows_evaluated_per_second": 45.12,
+      "events": 105,
       "faults_injected": 16,
       "faults_matched": 16,
       "faults_missed": 0,
-      "events_on_healthy_machines": 49,
+      "events_on_healthy_machines": 50,
       "healthy_events_by_type": {
-        "predicted-failure": 49
+        "predicted-failure": 49,
+        "threshold-breach": 1
       },
       "healthy_events_by_sensor": {
-        "current": 49
+        "current": 50
       },
       "detection_delay_windows": {
         "samples": 16,
@@ -1789,30 +1812,30 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 2219,
+      "machines_per_task": 2242,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
-          "forwarded": 5137,
-          "dropped_pct": 85.7,
+          "forwarded": 4991,
+          "dropped_pct": 86.1,
           "deadband_sigma": 1.88
         },
         "temperature": {
           "windows": 36000,
-          "forwarded": 5785,
-          "dropped_pct": 83.9,
+          "forwarded": 5741,
+          "dropped_pct": 84.1,
           "deadband_sigma": 0.67
         },
         "current": {
           "windows": 36000,
-          "forwarded": 3022,
+          "forwarded": 3012,
           "dropped_pct": 91.6,
           "deadband_sigma": 0.25
         },
         "rpm": {
           "windows": 36000,
-          "forwarded": 2491,
-          "dropped_pct": 93.1,
+          "forwarded": 2521,
+          "dropped_pct": 93,
           "deadband_sigma": 2
         }
       }
@@ -1824,42 +1847,43 @@
       "error_bound_sigma": 0.75,
       "heartbeat_ms": 300000,
       "windows_produced": 144000,
-      "forwarded": 11871,
-      "forwarded_per_second": 6.6,
-      "forwarded_per_machine_second": 0.03297,
+      "forwarded": 11828,
+      "forwarded_per_second": 6.57,
+      "forwarded_per_machine_second": 0.03286,
       "dropped_pct": 91.8,
       "reasons": {
         "first": 1600,
-        "divergence": 8707,
-        "safety": 201,
-        "heartbeat": 1363
+        "divergence": 8642,
+        "safety": 188,
+        "heartbeat": 1398
       },
-      "content_forwards": 8707,
-      "heartbeat_forwards": 1363,
-      "safety_forwards": 201,
-      "reconstructed": 124499,
-      "gap_windows": 124499,
-      "windows_in_closed_gaps": 136370,
+      "content_forwards": 8642,
+      "heartbeat_forwards": 1398,
+      "safety_forwards": 188,
+      "reconstructed": 124243,
+      "gap_windows": 124243,
+      "windows_in_closed_gaps": 136071,
       "consumer_coverage_pct": 100,
       "reconstruction_error_sigma": {
-        "samples": 124499,
-        "p50": 0.272,
-        "p95": 0.6699,
+        "samples": 124243,
+        "p50": 0.2647,
+        "p95": 0.6677,
         "max": 0.75,
-        "mean": 0.3016
+        "mean": 0.2969
       },
-      "windows_evaluated": 64982,
-      "windows_evaluated_per_second": 36.1,
-      "events": 120,
+      "windows_evaluated": 64837,
+      "windows_evaluated_per_second": 36.02,
+      "events": 123,
       "faults_injected": 16,
       "faults_matched": 16,
       "faults_missed": 0,
-      "events_on_healthy_machines": 63,
+      "events_on_healthy_machines": 69,
       "healthy_events_by_type": {
-        "predicted-failure": 63
+        "predicted-failure": 68,
+        "threshold-breach": 1
       },
       "healthy_events_by_sensor": {
-        "current": 63
+        "current": 69
       },
       "detection_delay_windows": {
         "samples": 16,
@@ -1868,29 +1892,29 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 3072,
+      "machines_per_task": 3083,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
-          "forwarded": 3363,
-          "dropped_pct": 90.7,
+          "forwarded": 3318,
+          "dropped_pct": 90.8,
           "deadband_sigma": 1.88
         },
         "temperature": {
           "windows": 36000,
-          "forwarded": 4069,
-          "dropped_pct": 88.7,
+          "forwarded": 4136,
+          "dropped_pct": 88.5,
           "deadband_sigma": 0.67
         },
         "current": {
           "windows": 36000,
-          "forwarded": 2389,
-          "dropped_pct": 93.4,
+          "forwarded": 2339,
+          "dropped_pct": 93.5,
           "deadband_sigma": 0.25
         },
         "rpm": {
           "windows": 36000,
-          "forwarded": 2050,
+          "forwarded": 2035,
           "dropped_pct": 94.3,
           "deadband_sigma": 2
         }
@@ -1903,42 +1927,43 @@
       "error_bound_sigma": 1,
       "heartbeat_ms": 300000,
       "windows_produced": 144000,
-      "forwarded": 10819,
-      "forwarded_per_second": 6.01,
-      "forwarded_per_machine_second": 0.03005,
+      "forwarded": 10768,
+      "forwarded_per_second": 5.98,
+      "forwarded_per_machine_second": 0.02991,
       "dropped_pct": 92.5,
       "reasons": {
         "first": 1600,
-        "divergence": 7306,
-        "safety": 204,
-        "heartbeat": 1709
+        "divergence": 7243,
+        "safety": 198,
+        "heartbeat": 1727
       },
-      "content_forwards": 7306,
-      "heartbeat_forwards": 1709,
-      "safety_forwards": 204,
-      "reconstructed": 125106,
-      "gap_windows": 125106,
-      "windows_in_closed_gaps": 135925,
+      "content_forwards": 7243,
+      "heartbeat_forwards": 1727,
+      "safety_forwards": 198,
+      "reconstructed": 124891,
+      "gap_windows": 124891,
+      "windows_in_closed_gaps": 135659,
       "consumer_coverage_pct": 100,
       "reconstruction_error_sigma": {
-        "samples": 125106,
-        "p50": 0.3003,
-        "p95": 0.8851,
+        "samples": 124891,
+        "p50": 0.3036,
+        "p95": 0.8843,
         "max": 1,
-        "mean": 0.3624
+        "mean": 0.3642
       },
-      "windows_evaluated": 61419,
-      "windows_evaluated_per_second": 34.12,
-      "events": 147,
+      "windows_evaluated": 61128,
+      "windows_evaluated_per_second": 33.96,
+      "events": 150,
       "faults_injected": 16,
       "faults_matched": 16,
       "faults_missed": 0,
-      "events_on_healthy_machines": 94,
+      "events_on_healthy_machines": 97,
       "healthy_events_by_type": {
-        "predicted-failure": 94
+        "predicted-failure": 96,
+        "threshold-breach": 1
       },
       "healthy_events_by_sensor": {
-        "current": 94
+        "current": 97
       },
       "detection_delay_windows": {
         "samples": 16,
@@ -1947,29 +1972,29 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 3371,
+      "machines_per_task": 3387,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
-          "forwarded": 2712,
-          "dropped_pct": 92.5,
+          "forwarded": 2727,
+          "dropped_pct": 92.4,
           "deadband_sigma": 1.88
         },
         "temperature": {
           "windows": 36000,
-          "forwarded": 4170,
-          "dropped_pct": 88.4,
+          "forwarded": 4136,
+          "dropped_pct": 88.5,
           "deadband_sigma": 0.67
         },
         "current": {
           "windows": 36000,
-          "forwarded": 2062,
+          "forwarded": 2037,
           "dropped_pct": 94.3,
           "deadband_sigma": 0.25
         },
         "rpm": {
           "windows": 36000,
-          "forwarded": 1875,
+          "forwarded": 1868,
           "dropped_pct": 94.8,
           "deadband_sigma": 2
         }
@@ -1982,42 +2007,43 @@
       "error_bound_sigma": 1.5,
       "heartbeat_ms": 300000,
       "windows_produced": 144000,
-      "forwarded": 8249,
+      "forwarded": 8248,
       "forwarded_per_second": 4.58,
       "forwarded_per_machine_second": 0.02291,
       "dropped_pct": 94.3,
       "reasons": {
         "first": 1600,
-        "divergence": 4221,
-        "safety": 216,
-        "heartbeat": 2212
+        "divergence": 4229,
+        "safety": 205,
+        "heartbeat": 2214
       },
-      "content_forwards": 4221,
-      "heartbeat_forwards": 2212,
-      "safety_forwards": 216,
-      "reconstructed": 125644,
-      "gap_windows": 125644,
-      "windows_in_closed_gaps": 133893,
+      "content_forwards": 4229,
+      "heartbeat_forwards": 2214,
+      "safety_forwards": 205,
+      "reconstructed": 125688,
+      "gap_windows": 125688,
+      "windows_in_closed_gaps": 133936,
       "consumer_coverage_pct": 100,
       "reconstruction_error_sigma": {
-        "samples": 125644,
-        "p50": 0.4404,
-        "p95": 1.3068,
+        "samples": 125688,
+        "p50": 0.4368,
+        "p95": 1.3075,
         "max": 1.5,
-        "mean": 0.5314
+        "mean": 0.5304
       },
-      "windows_evaluated": 44992,
-      "windows_evaluated_per_second": 25,
-      "events": 208,
+      "windows_evaluated": 45031,
+      "windows_evaluated_per_second": 25.02,
+      "events": 206,
       "faults_injected": 16,
       "faults_matched": 16,
       "faults_missed": 0,
-      "events_on_healthy_machines": 155,
+      "events_on_healthy_machines": 153,
       "healthy_events_by_type": {
-        "predicted-failure": 155
+        "predicted-failure": 152,
+        "threshold-breach": 1
       },
       "healthy_events_by_sensor": {
-        "current": 155
+        "current": 153
       },
       "detection_delay_windows": {
         "samples": 16,
@@ -2030,25 +2056,25 @@
       "per_sensor": {
         "vibration": {
           "windows": 36000,
-          "forwarded": 2161,
-          "dropped_pct": 94,
+          "forwarded": 2142,
+          "dropped_pct": 94.1,
           "deadband_sigma": 1.88
         },
         "temperature": {
           "windows": 36000,
-          "forwarded": 2587,
-          "dropped_pct": 92.8,
+          "forwarded": 2626,
+          "dropped_pct": 92.7,
           "deadband_sigma": 0.67
         },
         "current": {
           "windows": 36000,
-          "forwarded": 1776,
+          "forwarded": 1756,
           "dropped_pct": 95.1,
           "deadband_sigma": 0.25
         },
         "rpm": {
           "windows": 36000,
-          "forwarded": 1725,
+          "forwarded": 1724,
           "dropped_pct": 95.2,
           "deadband_sigma": 2
         }
@@ -2061,68 +2087,69 @@
       "error_bound_sigma": 2,
       "heartbeat_ms": 300000,
       "windows_produced": 144000,
-      "forwarded": 7577,
-      "forwarded_per_second": 4.21,
-      "forwarded_per_machine_second": 0.02105,
-      "dropped_pct": 94.7,
+      "forwarded": 7531,
+      "forwarded_per_second": 4.18,
+      "forwarded_per_machine_second": 0.02092,
+      "dropped_pct": 94.8,
       "reasons": {
         "first": 1600,
-        "divergence": 3123,
-        "safety": 225,
-        "heartbeat": 2629
+        "divergence": 3134,
+        "safety": 216,
+        "heartbeat": 2581
       },
-      "content_forwards": 3123,
-      "heartbeat_forwards": 2629,
-      "safety_forwards": 225,
-      "reconstructed": 126785,
-      "gap_windows": 126785,
-      "windows_in_closed_gaps": 134362,
+      "content_forwards": 3134,
+      "heartbeat_forwards": 2581,
+      "safety_forwards": 216,
+      "reconstructed": 126391,
+      "gap_windows": 126391,
+      "windows_in_closed_gaps": 133922,
       "consumer_coverage_pct": 100,
       "reconstruction_error_sigma": {
-        "samples": 126785,
-        "p50": 0.4567,
-        "p95": 1.6307,
+        "samples": 126391,
+        "p50": 0.4603,
+        "p95": 1.6324,
         "max": 2,
-        "mean": 0.5923
+        "mean": 0.5949
       },
-      "windows_evaluated": 40643,
-      "windows_evaluated_per_second": 22.58,
-      "events": 252,
+      "windows_evaluated": 40436,
+      "windows_evaluated_per_second": 22.46,
+      "events": 248,
       "faults_injected": 16,
       "faults_matched": 16,
       "faults_missed": 0,
-      "events_on_healthy_machines": 200,
+      "events_on_healthy_machines": 198,
       "healthy_events_by_type": {
-        "predicted-failure": 200
+        "predicted-failure": 197,
+        "threshold-breach": 1
       },
       "healthy_events_by_sensor": {
-        "current": 200
+        "current": 198
       },
       "detection_delay_windows": {
         "samples": 16,
         "p50": 0,
-        "p95": 2,
-        "max": 2,
+        "p95": 3,
+        "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 4813,
+      "machines_per_task": 4842,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
-          "forwarded": 1923,
+          "forwarded": 1918,
           "dropped_pct": 94.7,
           "deadband_sigma": 1.88
         },
         "temperature": {
           "windows": 36000,
-          "forwarded": 2333,
-          "dropped_pct": 93.5,
+          "forwarded": 2321,
+          "dropped_pct": 93.6,
           "deadband_sigma": 0.67
         },
         "current": {
           "windows": 36000,
-          "forwarded": 1657,
-          "dropped_pct": 95.4,
+          "forwarded": 1628,
+          "dropped_pct": 95.5,
           "deadband_sigma": 0.25
         },
         "rpm": {
@@ -2140,43 +2167,44 @@
       "error_bound_sigma": 3,
       "heartbeat_ms": 300000,
       "windows_produced": 144000,
-      "forwarded": 7193,
-      "forwarded_per_second": 4,
-      "forwarded_per_machine_second": 0.01998,
+      "forwarded": 7163,
+      "forwarded_per_second": 3.98,
+      "forwarded_per_machine_second": 0.0199,
       "dropped_pct": 95,
       "reasons": {
         "first": 1600,
-        "divergence": 2411,
-        "safety": 237,
-        "heartbeat": 2945
+        "divergence": 2413,
+        "safety": 230,
+        "heartbeat": 2920
       },
-      "content_forwards": 2411,
-      "heartbeat_forwards": 2945,
-      "safety_forwards": 237,
-      "reconstructed": 125191,
-      "gap_windows": 125191,
-      "windows_in_closed_gaps": 132384,
+      "content_forwards": 2413,
+      "heartbeat_forwards": 2920,
+      "safety_forwards": 230,
+      "reconstructed": 124813,
+      "gap_windows": 124813,
+      "windows_in_closed_gaps": 131976,
       "consumer_coverage_pct": 100,
       "reconstruction_error_sigma": {
-        "samples": 125191,
-        "p50": 0.4942,
-        "p95": 2.3438,
+        "samples": 124813,
+        "p50": 0.4946,
+        "p95": 2.3487,
         "max": 3,
-        "mean": 0.7424
+        "mean": 0.743
       },
-      "windows_evaluated": 38444,
-      "windows_evaluated_per_second": 21.36,
-      "events": 260,
+      "windows_evaluated": 38259,
+      "windows_evaluated_per_second": 21.26,
+      "events": 248,
       "faults_injected": 16,
       "faults_matched": 16,
       "faults_missed": 0,
-      "events_on_healthy_machines": 214,
+      "events_on_healthy_machines": 203,
       "healthy_events_by_type": {
-        "predicted-failure": 213,
-        "anomaly": 1
+        "predicted-failure": 201,
+        "anomaly": 1,
+        "threshold-breach": 1
       },
       "healthy_events_by_sensor": {
-        "current": 213,
+        "current": 202,
         "temperature": 1
       },
       "detection_delay_windows": {
@@ -2186,11 +2214,11 @@
         "max": 3,
         "mean": 0.9
       },
-      "machines_per_task": 5070,
+      "machines_per_task": 5091,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
-          "forwarded": 1756,
+          "forwarded": 1752,
           "dropped_pct": 95.1,
           "deadband_sigma": 1.88
         },
@@ -2202,13 +2230,13 @@
         },
         "current": {
           "windows": 36000,
-          "forwarded": 1534,
-          "dropped_pct": 95.7,
+          "forwarded": 1518,
+          "dropped_pct": 95.8,
           "deadband_sigma": 0.25
         },
         "rpm": {
           "windows": 36000,
-          "forwarded": 1586,
+          "forwarded": 1576,
           "dropped_pct": 95.6,
           "deadband_sigma": 2
         }
@@ -2221,75 +2249,76 @@
       "error_bound_sigma": 4,
       "heartbeat_ms": 300000,
       "windows_produced": 144000,
-      "forwarded": 7029,
-      "forwarded_per_second": 3.91,
-      "forwarded_per_machine_second": 0.01953,
+      "forwarded": 7013,
+      "forwarded_per_second": 3.9,
+      "forwarded_per_machine_second": 0.01948,
       "dropped_pct": 95.1,
       "reasons": {
         "first": 1600,
-        "divergence": 2097,
-        "safety": 249,
-        "heartbeat": 3083
+        "divergence": 2090,
+        "safety": 243,
+        "heartbeat": 3080
       },
-      "content_forwards": 2097,
-      "heartbeat_forwards": 3083,
-      "safety_forwards": 249,
-      "reconstructed": 124398,
-      "gap_windows": 124398,
-      "windows_in_closed_gaps": 131427,
+      "content_forwards": 2090,
+      "heartbeat_forwards": 3080,
+      "safety_forwards": 243,
+      "reconstructed": 124103,
+      "gap_windows": 124103,
+      "windows_in_closed_gaps": 131116,
       "consumer_coverage_pct": 100,
       "reconstruction_error_sigma": {
-        "samples": 124398,
-        "p50": 0.5613,
-        "p95": 3.0237,
+        "samples": 124103,
+        "p50": 0.5586,
+        "p95": 3.025,
         "max": 4,
-        "mean": 0.8971
+        "mean": 0.8965
       },
-      "windows_evaluated": 37501,
-      "windows_evaluated_per_second": 20.83,
-      "events": 244,
+      "windows_evaluated": 37402,
+      "windows_evaluated_per_second": 20.78,
+      "events": 233,
       "faults_injected": 16,
       "faults_matched": 16,
       "faults_missed": 0,
-      "events_on_healthy_machines": 201,
+      "events_on_healthy_machines": 192,
       "healthy_events_by_type": {
-        "predicted-failure": 200,
-        "anomaly": 1
+        "predicted-failure": 190,
+        "anomaly": 1,
+        "threshold-breach": 1
       },
       "healthy_events_by_sensor": {
-        "current": 195,
-        "temperature": 6
+        "current": 188,
+        "temperature": 4
       },
       "detection_delay_windows": {
         "samples": 16,
         "p50": 1,
-        "p95": 3,
-        "max": 3,
+        "p95": 4,
+        "max": 4,
         "mean": 1.2
       },
-      "machines_per_task": 5188,
+      "machines_per_task": 5200,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
-          "forwarded": 1689,
+          "forwarded": 1693,
           "dropped_pct": 95.3,
           "deadband_sigma": 1.88
         },
         "temperature": {
           "windows": 36000,
-          "forwarded": 2307,
+          "forwarded": 2309,
           "dropped_pct": 93.6,
           "deadband_sigma": 0.67
         },
         "current": {
           "windows": 36000,
-          "forwarded": 1486,
+          "forwarded": 1470,
           "dropped_pct": 95.9,
           "deadband_sigma": 0.25
         },
         "rpm": {
           "windows": 36000,
-          "forwarded": 1547,
+          "forwarded": 1541,
           "dropped_pct": 95.7,
           "deadband_sigma": 2
         }
@@ -2302,42 +2331,43 @@
       "error_bound_sigma": 0.25,
       "heartbeat_ms": 600000,
       "windows_produced": 144000,
-      "forwarded": 31635,
-      "forwarded_per_second": 17.58,
-      "forwarded_per_machine_second": 0.08788,
-      "dropped_pct": 78,
+      "forwarded": 31391,
+      "forwarded_per_second": 17.44,
+      "forwarded_per_machine_second": 0.0872,
+      "dropped_pct": 78.2,
       "reasons": {
         "first": 1600,
-        "divergence": 29805,
-        "safety": 193,
-        "heartbeat": 37
+        "divergence": 29570,
+        "safety": 185,
+        "heartbeat": 36
       },
-      "content_forwards": 29805,
-      "heartbeat_forwards": 37,
-      "safety_forwards": 193,
-      "reconstructed": 107905,
-      "gap_windows": 107905,
-      "windows_in_closed_gaps": 139540,
+      "content_forwards": 29570,
+      "heartbeat_forwards": 36,
+      "safety_forwards": 185,
+      "reconstructed": 108589,
+      "gap_windows": 108589,
+      "windows_in_closed_gaps": 139980,
       "consumer_coverage_pct": 100,
       "reconstruction_error_sigma": {
-        "samples": 107905,
-        "p50": 0.1107,
-        "p95": 0.2312,
+        "samples": 108589,
+        "p50": 0.1106,
+        "p95": 0.2317,
         "max": 0.25,
-        "mean": 0.1137
+        "mean": 0.1135
       },
-      "windows_evaluated": 109521,
-      "windows_evaluated_per_second": 60.85,
-      "events": 101,
+      "windows_evaluated": 109207,
+      "windows_evaluated_per_second": 60.67,
+      "events": 105,
       "faults_injected": 16,
       "faults_matched": 16,
       "faults_missed": 0,
-      "events_on_healthy_machines": 47,
+      "events_on_healthy_machines": 52,
       "healthy_events_by_type": {
-        "predicted-failure": 47
+        "predicted-failure": 51,
+        "threshold-breach": 1
       },
       "healthy_events_by_sensor": {
-        "current": 47
+        "current": 52
       },
       "detection_delay_windows": {
         "samples": 16,
@@ -2346,12 +2376,12 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 1153,
+      "machines_per_task": 1162,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
-          "forwarded": 12277,
-          "dropped_pct": 65.9,
+          "forwarded": 12117,
+          "dropped_pct": 66.3,
           "deadband_sigma": 1.88
         },
         "temperature": {
@@ -2362,14 +2392,14 @@
         },
         "current": {
           "windows": 36000,
-          "forwarded": 5401,
-          "dropped_pct": 85,
+          "forwarded": 5261,
+          "dropped_pct": 85.4,
           "deadband_sigma": 0.25
         },
         "rpm": {
           "windows": 36000,
-          "forwarded": 3916,
-          "dropped_pct": 89.1,
+          "forwarded": 3972,
+          "dropped_pct": 89,
           "deadband_sigma": 2
         }
       }
@@ -2381,42 +2411,43 @@
       "error_bound_sigma": 0.5,
       "heartbeat_ms": 600000,
       "windows_produced": 144000,
-      "forwarded": 15801,
-      "forwarded_per_second": 8.78,
-      "forwarded_per_machine_second": 0.04389,
-      "dropped_pct": 89,
+      "forwarded": 15571,
+      "forwarded_per_second": 8.65,
+      "forwarded_per_machine_second": 0.04325,
+      "dropped_pct": 89.2,
       "reasons": {
         "first": 1600,
-        "divergence": 13823,
-        "safety": 195,
-        "heartbeat": 183
+        "divergence": 13603,
+        "safety": 187,
+        "heartbeat": 181
       },
-      "content_forwards": 13823,
-      "heartbeat_forwards": 183,
-      "safety_forwards": 195,
-      "reconstructed": 119581,
-      "gap_windows": 119581,
-      "windows_in_closed_gaps": 135382,
+      "content_forwards": 13603,
+      "heartbeat_forwards": 181,
+      "safety_forwards": 187,
+      "reconstructed": 120186,
+      "gap_windows": 120186,
+      "windows_in_closed_gaps": 135757,
       "consumer_coverage_pct": 100,
       "reconstruction_error_sigma": {
-        "samples": 119581,
-        "p50": 0.1889,
-        "p95": 0.4516,
+        "samples": 120186,
+        "p50": 0.189,
+        "p95": 0.452,
         "max": 0.5,
-        "mean": 0.208
+        "mean": 0.2077
       },
-      "windows_evaluated": 77580,
-      "windows_evaluated_per_second": 43.1,
-      "events": 98,
+      "windows_evaluated": 76625,
+      "windows_evaluated_per_second": 42.57,
+      "events": 104,
       "faults_injected": 16,
       "faults_matched": 16,
       "faults_missed": 0,
-      "events_on_healthy_machines": 43,
+      "events_on_healthy_machines": 49,
       "healthy_events_by_type": {
-        "predicted-failure": 43
+        "predicted-failure": 48,
+        "threshold-breach": 1
       },
       "healthy_events_by_sensor": {
-        "current": 43
+        "current": 49
       },
       "detection_delay_windows": {
         "samples": 16,
@@ -2425,30 +2456,30 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 2308,
+      "machines_per_task": 2342,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
-          "forwarded": 5004,
-          "dropped_pct": 86.1,
+          "forwarded": 4842,
+          "dropped_pct": 86.6,
           "deadband_sigma": 1.88
         },
         "temperature": {
           "windows": 36000,
-          "forwarded": 5785,
-          "dropped_pct": 83.9,
+          "forwarded": 5741,
+          "dropped_pct": 84.1,
           "deadband_sigma": 0.67
         },
         "current": {
           "windows": 36000,
-          "forwarded": 2896,
-          "dropped_pct": 92,
+          "forwarded": 2844,
+          "dropped_pct": 92.1,
           "deadband_sigma": 0.25
         },
         "rpm": {
           "windows": 36000,
-          "forwarded": 2116,
-          "dropped_pct": 94.1,
+          "forwarded": 2144,
+          "dropped_pct": 94,
           "deadband_sigma": 2
         }
       }
@@ -2460,42 +2491,43 @@
       "error_bound_sigma": 0.75,
       "heartbeat_ms": 600000,
       "windows_produced": 144000,
-      "forwarded": 10908,
-      "forwarded_per_second": 6.06,
-      "forwarded_per_machine_second": 0.0303,
-      "dropped_pct": 92.4,
+      "forwarded": 10857,
+      "forwarded_per_second": 6.03,
+      "forwarded_per_machine_second": 0.03016,
+      "dropped_pct": 92.5,
       "reasons": {
         "first": 1600,
-        "divergence": 8771,
-        "safety": 202,
-        "heartbeat": 335
+        "divergence": 8719,
+        "safety": 189,
+        "heartbeat": 349
       },
-      "content_forwards": 8771,
-      "heartbeat_forwards": 335,
-      "safety_forwards": 202,
-      "reconstructed": 122192,
-      "gap_windows": 122192,
-      "windows_in_closed_gaps": 133100,
+      "content_forwards": 8719,
+      "heartbeat_forwards": 349,
+      "safety_forwards": 189,
+      "reconstructed": 121950,
+      "gap_windows": 121950,
+      "windows_in_closed_gaps": 132807,
       "consumer_coverage_pct": 100,
       "reconstruction_error_sigma": {
-        "samples": 122192,
-        "p50": 0.2858,
-        "p95": 0.6745,
+        "samples": 121950,
+        "p50": 0.2833,
+        "p95": 0.6736,
         "max": 0.75,
-        "mean": 0.3111
+        "mean": 0.3099
       },
-      "windows_evaluated": 58408,
-      "windows_evaluated_per_second": 32.45,
-      "events": 124,
+      "windows_evaluated": 58229,
+      "windows_evaluated_per_second": 32.35,
+      "events": 114,
       "faults_injected": 16,
       "faults_matched": 16,
       "faults_missed": 0,
-      "events_on_healthy_machines": 67,
+      "events_on_healthy_machines": 60,
       "healthy_events_by_type": {
-        "predicted-failure": 67
+        "predicted-failure": 59,
+        "threshold-breach": 1
       },
       "healthy_events_by_sensor": {
-        "current": 67
+        "current": 60
       },
       "detection_delay_windows": {
         "samples": 16,
@@ -2504,30 +2536,30 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 3343,
+      "machines_per_task": 3359,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
-          "forwarded": 3081,
-          "dropped_pct": 91.4,
+          "forwarded": 3023,
+          "dropped_pct": 91.6,
           "deadband_sigma": 1.88
         },
         "temperature": {
           "windows": 36000,
-          "forwarded": 4069,
-          "dropped_pct": 88.7,
+          "forwarded": 4136,
+          "dropped_pct": 88.5,
           "deadband_sigma": 0.67
         },
         "current": {
           "windows": 36000,
-          "forwarded": 2103,
+          "forwarded": 2073,
           "dropped_pct": 94.2,
           "deadband_sigma": 0.25
         },
         "rpm": {
           "windows": 36000,
-          "forwarded": 1655,
-          "dropped_pct": 95.4,
+          "forwarded": 1625,
+          "dropped_pct": 95.5,
           "deadband_sigma": 2
         }
       }
@@ -2539,42 +2571,43 @@
       "error_bound_sigma": 1,
       "heartbeat_ms": 600000,
       "windows_produced": 144000,
-      "forwarded": 9724,
-      "forwarded_per_second": 5.4,
-      "forwarded_per_machine_second": 0.02701,
-      "dropped_pct": 93.2,
+      "forwarded": 9657,
+      "forwarded_per_second": 5.37,
+      "forwarded_per_machine_second": 0.02683,
+      "dropped_pct": 93.3,
       "reasons": {
         "first": 1600,
-        "divergence": 7444,
-        "safety": 202,
-        "heartbeat": 478
+        "divergence": 7376,
+        "safety": 196,
+        "heartbeat": 485
       },
-      "content_forwards": 7444,
-      "heartbeat_forwards": 478,
-      "safety_forwards": 202,
-      "reconstructed": 121867,
-      "gap_windows": 121867,
-      "windows_in_closed_gaps": 131591,
+      "content_forwards": 7376,
+      "heartbeat_forwards": 485,
+      "safety_forwards": 196,
+      "reconstructed": 120888,
+      "gap_windows": 120888,
+      "windows_in_closed_gaps": 130545,
       "consumer_coverage_pct": 100,
       "reconstruction_error_sigma": {
-        "samples": 121867,
-        "p50": 0.3375,
-        "p95": 0.8969,
+        "samples": 120888,
+        "p50": 0.3327,
+        "p95": 0.896,
         "max": 1,
-        "mean": 0.3867
+        "mean": 0.3845
       },
-      "windows_evaluated": 53774,
-      "windows_evaluated_per_second": 29.87,
-      "events": 135,
+      "windows_evaluated": 53426,
+      "windows_evaluated_per_second": 29.68,
+      "events": 160,
       "faults_injected": 16,
       "faults_matched": 16,
       "faults_missed": 0,
-      "events_on_healthy_machines": 81,
+      "events_on_healthy_machines": 107,
       "healthy_events_by_type": {
-        "predicted-failure": 81
+        "predicted-failure": 106,
+        "threshold-breach": 1
       },
       "healthy_events_by_sensor": {
-        "current": 81
+        "current": 107
       },
       "detection_delay_windows": {
         "samples": 16,
@@ -2583,29 +2616,29 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 3750,
+      "machines_per_task": 3776,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
-          "forwarded": 2392,
+          "forwarded": 2376,
           "dropped_pct": 93.4,
           "deadband_sigma": 1.88
         },
         "temperature": {
           "windows": 36000,
-          "forwarded": 4170,
-          "dropped_pct": 88.4,
+          "forwarded": 4136,
+          "dropped_pct": 88.5,
           "deadband_sigma": 0.67
         },
         "current": {
           "windows": 36000,
-          "forwarded": 1721,
-          "dropped_pct": 95.2,
+          "forwarded": 1699,
+          "dropped_pct": 95.3,
           "deadband_sigma": 0.25
         },
         "rpm": {
           "windows": 36000,
-          "forwarded": 1441,
+          "forwarded": 1446,
           "dropped_pct": 96,
           "deadband_sigma": 2
         }
@@ -2618,42 +2651,43 @@
       "error_bound_sigma": 1.5,
       "heartbeat_ms": 600000,
       "windows_produced": 144000,
-      "forwarded": 6977,
-      "forwarded_per_second": 3.88,
-      "forwarded_per_machine_second": 0.01938,
+      "forwarded": 6942,
+      "forwarded_per_second": 3.86,
+      "forwarded_per_machine_second": 0.01928,
       "dropped_pct": 95.2,
       "reasons": {
         "first": 1600,
-        "divergence": 4487,
-        "safety": 218,
-        "heartbeat": 672
+        "divergence": 4464,
+        "safety": 204,
+        "heartbeat": 674
       },
-      "content_forwards": 4487,
-      "heartbeat_forwards": 672,
-      "safety_forwards": 218,
-      "reconstructed": 120900,
-      "gap_windows": 120900,
-      "windows_in_closed_gaps": 127877,
+      "content_forwards": 4464,
+      "heartbeat_forwards": 674,
+      "safety_forwards": 204,
+      "reconstructed": 120400,
+      "gap_windows": 120400,
+      "windows_in_closed_gaps": 127342,
       "consumer_coverage_pct": 100,
       "reconstruction_error_sigma": {
-        "samples": 120900,
-        "p50": 0.526,
-        "p95": 1.3408,
+        "samples": 120400,
+        "p50": 0.522,
+        "p95": 1.3375,
         "max": 1.5,
-        "mean": 0.5904
+        "mean": 0.5882
       },
-      "windows_evaluated": 36106,
-      "windows_evaluated_per_second": 20.06,
-      "events": 221,
+      "windows_evaluated": 35900,
+      "windows_evaluated_per_second": 19.94,
+      "events": 224,
       "faults_injected": 16,
       "faults_matched": 16,
       "faults_missed": 0,
-      "events_on_healthy_machines": 164,
+      "events_on_healthy_machines": 170,
       "healthy_events_by_type": {
-        "predicted-failure": 164
+        "predicted-failure": 169,
+        "threshold-breach": 1
       },
       "healthy_events_by_sensor": {
-        "current": 164
+        "current": 170
       },
       "detection_delay_windows": {
         "samples": 16,
@@ -2662,29 +2696,29 @@
         "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 5227,
+      "machines_per_task": 5253,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
-          "forwarded": 1784,
-          "dropped_pct": 95,
+          "forwarded": 1762,
+          "dropped_pct": 95.1,
           "deadband_sigma": 1.88
         },
         "temperature": {
           "windows": 36000,
-          "forwarded": 2578,
-          "dropped_pct": 92.8,
+          "forwarded": 2620,
+          "dropped_pct": 92.7,
           "deadband_sigma": 0.67
         },
         "current": {
           "windows": 36000,
-          "forwarded": 1360,
-          "dropped_pct": 96.2,
+          "forwarded": 1315,
+          "dropped_pct": 96.3,
           "deadband_sigma": 0.25
         },
         "rpm": {
           "windows": 36000,
-          "forwarded": 1255,
+          "forwarded": 1245,
           "dropped_pct": 96.5,
           "deadband_sigma": 2
         }
@@ -2697,73 +2731,76 @@
       "error_bound_sigma": 2,
       "heartbeat_ms": 600000,
       "windows_produced": 144000,
-      "forwarded": 6092,
-      "forwarded_per_second": 3.38,
-      "forwarded_per_machine_second": 0.01692,
+      "forwarded": 6065,
+      "forwarded_per_second": 3.37,
+      "forwarded_per_machine_second": 0.01685,
       "dropped_pct": 95.8,
       "reasons": {
         "first": 1600,
-        "divergence": 3427,
-        "safety": 226,
-        "heartbeat": 839
+        "divergence": 3413,
+        "safety": 222,
+        "heartbeat": 830
       },
-      "content_forwards": 3427,
-      "heartbeat_forwards": 839,
-      "safety_forwards": 226,
-      "reconstructed": 120757,
-      "gap_windows": 120757,
-      "windows_in_closed_gaps": 126849,
+      "content_forwards": 3413,
+      "heartbeat_forwards": 830,
+      "safety_forwards": 222,
+      "reconstructed": 120071,
+      "gap_windows": 120071,
+      "windows_in_closed_gaps": 126136,
       "consumer_coverage_pct": 100,
       "reconstruction_error_sigma": {
-        "samples": 120757,
-        "p50": 0.5767,
-        "p95": 1.75,
+        "samples": 120071,
+        "p50": 0.5823,
+        "p95": 1.7423,
         "max": 2,
-        "mean": 0.7001
+        "mean": 0.7018
       },
-      "windows_evaluated": 30258,
-      "windows_evaluated_per_second": 16.81,
-      "events": 247,
+      "windows_evaluated": 30160,
+      "windows_evaluated_per_second": 16.76,
+      "events": 260,
       "faults_injected": 16,
       "faults_matched": 16,
       "faults_missed": 0,
-      "events_on_healthy_machines": 193,
+      "events_on_healthy_machines": 210,
       "healthy_events_by_type": {
-        "predicted-failure": 193
+        "predicted-failure": 208,
+        "anomaly": 1,
+        "threshold-breach": 1
       },
       "healthy_events_by_sensor": {
-        "current": 193
+        "current": 209,
+        "temperature": 1
       },
       "detection_delay_windows": {
         "samples": 16,
         "p50": 0,
-        "p95": 2,
-        "max": 2,
+        "p95": 3,
+        "max": 3,
         "mean": 0.8
       },
-      "machines_per_task": 5986,
+      "machines_per_task": 6013,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
-          "forwarded": 1516,
+          "forwarded": 1521,
           "dropped_pct": 95.8,
           "deadband_sigma": 1.88
         },
         "temperature": {
           "windows": 36000,
-          "forwarded": 2224,
-          "dropped_pct": 93.8,
+          "forwarded": 2208,
+          "dropped_pct": 93.9,
           "deadband_sigma": 0.67
         },
         "current": {
           "windows": 36000,
-          "forwarded": 1187,
-          "dropped_pct": 96.7,
+          "forwarded": 1167,
+          "dropped_pct": 96.8,
           "deadband_sigma": 0.25
         },
         "rpm": {
           "windows": 36000,
-          "forwarded": 1165,
+          "forwarded": 1169,
           "dropped_pct": 96.8,
           "deadband_sigma": 2
         }
@@ -2776,73 +2813,74 @@
       "error_bound_sigma": 3,
       "heartbeat_ms": 600000,
       "windows_produced": 144000,
-      "forwarded": 5421,
-      "forwarded_per_second": 3.01,
-      "forwarded_per_machine_second": 0.01506,
-      "dropped_pct": 96.2,
+      "forwarded": 5393,
+      "forwarded_per_second": 3,
+      "forwarded_per_machine_second": 0.01498,
+      "dropped_pct": 96.3,
       "reasons": {
         "first": 1600,
-        "divergence": 2506,
-        "safety": 262,
-        "heartbeat": 1053
+        "divergence": 2478,
+        "safety": 239,
+        "heartbeat": 1076
       },
-      "content_forwards": 2506,
-      "heartbeat_forwards": 1053,
-      "safety_forwards": 262,
-      "reconstructed": 119118,
-      "gap_windows": 119118,
-      "windows_in_closed_gaps": 124539,
+      "content_forwards": 2478,
+      "heartbeat_forwards": 1076,
+      "safety_forwards": 239,
+      "reconstructed": 118217,
+      "gap_windows": 118217,
+      "windows_in_closed_gaps": 123610,
       "consumer_coverage_pct": 100,
       "reconstruction_error_sigma": {
-        "samples": 119118,
-        "p50": 0.7465,
-        "p95": 2.5732,
+        "samples": 118217,
+        "p50": 0.75,
+        "p95": 2.5758,
         "max": 3,
-        "mean": 0.962
+        "mean": 0.9597
       },
-      "windows_evaluated": 26055,
-      "windows_evaluated_per_second": 14.48,
-      "events": 223,
+      "windows_evaluated": 25870,
+      "windows_evaluated_per_second": 14.37,
+      "events": 233,
       "faults_injected": 16,
       "faults_matched": 16,
       "faults_missed": 0,
-      "events_on_healthy_machines": 182,
+      "events_on_healthy_machines": 188,
       "healthy_events_by_type": {
-        "predicted-failure": 182
+        "predicted-failure": 187,
+        "threshold-breach": 1
       },
       "healthy_events_by_sensor": {
-        "current": 182
+        "current": 188
       },
       "detection_delay_windows": {
         "samples": 16,
         "p50": 1,
         "p95": 3,
         "max": 3,
-        "mean": 1.1
+        "mean": 0.9
       },
-      "machines_per_task": 6727,
+      "machines_per_task": 6762,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
-          "forwarded": 1299,
+          "forwarded": 1301,
           "dropped_pct": 96.4,
           "deadband_sigma": 1.88
         },
         "temperature": {
           "windows": 36000,
-          "forwarded": 2020,
+          "forwarded": 2028,
           "dropped_pct": 94.4,
           "deadband_sigma": 0.67
         },
         "current": {
           "windows": 36000,
-          "forwarded": 1045,
-          "dropped_pct": 97.1,
+          "forwarded": 1005,
+          "dropped_pct": 97.2,
           "deadband_sigma": 0.25
         },
         "rpm": {
           "windows": 36000,
-          "forwarded": 1057,
+          "forwarded": 1059,
           "dropped_pct": 97.1,
           "deadband_sigma": 2
         }
@@ -2855,74 +2893,75 @@
       "error_bound_sigma": 4,
       "heartbeat_ms": 600000,
       "windows_produced": 144000,
-      "forwarded": 5084,
-      "forwarded_per_second": 2.82,
-      "forwarded_per_machine_second": 0.01412,
+      "forwarded": 5053,
+      "forwarded_per_second": 2.81,
+      "forwarded_per_machine_second": 0.01404,
       "dropped_pct": 96.5,
       "reasons": {
         "first": 1600,
-        "divergence": 1984,
-        "safety": 279,
-        "heartbeat": 1221
+        "divergence": 2011,
+        "safety": 244,
+        "heartbeat": 1198
       },
-      "content_forwards": 1984,
-      "heartbeat_forwards": 1221,
-      "safety_forwards": 279,
-      "reconstructed": 118313,
-      "gap_windows": 118313,
-      "windows_in_closed_gaps": 123397,
+      "content_forwards": 2011,
+      "heartbeat_forwards": 1198,
+      "safety_forwards": 244,
+      "reconstructed": 117020,
+      "gap_windows": 117020,
+      "windows_in_closed_gaps": 122073,
       "consumer_coverage_pct": 100,
       "reconstruction_error_sigma": {
-        "samples": 118313,
-        "p50": 0.8844,
-        "p95": 3.368,
+        "samples": 117020,
+        "p50": 0.8747,
+        "p95": 3.3625,
         "max": 4,
-        "mean": 1.1935
+        "mean": 1.1906
       },
-      "windows_evaluated": 23897,
-      "windows_evaluated_per_second": 13.28,
-      "events": 212,
+      "windows_evaluated": 23689,
+      "windows_evaluated_per_second": 13.16,
+      "events": 214,
       "faults_injected": 16,
       "faults_matched": 16,
       "faults_missed": 0,
-      "events_on_healthy_machines": 173,
+      "events_on_healthy_machines": 170,
       "healthy_events_by_type": {
-        "predicted-failure": 173
+        "predicted-failure": 169,
+        "threshold-breach": 1
       },
       "healthy_events_by_sensor": {
         "current": 163,
-        "temperature": 10
+        "temperature": 7
       },
       "detection_delay_windows": {
         "samples": 16,
         "p50": 1,
-        "p95": 3,
-        "max": 3,
+        "p95": 4,
+        "max": 4,
         "mean": 1.4
       },
-      "machines_per_task": 7173,
+      "machines_per_task": 7217,
       "per_sensor": {
         "vibration": {
           "windows": 36000,
-          "forwarded": 1204,
+          "forwarded": 1200,
           "dropped_pct": 96.7,
           "deadband_sigma": 1.88
         },
         "temperature": {
           "windows": 36000,
-          "forwarded": 1888,
-          "dropped_pct": 94.8,
+          "forwarded": 1896,
+          "dropped_pct": 94.7,
           "deadband_sigma": 0.67
         },
         "current": {
           "windows": 36000,
-          "forwarded": 979,
-          "dropped_pct": 97.3,
+          "forwarded": 937,
+          "dropped_pct": 97.4,
           "deadband_sigma": 0.25
         },
         "rpm": {
           "windows": 36000,
-          "forwarded": 1013,
+          "forwarded": 1020,
           "dropped_pct": 97.2,
           "deadband_sigma": 2
         }
